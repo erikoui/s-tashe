@@ -1,6 +1,5 @@
 const express = require('express')
 const app = express()
-const port = process.env.PORT||3000
 
 app.use(express.static('./public'));
 
@@ -8,6 +7,6 @@ app.use(express.static('./public'));
 //   res.send('Hello Wossssrld!')
 // })
 
-app.listen(port, () => {
+app.listen(process.env.PORT, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
