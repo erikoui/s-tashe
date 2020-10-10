@@ -1,0 +1,19 @@
+{
+  "name": "s-tashe",
+  "version": "1.0.0",
+  "description": "An image stash",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/erikoui/s-tashe.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/erikoui/s-tashe/issues"
+  },
+  "homepage": "https://github.com/erikoui/s-tashe#readme"
+}
