@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <% include ../partials/header.ejs %>
+</head>
+
+<body>
+  <% include ../partials/nav.ejs %>
+  <div class="jumbotron text-center">
+    <div class="container">
+      <a href="/" class="lang-logo">
+        <img src="/lang-logo.png">
+      </a>
+      <h1>S-tashe: Gotta catch'em all</h1>
+      <p>This site uses bootstrap, EJS, and nodejs. JQuery is loaded automatically with the header include.</p>
+      <a type="button" class="btn btn-lg btn-default" href=""><span class="glyphicon glyphicon-flash"></span>
+        Button1</a>
+      <a type="button" class="btn btn-lg btn-primary" href=""><span class="glyphicon glyphicon-download"></span>
+        Button2</a>
+    </div>
+  </div>
+  <div class="container">
+    <hr>
+    <div class="row">
+      <div class="col-md-6">
+        <h3><span class="glyphicon glyphicon-info-sign"></span> How this sample app works</h3>
+        <ul>
+          <li>The code is merged to the <a href=https://github.com/erikoui/s-tashe>GitHub repo</a>, on the master
+            branch.</li>
+          <li>Then the repo owner can chose to merge to the live branch, where heroku will automatically get the code
+            from.</li>
+          <li>Heroku provides <a href="https://addons.heroku.com/">150 add-on services</a> for scaling the app</li>
+        </ul>
+      </div>
+    </div> <!-- row -->
+  </div>
+
+
+</body>
+
+</html>
