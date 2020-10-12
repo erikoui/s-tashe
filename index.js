@@ -58,7 +58,7 @@ express()
   .get('/', (req, res) => res.render('pages/index.ejs', { user: req.user }))
   .get('/login', (req, res) => res.render('pages/login.ejs', { user: req.user }))
   .post('/login',
-    passport.authenticate('local', { failureRedirect: '/pages/login' }),
+    passport.authenticate('local', { failureRedirect: '/login' }),
     function (req, res) {
       res.redirect('/');
     })
@@ -71,5 +71,10 @@ express()
     require('connect-ensure-login').ensureLoggedIn(),
     function (req, res) {
       res.render('pages/admin', { user: req.user });
+    })
+    .get('/profile',
+    require('connect-ensure-login').ensureLoggedIn(),
+    function (req, res) {
+      res.render('pages/profile', { user: req.user });
     })
   .listen(PORT, () => console.log(`Listening on ${PORT}`))
