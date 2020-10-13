@@ -16,6 +16,7 @@ const PORT = process.env.PORT || 5000
 // will be set at `req.user` in route handlers after authentication.
 passport.use(new Strategy(
   function (username, password, cb) {
+    //db.users.testDb();
     db.users.findByUsername(username, function (err, user) {
       if (err) { return cb(err); }
       if (!user) { return cb(null, false); }
