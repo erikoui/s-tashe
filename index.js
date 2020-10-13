@@ -1,8 +1,10 @@
 const express = require('express')
 const path = require('path')
 var db = require('./db');
+var childProcess = require('child_process');
 const passport = require('passport'), Strategy = require('passport-local').Strategy;
 const errorHandler = require('./_helpers/error-handler')
+
 const chanDownloader = './_helpers/chan-downloader'
 const PORT = process.env.PORT || 5000
 
@@ -40,6 +42,35 @@ passport.deserializeUser(function (id, cb) {
   });
 });
 
+//TODO: fix communication between script and main function (callback methodology)
+function runScript(scriptPath, args, callback) {
+  // keep track of whether callback has been invoked to prevent multiple invocations
+  var invoked = false;
+  var process = childProcess.fork(scriptPath, args);
+  var output = ''
+
+  // listen for errors as they may prevent the exit event from firing
+  process.on('error', function (err) {
+    if (invoked) return;
+    invoked = true;
+    callback(err);
+  });
+
+  //listen for general messages
+  process.on('message', function (data) {
+    if (invoked) return;
+    output.concat(data)
+  });
+  // execute the callback once the process has finished running
+  process.on('exit', function (code) {
+    if (invoked) return;
+    invoked = true;
+    var err = code === 0 ? null : new Error('exit code ' + code);
+    callback(output);
+  });
+
+}
+
 express()
   .use(express.static(path.join(__dirname, 'public')))//this is the folder with all resources
   .set('views', path.join(__dirname, 'views'))//this is the folder with all the ejs files
@@ -63,56 +94,19 @@ express()
     });
 
   })
-  .post('/login',
-    passport.authenticate('local', { failureRedirect: '/login' }),
-    function (req, res) {
-      res.redirect('/');
-    })
+  .post('/login', passport.authenticate('local', { failureRedirect: '/login' }), (req, res) => {
+    res.redirect('/');
+  })
   .get('/logout',
-    function (req, res) {
+    (req, res) => {
       req.logout();
       res.redirect('/');
     })
-  .get('/admin',
-    require('connect-ensure-login').ensureLoggedIn(),
-    function (req, res) {
-      res.render('pages/admin', { user: req.user });
-    })
-  .get('/profile',
-    require('connect-ensure-login').ensureLoggedIn(),
-    function (req, res) {
-      res.render('pages/profile', { user: req.user });
-    })
+  .get('/admin', require('connect-ensure-login').ensureLoggedIn(), (req, res) => {
+    res.render('pages/admin', { user: req.user });
+  })
+  .get('/profile', require('connect-ensure-login').ensureLoggedIn(), (req, res) => {
+    res.render('pages/profile', { user: req.user });
+  })
   .listen(PORT, () => console.log(`Listening on ${PORT}`))
-
-
-var childProcess = require('child_process');
-
-function runScript(scriptPath, args, callback) {
-  // keep track of whether callback has been invoked to prevent multiple invocations
-  var invoked = false;
-  var process = childProcess.fork(scriptPath, args);
-  var output=''
-
-  // listen for errors as they may prevent the exit event from firing
-  process.on('error', function (err) {
-    if (invoked) return;
-    invoked = true;
-    callback(err);
-  });
-
-  //listen for general messages
-  process.on('message', function (data) {
-    if (invoked) return;
-    output.concat(data)
-  });
-  // execute the callback once the process has finished running
-  process.on('exit', function (code) {
-    if (invoked) return;
-    invoked = true;
-    var err = code === 0 ? null : new Error('exit code ' + code);
-    callback(output);
-  });
-
-}
 
