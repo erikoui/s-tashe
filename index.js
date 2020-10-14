@@ -1,9 +1,44 @@
 const express = require('express')
 const path = require('path')
 const { db } = require('./db');
+
 var childProcess = require('child_process');
 const passport = require('passport'), Strategy = require('passport-local').Strategy;
 const errorHandler = require('./_helpers/error-handler')
+
+///////////////IBM COS////////////////////
+const myCOS = require('ibm-cos-sdk');
+
+var config = {
+  endpoint: process.env.COS_ENDPOINT,
+  apiKeyId: process.env.COS_APIKEY,
+  ibmAuthEndpoint: process.env.COS_AUTH_ENDPOINT,
+  serviceInstanceId: process.env.COS_SERVICEINSTANCE,
+};
+
+var cos = new myCOS.S3(config);
+function getBucketContents(bucketName) {
+  console.log(`Retrieving bucket contents from: ${bucketName}`);
+  return cos.listObjects(
+    { Bucket: bucketName },
+  ).promise()
+    .then((data) => {
+      if (data != null && data.Contents != null) {
+        for (var i = 0; i < data.Contents.length; i++) {
+          var itemKey = data.Contents[i].Key;
+          var itemSize = data.Contents[i].Size;
+          console.log(`Item: ${itemKey} (${itemSize} bytes).`)
+        }
+      }
+    })
+    .catch((e) => {
+      console.error(`ERROR: ${e.code} - ${e.message}\n`);
+    });
+}
+getBucketContents("s-tashe-ibm-storage")
+//////////////////////////////////////////
+
+
 
 const chanDownloader = './_helpers/chan-downloader'
 const PORT = process.env.PORT || 5000
@@ -27,7 +62,7 @@ passport.use(new Strategy(
     } catch (e) {
       return cb(e);
     }
-    console.log("Found user "+user.uname)
+    console.log("Found user " + user.uname)
     return cb(null, user)
   }
 ));
@@ -40,8 +75,8 @@ passport.use(new Strategy(
 // serializing, and querying the user record by ID from the database when
 // deserializing.
 passport.serializeUser((user, cb) => {
-    cb(null, user.id);
-  });
+  cb(null, user.id);
+});
 
 passport.deserializeUser(async (id, done) => {
   try {
@@ -108,7 +143,7 @@ express()
 
   })
   //TODO: fix this, it redirects when username incorrect, but does not login on username correct.
-  .post('/login', passport.authenticate('local', { failureRedirect: '/login' }),async (req, res) => {
+  .post('/login', passport.authenticate('local', { failureRedirect: '/login' }), async (req, res) => {
     console.log("logged in")
     res.redirect('/');
   })

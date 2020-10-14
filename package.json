@@ -15,13 +15,17 @@
     "ejs": "^2.5.6",
     "express": "^4.15.2",
     "express-session": "^1.17.1",
+    "googleapis": "^61.0.0",
+    "ibm-cos-sdk": "^1.7.0",
+    "ibm-cos-sdk-config": "^1.2.0",
     "limiter": "^1.1.5",
     "morgan": "^1.10.0",
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
     "pg": "^8.4.1",
     "pg-promise": "^10.7.0",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "xml2js": "^0.4.23"
   },
   "devDependencies": {
     "got": "^11.3.0",
