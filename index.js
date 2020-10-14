@@ -1,6 +1,6 @@
 const express = require('express')
 const path = require('path')
-var db = require('./db');
+const { db } = require('./db');
 var childProcess = require('child_process');
 const passport = require('passport'), Strategy = require('passport-local').Strategy;
 const errorHandler = require('./_helpers/error-handler')
@@ -15,15 +15,22 @@ const PORT = process.env.PORT || 5000
 // that the password is correct and then invoke `cb` with a user object, which
 // will be set at `req.user` in route handlers after authentication.
 passport.use(new Strategy(
-  function (username, password, cb) {
+  async function (username, password, cb) {
     //db.users.testDb();
-    db.users.findByUsername(username, function (err, user) {
-      if (err) { return cb(err); }
-      if (!user) { return cb(null, false); }
-      if (user.password != password) { return cb(null, false); }
-      return cb(null, user);
-    });
-  }));
+    let user;
+    try {
+      user = await db.users.findByName(username);
+      if (!user) {
+        console.log("Invalid login")
+        return cb(null, false, { message: 'No user by that name' });
+      }
+    } catch (e) {
+      return cb(e);
+    }
+    console.log("Found user "+user.uname)
+    return cb(null, user)
+  }
+));
 
 // Configure Passport authenticated session persistence.
 //
@@ -32,15 +39,20 @@ passport.use(new Strategy(
 // typical implementation of this is as simple as supplying the user ID when
 // serializing, and querying the user record by ID from the database when
 // deserializing.
-passport.serializeUser(function (user, cb) {
-  cb(null, user.id);
-});
-
-passport.deserializeUser(function (id, cb) {
-  db.users.findById(id, function (err, user) {
-    if (err) { return cb(err); }
-    cb(null, user);
+passport.serializeUser((user, cb) => {
+    cb(null, user.id);
   });
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    let user = await db.users.findById(id);
+    if (!user) {
+      return done(new Error('user not found'));
+    }
+    done(null, user);
+  } catch (e) {
+    done(e);
+  }
 });
 
 //TODO: fix communication between script and main function (callback methodology)
@@ -95,7 +107,9 @@ express()
     });
 
   })
-  .post('/login', passport.authenticate('local', { failureRedirect: '/login' }), (req, res) => {
+  //TODO: fix this, it redirects when username incorrect, but does not login on username correct.
+  .post('/login', passport.authenticate('local', { failureRedirect: '/login' }),async (req, res) => {
+    console.log("logged in")
     res.redirect('/');
   })
   .get('/logout',
