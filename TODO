@@ -1,0 +1,2 @@
+Make chan-downlader.js save to COS bucket and add to database
+Make a .ejs that loads 2 random pics from the bucket
