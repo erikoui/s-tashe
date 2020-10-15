@@ -1,2 +1,7 @@
-Make chan-downlader.js add to database
+Make chan-downlader.js add filenames and tags from the thread title to the database (metadata for each picture)
+
 Make a .ejs that loads 2 random pics from the bucket
+    pic links look like this:
+        <process.env.COS_ENDPOINT>/<bucket name>/<filename>
+    e.g:
+        https://s3.eu-de.cloud-object-storage.appdomain.cloud/s-tashe-ibm-storage/1602694848775.jpg
