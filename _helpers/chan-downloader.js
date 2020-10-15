@@ -16,7 +16,7 @@ var imageLimiter = new RateLimiter(1, "second")
 var threadFolder = __dirname
 
 function Grabber(thread) {
-    console.log("Downloading thread " + thread)
+    process.send({ log: "Downloading thread " + thread })
     var self = this
 
     var threadInfo = thread.match(/https?\:\/\/boards\.4chan\.org\/(.*)\/thread\/(\d*)/)
@@ -26,10 +26,10 @@ function Grabber(thread) {
         process.send({ log: "Verified link regex: " + thread })
     this.board = threadInfo[1]
     this.thread = threadInfo[2]
-
     // I prefer saving the pics in folders so that I know what's going on without the db
+    // uncomment this in case the server accepts persistent local storage
     threadFolder = path.join(__dirname, this.board + "_" + this.thread) + "/"
-    fs.mkdir(threadFolder, self.getThreadJSON(this.board, this.thread), (err) => { process.send({ log: "Error making directory" }) })
+    fs.mkdir(threadFolder, self.getThreadJSON(this.board, this.thread), (err) => { process.emitWarning("Couldnt make directory") })
 }
 
 Grabber.prototype.getImages = function (json, eightChan) {
@@ -39,44 +39,35 @@ Grabber.prototype.getImages = function (json, eightChan) {
     var posts = threadJSON["posts"]
     var tim, ext, filename, extras
 
-    var createFun = function (url, ext, tim) {
-        fs.stat(self.board + "_" + self.thread + "/" + tim + ext, function (err, stat) {
-            if (err == null)
-                return console.log("Already exists: " + tim + ext)
-            else
-                postCheck()
-        })
-
-        var postCheck = function () {
-            var options = {
-                host: "https://i.4cdn.org",
-                path: "/" + self.board + "/" + tim + ext
-            }
-
-            return imageLimiter.removeTokens(1, () => {
-                if (tim !== undefined) {
-                    var imageName = tim;
-                    var imageExtention = ext;
-                    var imageUrl = options.host + options.path//imagename and imageextrention not needed because it is already in image.path
-                    //console.log("Would download " + imageUrl + " to " + threadFolder + imageName + imageExtention)
-                    if (fs.existsSync(threadFolder + imageName + imageExtention)) {
-                        console.log('Image: ' + imageName + imageExtention + " already exists, not saving this image.");
-                    } else {
-                        console.log("Saving image: " + imageName + imageExtention);
-                        request(imageUrl).pipe(fs.createWriteStream(threadFolder + imageName + imageExtention)).on("finish", function () { console.log("Image saved") });
-                    }
-
-                }
-            })
+    var createFun = function (ext, tim) {
+        var options = {
+            host: "https://i.4cdn.org",
+            path: "/" + self.board + "/" + tim + ext
         }
+
+        return imageLimiter.removeTokens(1, () => {
+            if (tim !== undefined) {
+                var imageName = tim;
+                var imageExtention = ext;
+                var imageUrl = options.host + options.path//imagename and imageextrention not needed because it is already in image.path
+                if (fs.existsSync(threadFolder + imageName + imageExtention)) {
+                    process.send({ log: 'Image: ' + imageName + imageExtention + " already exists, not saving this image." });
+                } else {
+                    process.send({ log: "Saving image: " + imageName + imageExtention });
+                    request(imageUrl).pipe(fs.createWriteStream(threadFolder + imageName + imageExtention)).on("finish", function () {
+                        process.send({ log: "Image " + imageName + " saved" })
+                    });
+                }
+                process.send({filenames: threadFolder + imageName + imageExtention})
+            }
+        })
     }
 
     for (var i = 0; i < posts.length; i++) {
         if ("filename" in posts[i]) {
-            filename = posts[i]["filename"]
             ext = posts[i]["ext"]
             tim = posts[i]["tim"]
-            createFun(filename, ext, tim)
+            createFun(ext, tim)
         }
     }
 };
@@ -90,7 +81,6 @@ Grabber.prototype.getThreadJSON = function (board, thread, eightChan) {
     }
 
     imageLimiter.removeTokens(1, function () {
-        //console.log("Loading JSON from "+JSON.stringify(options))
         const req = https.request(options, (res) => {
             const { statusCode } = res;
             const contentType = res.headers['content-type'];
@@ -106,7 +96,8 @@ Grabber.prototype.getThreadJSON = function (board, thread, eightChan) {
                     `Expected application/json but received ${contentType}`);
             }
             if (error) {
-                console.error(error.message);
+                process.emitWarning(error.message);
+                //console.error(error.message);
                 // Consume response data to free up memory
                 res.resume();
                 return;
@@ -118,7 +109,6 @@ Grabber.prototype.getThreadJSON = function (board, thread, eightChan) {
             res.on('end', () => {
                 try {
                     const parsedData = JSON.parse(rawData);
-                    //console.log(parsedData);
                     self.getImages(parsedData, eightChan)
                 } catch (e) {
                     console.error(e.message);
@@ -133,9 +123,8 @@ Grabber.prototype.getThreadJSON = function (board, thread, eightChan) {
 
 Grabber.prototype.urlRetrieve = function (transport, options, callback) {
     var dom = domain.create()
-    console.log("Get: " + options.host + options.path)
     dom.on("error", function (err) {
-        console.log("Erroor: " + JSON.stringify(err))
+        process.emitWarning("Error in chan-downloader: " + JSON.stringify(err))
     })
     dom.run(function () {
         var req = transport.request(options, function (res) {

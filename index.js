@@ -8,7 +8,7 @@ const errorHandler = require('./_helpers/error-handler');
 
 ///////////////IBM COS////////////////////
 const Cloud = require('./cos');
-cloud=new Cloud()
+cloud = new Cloud()
 //////////////////////////////////////////
 
 const chanDownloader = './_helpers/chan-downloader'
@@ -61,31 +61,30 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-//TODO: fix communication between script and main function (callback methodology)
-function runScript(scriptPath, args, callback) {
-  // keep track of whether callback has been invoked to prevent multiple invocations
+function runScript(scriptPath, args, messagecb, warningcb, donecb) {
+  // keep track of whether messagecb has been invoked to prevent multiple invocations
   var invoked = false;
   var process = childProcess.fork(scriptPath, args);
   var output = ''
 
   // listen for errors as they may prevent the exit event from firing
-  process.on('error', function (err) {
-    if (invoked) return;
-    invoked = true;
-    callback(err);
+  process.on('warning', function (err) {
+    warningcb(err);
   });
 
-  //listen for general messages
+  //listen for general messages (from process.send)
   process.on('message', function (data) {
-    if (invoked) return;
-    output.concat(data)
+    if(data)
+      messagecb(data)
   });
-  // execute the callback once the process has finished running
+
+  // execute the messagecb once the process has finished running
   process.on('exit', function (code) {
     if (invoked) return;
     invoked = true;
     var err = code === 0 ? null : new Error('exit code ' + code);
-    callback(output);
+    messagecb(output);
+    donecb();
   });
 
 }
@@ -105,13 +104,31 @@ express()
   .get('/download', (req, res) => {
     //thread is set by the url (e.g .../download?thread=https://boards.4chan.org/sp/thread/103)
     let thread = req.query.thread
+    let output = { log: [] ,filenames:[]}
+    runScript(chanDownloader, [thread],
+      (msg) => {
+        //This runs each time the script calls process.send
+        if(msg.log)//log message
+          output.log.push(msg.log);
+        if(msg.filenames)//chanDownloader sent a filename 
+          output.filenames.push(msg.filenames);
+      },
+      (warn) => {
+        //This runs each time the script calls process.emitWarning
+        console.log(warn)
+      },
+      () => {
+        //This will get run after the script has finished
+        console.log(output)
+        for (var i = 0; i < output.log.length; i++) {
+          if (output.log[i])//ignore undefined so that the server doesnt crash
+            res.write(output.log[i])
+        }
 
-    runScript(chanDownloader, [thread], function (err) {
-      //err is a json object returned from chan-downoader.js
-      //TODO: res.render(pages/chandownloaderoutput,{status: err}) or something
-      res.end('Output:\n' + JSON.stringify(err));
-    });
-
+        //TODO: upload the images to cloud here.
+        //TODO: res.render(pages/chandownloaderoutput,{status: err}) or something
+        res.end()
+      })
   })
   //TODO: fix this, it redirects when username incorrect, but does not login on username correct.
   .post('/login', passport.authenticate('local', { failureRedirect: '/login' }), async (req, res) => {
