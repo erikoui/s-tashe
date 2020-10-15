@@ -1,6 +1,7 @@
 const express = require('express')
 const path = require('path')
 const { db } = require('./db');
+var fs = require("fs")
 
 var childProcess = require('child_process');
 const passport = require('passport'), Strategy = require('passport-local').Strategy;
@@ -108,6 +109,8 @@ express()
     runScript(chanDownloader, [thread],
       (msg) => {
         //This runs each time the script calls process.send
+
+        //Save the massage to the approptiate JSON tag
         if(msg.log)//log message
           output.log.push(msg.log);
         if(msg.filenames)//chanDownloader sent a filename 
@@ -122,10 +125,15 @@ express()
         console.log(output)
         for (var i = 0; i < output.log.length; i++) {
           if (output.log[i])//ignore undefined so that the server doesnt crash
-            res.write(output.log[i])
+            res.write(output.log[i]+"\n")
         }
 
-        //TODO: upload the images to cloud here.
+        for(var i=0;i<output.filenames.length;i++){
+          //TODO: get md5 of file
+          md5=path.parse(output.filenames[i]).name;
+          ext=path.parse(output.filenames[i]).ext;
+          cloud.multiPartUpload('s-tashe-ibm-storage',md5+ext,output.filenames[i]);
+        }
         //TODO: res.render(pages/chandownloaderoutput,{status: err}) or something
         res.end()
       })

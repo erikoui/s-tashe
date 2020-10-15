@@ -2,6 +2,8 @@
 //Interface between this app and the cloud server (IBM COS)
 
 const myCOS = require('ibm-cos-sdk');
+const async = require('async')
+var fs = require("fs")
 
 class Cloud {
     constructor() {
@@ -61,7 +63,7 @@ class Cloud {
         }
     
         console.log(`Starting multi-part upload for ${itemName} to bucket: ${bucketName}`);
-        return cos.createMultipartUpload({
+        return this.cos.createMultipartUpload({
             Bucket: bucketName,
             Key: itemName
         }).promise()
@@ -82,7 +84,7 @@ class Cloud {
     
                     console.log(`Uploading to ${itemName} (part ${partNum} of ${partCount})`);  
     
-                    cos.uploadPart({
+                    this.cos.uploadPart({
                         Body: fileData.slice(start, end),
                         Bucket: bucketName,
                         Key: itemName,
@@ -97,7 +99,7 @@ class Cloud {
                         console.error(`ERROR: ${e.code} - ${e.message}\n`);
                     });
                 }, (e, dataPacks) => {
-                    cos.completeMultipartUpload({
+                    this.cos.completeMultipartUpload({
                         Bucket: bucketName,
                         Key: itemName,
                         MultipartUpload: {
@@ -119,7 +121,7 @@ class Cloud {
     }
     
     async cancelMultiPartUpload(bucketName, itemName, uploadID) {
-        return cos.abortMultipartUpload({
+        return this.cos.abortMultipartUpload({
             Bucket: bucketName,
             Key: itemName,
             UploadId: uploadID
