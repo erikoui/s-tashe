@@ -5,3 +5,5 @@ Make a .ejs that loads 2 random pics from the bucket
         <process.env.COS_ENDPOINT>/<bucket name>/<filename>
     e.g:
         https://s3.eu-de.cloud-object-storage.appdomain.cloud/s-tashe-ibm-storage/1602694848775.jpg
+
+user priviledge levels
