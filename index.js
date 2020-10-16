@@ -1,9 +1,9 @@
 const express = require('express')
 const path = require('path')
 const { db } = require('./db');
-var fs = require("fs")
+const fs = require("fs")
 const md5File = require('md5-file')
-var childProcess = require('child_process');
+const childProcess = require('child_process');
 const passport = require('passport'), Strategy = require('passport-local').Strategy;
 const errorHandler = require('./_helpers/error-handler');
 

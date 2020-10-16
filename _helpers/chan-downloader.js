@@ -5,12 +5,13 @@
 // TODO: you should only be able to run this script as an admin or automatically
 
 
-var RateLimiter = require("limiter").RateLimiter
-var fs = require("fs")
-var https = require("https")
-var domain = require("domain")
+const RateLimiter = require("limiter").RateLimiter
+const fs = require("fs")
+const https = require("https")
+const domain = require("domain")
 const request = require("request")
-var path = require("path")
+const path = require("path")
+const { db } = require("../db")
 
 var imageLimiter = new RateLimiter(1, "second")
 var threadFolder = __dirname
@@ -32,7 +33,7 @@ function Grabber(thread) {
     fs.mkdir(threadFolder, self.getThreadJSON(this.board, this.thread), (err) => { process.emitWarning("Couldnt make directory") })
 }
 
-Grabber.prototype.getImages = function (json, eightChan) {
+Grabber.prototype.getImages = function (json) {
     var self = this
     var threadJSON = json
 
@@ -58,7 +59,7 @@ Grabber.prototype.getImages = function (json, eightChan) {
                         process.send({ log: "Image " + imageName + " saved" })
                     });
                 }
-                process.send({filenames: threadFolder + imageName + imageExtention})
+                process.send({ filenames: threadFolder + imageName + imageExtention })
             }
         })
     }
@@ -72,7 +73,21 @@ Grabber.prototype.getImages = function (json, eightChan) {
     }
 };
 
-Grabber.prototype.getThreadJSON = function (board, thread, eightChan) {
+Grabber.prototype.findTags = function (json) {
+    const titlePost = json.posts[0]
+    var bag = titlePost.sub + " " + titlePost.com//make bag of words from the title post including its subject
+    bag = bag.replace(/[^a-zA-Z ]/g, "")//clean up any weird characters
+    bag = bag.toLowerCase()//normalize
+    bag = bag.split(" ")//turn it into an array
+
+    db.tags.all().then((tags)=>{
+        //TODO: do something with the tag JSON
+    });
+
+    
+}
+
+Grabber.prototype.getThreadJSON = function (board, thread) {
     var self = this
     var options = {
         hostname: "a.4cdn.org",
@@ -109,7 +124,9 @@ Grabber.prototype.getThreadJSON = function (board, thread, eightChan) {
             res.on('end', () => {
                 try {
                     const parsedData = JSON.parse(rawData);
-                    self.getImages(parsedData, eightChan)
+                    self.findTags(parsedData);
+                    self.getImages(parsedData);
+                    console.log("uncomment getImages")
                 } catch (e) {
                     console.error(e.message);
                 }
