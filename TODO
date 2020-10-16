@@ -1,4 +1,5 @@
-Make chan-downlader.js add filenames and tags from the thread title to the database (metadata for each picture)
+Make chan-downlader.js add filenames and tags from the thread title to the database (metadata for each picture) - updatedb function in index.js
+convert chan-downloader to a module
 
 Make a .ejs that loads 2 random pics from the bucket
     pic links look like this:
@@ -7,3 +8,5 @@ Make a .ejs that loads 2 random pics from the bucket
         https://s3.eu-de.cloud-object-storage.appdomain.cloud/s-tashe-ibm-storage/1602694848775.jpg
 
 user priviledge levels
+
+fix the login issue

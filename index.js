@@ -85,7 +85,6 @@ function runScript(scriptPath, args, messagecb, warningcb, donecb) {
       return;
     invoked = true;
     var err = code === 0 ? null : new Error('exit code ' + code);
-    messagecb(output);
     donecb();
   });
 
@@ -106,7 +105,7 @@ express()
   .get('/download', (req, res) => {
     //thread is set by the url (e.g .../download?thread=https://boards.4chan.org/sp/thread/103)
     let thread = req.query.thread
-    let output = { log: [], filenames: [] }
+    let output = { log: [], filenames: [], tags: [], tagids: [] }
     runScript(chanDownloader, [thread],
       (msg) => {
         //This runs each time the script calls process.send
@@ -116,6 +115,10 @@ express()
           output.log.push(msg.log);
         if (msg.filenames)//chanDownloader sent a filename 
           output.filenames.push(msg.filenames);
+        if (msg.tags) {//chanDownloader sent a tag
+          output.tags = msg.tags//tags is an array already
+          output.tagids = msg.tagids
+        }
       },
       (warn) => {
         //This runs each time the script calls process.emitWarning
@@ -123,31 +126,56 @@ express()
       },
       () => {
         //This will get run after the script has finished
-        console.log(output)
-        for (var i = 0; i < output.log.length; i++) {
-          if (output.log[i])//ignore undefined so that the server doesnt crash
-            res.write(output.log[i] + "\n")
+
+        //upload is done in a separate function for readability
+        async function upload(filePath, md5) {
+          let ext = path.parse(filePath).ext;
+          await cloud.simpleUpload('s-tashe-ibm-storage', md5 + ext, filePath);
+          return md5 + ext
         }
 
+        function updatedb(fn) {
+          //TODO: Implement this idea in the db repo files (pictures.add and pic_tag.addTagToPic)
+          // picjson = {
+          //   filename: fn,
+          //   description: "No description",
+          // }
+          // picid = db.pictures.add(picjson);
+          // db.pic_tag.addTagToPic(tagid, picid);
+        }
+
+        //rendering the output JSON file is done in a separate function for readability
+        function renderOutput() {
+          //TODO: res.render(pages/chandownloaderoutput,{status: output}) or something
+          console.log(output)
+          for (var i = 0; i < output.log.length; i++) {
+            if (output.log[i])//ignore undefined so that the server doesnt crash
+              res.write(output.log[i] + "\n")
+          }
+          res.end()
+        }
+
+        //This loop uploads the files to the cloud storage, while also setting the filename to its md5 sum
         for (var i = 0; i < output.filenames.length; i++) {
           //calculates MD5 of each pic asynchronously and uploads it when done, to prevent duplicate file uploads
           //DO NOT CHANGE CONST. IT ENSURES FILEPATH IS PASSED TO THE .then()
-          const filePath=path.join(output.filenames[i])
-          md5File(filePath).then((md5) => {
-            ext = path.parse(filePath).ext;
-            cloud.simpleUpload('s-tashe-ibm-storage', md5 + ext, filePath);
-          }).catch((reason) => {
-            console.log("error with md5 while uploading to cloud:" + reason)
-          })
-        }
-        
-        //upload is done in a separate function to bind the filePath else it will just upload the last image many times instead of all images one time
-        function upload(filePath,md5){
-          
+          const filePath = path.join(output.filenames[i])
+          md5File(filePath).
+            then((md5) => {
+              upload(filePath, md5).then((cloudname) => {
+                console.log(cloudname)
+                updatedb(cloudname)//TODO-ish:adds a record to the pictures table with the filename, and records to the tag table with tags.
+              })
+                .catch((reason) => {
+                  console.log("error in file upload promise: " + reason)
+                })
+            })
+            .catch((reason) => {
+              console.log("error with md5 while uploading to cloud:" + reason)
+            })
         }
 
-        //TODO: res.render(pages/chandownloaderoutput,{status: err}) or something
-        res.end()
+        renderOutput();
       })
   })
   //TODO: fix this, it redirects when username incorrect, but does not login on username correct.
