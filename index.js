@@ -100,6 +100,15 @@ express()
   .use(errorHandler)
   .set('view engine', 'ejs')
   .get('/', (req, res) => res.render('pages/index.ejs', { user: req.user }))
+
+  //TODO: make this load filenames from the database and also load matching tags
+  .get('/showImages', (req, res) => {
+    res.render('pages/showImages.ejs', { 
+    image1: "dcef147ab2efacff940cb8ed1dd7eef0.jpg", 
+    image2: "2f468f5dcc735b77fca394331eea3547.jpg" 
+    }
+  )})
+
   .get('/login', (req, res) => res.render('pages/login.ejs', { user: req.user }))
   .get('/download', (req, res) => {
     //thread is set by the url (e.g .../download?thread=https://boards.4chan.org/sp/thread/103)
@@ -209,19 +218,19 @@ express()
     res.render('pages/profile', { user: req.user });
   })
   .get('/deleteallfiles', (req, res) => {
-    cloud.getBucketContents(async (err,data)=>{
-        if (err) {
-          console.log("error getting item list from cos:" + err);
-          res.end("error");
-        } else {
-          let filenames=[]
-          for(var i=0;i<data.Contents.length;i++){
-            filenames.push(data.Contents[i].Key)
-          }
-          await cloud.deleteItems(filenames);
-          res.end(filenames.toString());
+    cloud.getBucketContents(async (err, data) => {
+      if (err) {
+        console.log("error getting item list from cos:" + err);
+        res.end("error");
+      } else {
+        let filenames = []
+        for (var i = 0; i < data.Contents.length; i++) {
+          filenames.push(data.Contents[i].Key)
         }
-      });
+        await cloud.deleteItems(filenames);
+        res.end(filenames.toString());
+      }
+    });
   })
   .listen(PORT, () => console.log(`Listening on ${PORT}`))
 

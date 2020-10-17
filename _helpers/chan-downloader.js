@@ -64,7 +64,7 @@ Grabber.prototype.getImages = function (json) {
         })
     }
 
-    for (var i = 0; i < 2/*posts.length*/; i++) {
+    for (var i = 0; i < posts.length; i++) {
         if ("filename" in posts[i]) {
             ext = posts[i]["ext"]
             tim = posts[i]["tim"]
