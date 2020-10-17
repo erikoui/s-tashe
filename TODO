@@ -1,4 +1,3 @@
-Make chan-downlader.js add filenames and tags from the thread title to the database (metadata for each picture) - updatedb function in index.js
 convert chan-downloader to a module
 
 Make a .ejs that loads 2 random pics from the bucket
@@ -7,7 +6,10 @@ Make a .ejs that loads 2 random pics from the bucket
     e.g:
         https://s3.eu-de.cloud-object-storage.appdomain.cloud/s-tashe-ibm-storage/1602694848775.jpg
 
+
 password authentication
 register page
 user priviledge levels
 check if file exists on cloud before uploading (also check database records and add them if missing)
+rate limiter file uploads because they time out on slow connection
+fix  couldnt add picture to the database: error: too many connections for role "etydxociqwbhqg"

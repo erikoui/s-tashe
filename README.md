@@ -37,6 +37,10 @@ ok so the site archives images from 4chan, and tags them using some keywords fro
 
   * `COS_BUCKETNAME=<your bucket name>`
   _Also called a Key name_
+
+  * `COS_ACCESS_KEY_ID=<your HMAC key>`
+
+  * `COS_SECRET_ACCESS_KEY=<your HMAC secret key>`
 * `node index.js`
 * Open your browser to `localhost:5000`
 * Reach out for help if you need to

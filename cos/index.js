@@ -14,6 +14,10 @@ class Cloud {
             apiKeyId: process.env.COS_APIKEY,
             ibmAuthEndpoint: process.env.COS_AUTH_ENDPOINT,
             serviceInstanceId: process.env.COS_SERVICEINSTANCE,
+            cos_hmac_keys: {
+                access_key_id: process.env.COS_ACCESS_KEY_ID,
+                secret_access_key: process.env.COS_SECRET_ACCESS_KEY
+              }
         });
     }
 
@@ -34,7 +38,7 @@ class Cloud {
         } catch (e) {
             //TODO: put this error in the callback
             console.error(`ERROR: ${e.code} - ${e.message}\n`);
-            return cb(e, null)
+            return cb(e, null);
         }
     }
 
@@ -136,6 +140,28 @@ class Cloud {
             .catch((e) => {
                 console.error(`ERROR: ${e.code} - ${e.message}\n`);
             });
+    }
+
+    // deleteItems: takes an array of strings, each representing the filename (aka key) of a file on the server
+
+    async deleteItems(filenames) {
+        var deleteRequest = {"Objects": []};
+        for(var i=0;i<filenames.length;i++){
+            deleteRequest.Objects.push({"Key": filenames[i]});
+        }
+        console.log()
+
+        return this.cos.deleteObjects({
+            Bucket: bucketName,
+            Delete: deleteRequest
+        }).promise()
+        .then((data) => {
+            console.log(`Deleted items for ${bucketName}`);
+            console.log(data.Deleted);
+        })
+        .catch((e) => {
+            console.log(`ERROR: ${e.code} - ${e.message}\n`);
+        });    
     }
 }
 module.exports = Cloud

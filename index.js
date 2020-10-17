@@ -193,7 +193,6 @@ express()
         renderOutput();
       })
   })
-  //TODO: fix this, it redirects when username incorrect, but does not login on username correct.
   .post('/login', passport.authenticate('local', { failureRedirect: '/login' }), async (req, res) => {
     console.log("logged in")
     res.redirect('/');
@@ -208,6 +207,21 @@ express()
   })
   .get('/profile', require('connect-ensure-login').ensureLoggedIn(), (req, res) => {
     res.render('pages/profile', { user: req.user });
+  })
+  .get('/deleteallfiles', (req, res) => {
+    cloud.getBucketContents(async (err,data)=>{
+        if (err) {
+          console.log("error getting item list from cos:" + err);
+          res.end("error");
+        } else {
+          let filenames=[]
+          for(var i=0;i<data.Contents.length;i++){
+            filenames.push(data.Contents[i].Key)
+          }
+          await cloud.deleteItems(filenames);
+          res.end(filenames.toString());
+        }
+      });
   })
   .listen(PORT, () => console.log(`Listening on ${PORT}`))
 
