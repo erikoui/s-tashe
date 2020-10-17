@@ -1,45 +1,13 @@
 --
--- Creates the database
-
 -- PostgreSQL database dump
--- Created by:
---   in pgAdmin right click on the database
---   click backup
---   set filename and type sql
---   format plain
---   dump options only schema
---   no owner
---   no priviledges
---   include CREATE database
 --
---   database name was changed to something readable
+
+--load this using pgAdmin 4 to get a db with tables and some tags
 
 -- Dumped from database version 12.4 (Ubuntu 12.4-1.pgdg16.04+1)
 -- Dumped by pg_dump version 13.0
 
--- Started on 2020-10-17 08:32:53
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
-
---
--- TOC entry 3873 (class 1262 OID 16809053)
--- Name: s_tashe_db; Type: DATABASE; Schema: -; Owner: -
---
-
--- Remove this statement if you already created a database and just want the tables
-CREATE DATABASE s_tashe_db WITH TEMPLATE = template0 ENCODING = 'UTF8' LOCALE = 'en_US.UTF-8';
-
--- change s_tashe_db to your db name
-\connect s_tashe_db
+-- Started on 2020-10-17 18:04:37
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -96,7 +64,7 @@ CREATE SEQUENCE public.pictures_id_seq
 
 
 --
--- TOC entry 3874 (class 0 OID 0)
+-- TOC entry 3880 (class 0 OID 0)
 -- Dependencies: 206
 -- Name: pictures_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
@@ -131,7 +99,7 @@ CREATE SEQUENCE public.tags_id_seq
 
 
 --
--- TOC entry 3875 (class 0 OID 0)
+-- TOC entry 3881 (class 0 OID 0)
 -- Dependencies: 204
 -- Name: tags_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
@@ -169,7 +137,7 @@ CREATE SEQUENCE public.users_id_seq
 
 
 --
--- TOC entry 3876 (class 0 OID 0)
+-- TOC entry 3882 (class 0 OID 0)
 -- Dependencies: 202
 -- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
@@ -199,6 +167,78 @@ ALTER TABLE ONLY public.tags ALTER COLUMN id SET DEFAULT nextval('public.tags_id
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- TOC entry 3874 (class 0 OID 17240384)
+-- Dependencies: 208
+-- Data for Name: picture_tag; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.picture_tag (tag_id, pic_id) FROM stdin;
+\.
+
+
+--
+-- TOC entry 3873 (class 0 OID 17230039)
+-- Dependencies: 207
+-- Data for Name: pictures; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.pictures (id, description, votes, views, filename) FROM stdin;
+\.
+
+
+--
+-- TOC entry 3871 (class 0 OID 17229886)
+-- Dependencies: 205
+-- Data for Name: tags; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.tags (id, tag, alts) FROM stdin;
+2	latex	\N
+1	asian	{asians,chinks,chink}
+4	insta	{social,fb,instagram,vsco}
+3	bimbo	{fake}
+\.
+
+
+--
+-- TOC entry 3869 (class 0 OID 16819139)
+-- Dependencies: 203
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.users (uname, points, password, id, deleted, joinedon) FROM stdin;
+admin	23	plaintextpasswordlmao	1	f	2020-10-13 20:19:32.775983+00
+\.
+
+
+--
+-- TOC entry 3883 (class 0 OID 0)
+-- Dependencies: 206
+-- Name: pictures_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.pictures_id_seq', 25, true);
+
+
+--
+-- TOC entry 3884 (class 0 OID 0)
+-- Dependencies: 204
+-- Name: tags_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.tags_id_seq', 4, true);
+
+
+--
+-- TOC entry 3885 (class 0 OID 0)
+-- Dependencies: 202
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.users_id_seq', 2, true);
 
 
 --
@@ -273,7 +313,7 @@ ALTER TABLE ONLY public.picture_tag
     ADD CONSTRAINT picture_tag_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES public.tags(id) ON UPDATE CASCADE;
 
 
--- Completed on 2020-10-17 08:33:04
+-- Completed on 2020-10-17 18:04:48
 
 --
 -- PostgreSQL database dump complete

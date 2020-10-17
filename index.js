@@ -133,14 +133,29 @@ express()
           return md5 + ext
         }
 
-        function updatedb(fn) {
+        function updatedb(fn, tags) {
           //TODO: Implement this idea in the db repo files (pictures.add and pic_tag.addTagToPic)
-          // picjson = {
-          //   filename: fn,
-          //   description: "No description",
-          // }
-          // picid = db.pictures.add(picjson);
-          // db.pic_tag.addTagToPic(tagid, picid);
+          const taglist = tags;
+          let picDescription = "No description"
+          let picRecord = db.pictures.add(picDescription, fn)
+            .then((picRecord) => {
+              console.log(picRecord)
+              for (var i = 0; i < tags.length; i++) {
+                if (tags[i]) {
+                  db.picTags.tagImage(picRecord.id, tags[i])
+                    .then((picTagRecord) => {
+                      console.log("Picture tagged successfully")
+                    })
+                    .catch((e) => {
+                      console.log("couldnt tag picture: " + e)
+                    });
+                }
+              }
+            })
+            .catch((e) => {
+              console.log("couldnt add picture to the database: " + e)
+            })
+
         }
 
         //rendering the output JSON file is done in a separate function for readability
@@ -162,7 +177,7 @@ express()
           md5File(filePath).
             then((md5) => {
               upload(filePath, md5).then((cloudname) => {
-                updatedb(cloudname)//TODO-ish:adds a record to the pictures table with the filename, and records to the tag table with tags.
+                updatedb(cloudname, output.tagids)//TODO-ish:adds a record to the pictures table with the filename, and records to the tag table with tags.
                 console.log("Upload successful")
                 output.log.push("Upload successful")
               })

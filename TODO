@@ -7,4 +7,7 @@ Make a .ejs that loads 2 random pics from the bucket
     e.g:
         https://s3.eu-de.cloud-object-storage.appdomain.cloud/s-tashe-ibm-storage/1602694848775.jpg
 
+password authentication
+register page
 user priviledge levels
+check if file exists on cloud before uploading (also check database records and add them if missing)
