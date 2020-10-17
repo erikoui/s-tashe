@@ -66,7 +66,6 @@ function runScript(scriptPath, args, messagecb, warningcb, donecb) {
   // keep track of whether messagecb has been invoked to prevent multiple invocations
   var invoked = false;
   var process = childProcess.fork(scriptPath, args);
-  var output = ''
 
   // listen for errors as they may prevent the exit event from firing
   process.on('warning', (err) => {

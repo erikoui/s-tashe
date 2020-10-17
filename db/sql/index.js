@@ -18,18 +18,13 @@ const {join: joinPath} = require('path');
 
 module.exports = {
     users: {
-        create: sql('users/create.sql'),
-        empty: sql('users/empty.sql'),
-        init: sql('users/init.sql'),
-        drop: sql('users/drop.sql'),
         add: sql('users/add.sql')
     },
     pictures: {
-        create: sql('pictures/create.sql'),
-        empty: sql('pictures/empty.sql'),
-        drop: sql('pictures/drop.sql'),
-        find: sql('pictures/find.sql'),
         add: sql('pictures/add.sql')
+    },
+    databasemanager: {
+        createdb: sql('databasemanager/createdb.sql')
     }
 };
 

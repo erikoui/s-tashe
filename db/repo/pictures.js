@@ -1,56 +1,46 @@
-//TODO: I just copied this, adapt for use with our db
+// Manages the pictures table
 
+// All the functions in the class are promises (from async) so you 
+// can call them with db.pictures.function(args).then(()=>{}).catch(()=>{}),
+// or you can await them in async functions
+
+// load pictures.js but call it sql because we're cool like that
 const {pictures: sql} = require('../sql');
-
-const cs = {}; // Reusable ColumnSet objects.
-
-/*
- This repository mixes hard-coded and dynamic SQL, primarily to show a diverse example of using both.
- */
 
 class PicturesRepository {
     constructor(db, pgp) {
         this.db = db;
         this.pgp = pgp;
-
-        // set-up all ColumnSet objects, if needed:
-        createColumnsets(pgp);
     }
 
-    // Creates the table;
-    async create() {
-        return this.db.none(sql.create);
-    }
-
-    // Drops the table;
-    async drop() {
-        return this.db.none(sql.drop);
-    }
-
-    // Removes all records from the table;
-    async empty() {
-        return this.db.none(sql.empty);
-    }
-
-    // Adds a new record and returns the full object;
-    // It is also an example of mapping HTTP requests into query parameters;
-    async add(values) {
+    // Adds a new record and returns the full object
+    async add(desc,fname) {
         return this.db.one(sql.add, {
-            userId: +values.userId,
-            pictureName: values.name
+            description: desc,
+            filename: fname
         });
     }
 
-    // Tries to delete a picture by id, and returns the number of records deleted;
+    // TODO: Tries to delete a picture by id, and returns the number of records deleted;
     async remove(id) {
-        return this.db.result('DELETE FROM pictures WHERE id = $1', +id, r => r.rowCount);
+        //return this.db.result('DELETE FROM pictures WHERE id = $1', +id, r => r.rowCount);
+        console.log("pictures.js remove not yet implemented")
+        return 0;
     }
 
-    // Tries to find a user picture from user id + picture name;
-    async find(values) {
-        return this.db.oneOrNone(sql.find, {
-            userId: +values.userId,
-            pictureName: values.name
+    // Tries to find a picture from picture filename;
+    // if it doesnt find it, the promise will go to .catch((rej) => {...})
+    async findByFilename(fname) {
+        return this.db.one('SELECT * FROM pictures WHERE filename = ${filename}',{
+            filename : fname
+        });
+    }
+
+    // Tries to find many pics from picture description;
+    // if it doesnt find it, the promise will go to .catch((rej) => {...})
+    async findByDescription(desc) {
+        return this.db.many('SELECT * FROM pictures WHERE description = ${description}',{
+            description : desc
         });
     }
 
@@ -63,22 +53,6 @@ class PicturesRepository {
     async total() {
         return this.db.one('SELECT count(*) FROM pictures', [], a => +a.count);
     }
-}
-
-//////////////////////////////////////////////////////////
-// Example of statically initializing ColumnSet objects:
-
-function createColumnsets(pgp) {
-    // create all ColumnSet objects only once:
-    if (!cs.insert) {
-        // Type TableName is useful when schema isn't default "public" ,
-        // otherwise you can just pass in a string for the table name.
-        const table = new pgp.helpers.TableName({table: 'pictures', schema: 'public'});
-
-        cs.insert = new pgp.helpers.ColumnSet(['name'], {table});
-        cs.update = cs.insert.extend(['?id', '?user_id']);
-    }
-    return cs;
 }
 
 module.exports = PicturesRepository;

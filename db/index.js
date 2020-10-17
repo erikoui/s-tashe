@@ -1,7 +1,8 @@
 const { Client } = require('pg')
 const promise = require('bluebird'); // best promise library today
 const pgPromise = require('pg-promise'); // pg-promise core library
-const { Users, Pictures, Tags } = require('./repo');
+const { Users, Pictures, Tags, PicTags, DatabaseManager } = require('./repo');
+
 
 const dbConfig = {
   connectionString: process.env.DATABASE_URL,
@@ -25,6 +26,8 @@ const initOptions = {
     obj.users = new Users(obj, pgp);
     obj.pictures = new Pictures(obj, pgp);
     obj.tags = new Tags(obj,pgp);
+    obj.picTags = new PicTags(obj,pgp);
+    obj.databaseManager = new DatabaseManager(obj,pgp);
   }
 };
 
