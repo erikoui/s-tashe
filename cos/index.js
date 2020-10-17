@@ -5,6 +5,8 @@ const myCOS = require('ibm-cos-sdk');
 const async = require('async')
 var fs = require("fs")
 
+const bucketName=process.env.COS_BUCKETNAME
+
 class Cloud {
     constructor() {
         this.cos = new myCOS.S3({
@@ -15,7 +17,7 @@ class Cloud {
         });
     }
 
-    async getBucketContents(bucketName, cb) {
+    async getBucketContents(cb) {
         //cb(err,data)
         console.log(`Retrieving bucket contents from: ${bucketName}`);
         try {
@@ -36,7 +38,7 @@ class Cloud {
         }
     }
 
-    async getItem(bucketName, itemName, cb) {
+    async getItem(itemName, cb) {
         //cb(err,data)
         console.log(`Retrieving item from bucket: ${bucketName}, key: ${itemName}`);
         try {
@@ -54,7 +56,7 @@ class Cloud {
         }
     }
 
-    async simpleUpload(bucketName, itemName, filePath) {
+    async simpleUpload(itemName, filePath) {
         console.log("Starting upload of "+itemName)
         await this.cos.upload({
             Bucket: bucketName,
@@ -65,11 +67,12 @@ class Cloud {
                 console.log("file " + itemName + " uplaoded.")
             })
             .catch((err) => {
-                console.error(`ERROR: ${e.code} - ${e.message}\n`);
+                console.error(`ERROR: ${err.code} - ${err.message}\n`);
             });
     }
 
-    async multiPartUpload(bucketName, itemName, filePath) {
+    async multiPartUpload(itemName, filePath) {
+
         var uploadID = null;
 
         if (!fs.existsSync(filePath)) {

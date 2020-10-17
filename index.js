@@ -130,7 +130,7 @@ express()
         //upload is done in a separate function for readability
         async function upload(filePath, md5) {
           let ext = path.parse(filePath).ext;
-          await cloud.simpleUpload('s-tashe-ibm-storage', md5 + ext, filePath);
+          await cloud.simpleUpload(md5 + ext, filePath);
           return md5 + ext
         }
 
@@ -163,8 +163,9 @@ express()
           md5File(filePath).
             then((md5) => {
               upload(filePath, md5).then((cloudname) => {
-                console.log(cloudname)
                 updatedb(cloudname)//TODO-ish:adds a record to the pictures table with the filename, and records to the tag table with tags.
+                console.log("Upload successful")
+                output.log.push("Upload successful")
               })
                 .catch((reason) => {
                   console.log("error in file upload promise: " + reason)
