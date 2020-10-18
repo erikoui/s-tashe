@@ -4,5 +4,8 @@ register page
 user priviledge levels
 check if file exists on cloud before uploading (also check database records and add them if missing)
 rate limiter file uploads because they time out on slow connection
-fix  couldnt add picture to the database: error: too many connections for role "etydxociqwbhqg"
+
 Automatically delete pics after uploading
+
+Load images based by tag
+  -> also SFW mode (sfw tag)
