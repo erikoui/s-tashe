@@ -6,7 +6,7 @@ const { Users, Pictures, Tags, PicTags, DatabaseManager } = require('./repo');
 
 const dbConfig = {
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL ? true : false,
+  ssl: process.env.LOCAL ? true : false,
   ssl: {
     rejectUnauthorized: false
   }
