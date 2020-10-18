@@ -1,6 +1,6 @@
 /*
-    Adds a new Product for the specified User.
+    creates a picture record
 */
-INSERT INTO pictures(user_id, name)
-VALUES(${userId}, ${pictureName})
+INSERT INTO pictures(description, filename)
+VALUES(${description}, ${filename})
 RETURNING *

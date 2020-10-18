@@ -1,9 +1,16 @@
 const express = require('express')
 const path = require('path')
 const { db } = require('./db');
-var childProcess = require('child_process');
+const fs = require("fs")
+const md5File = require('md5-file')
+const childProcess = require('child_process');
 const passport = require('passport'), Strategy = require('passport-local').Strategy;
-const errorHandler = require('./_helpers/error-handler')
+const errorHandler = require('./_helpers/error-handler');
+
+///////////////IBM COS////////////////////
+const Cloud = require('./cos');
+cloud = new Cloud()
+//////////////////////////////////////////
 
 const chanDownloader = './_helpers/chan-downloader'
 const PORT = process.env.PORT || 5000
@@ -15,20 +22,20 @@ const PORT = process.env.PORT || 5000
 // that the password is correct and then invoke `cb` with a user object, which
 // will be set at `req.user` in route handlers after authentication.
 passport.use(new Strategy(
-  async function (username, password, cb) {
+  async (username, password, cb) => {
     //db.users.testDb();
     let user;
     try {
       user = await db.users.findByName(username);
       if (!user) {
-        console.log("Invalid login")
+        console.log("Invalid login");
         return cb(null, false, { message: 'No user by that name' });
       }
     } catch (e) {
       return cb(e);
     }
-    console.log("Found user "+user.uname)
-    return cb(null, user)
+    console.log("Found user " + user.uname);
+    return cb(null, user);
   }
 ));
 
@@ -40,8 +47,8 @@ passport.use(new Strategy(
 // serializing, and querying the user record by ID from the database when
 // deserializing.
 passport.serializeUser((user, cb) => {
-    cb(null, user.id);
-  });
+  cb(null, user.id);
+});
 
 passport.deserializeUser(async (id, done) => {
   try {
@@ -55,31 +62,29 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-//TODO: fix communication between script and main function (callback methodology)
-function runScript(scriptPath, args, callback) {
-  // keep track of whether callback has been invoked to prevent multiple invocations
+function runScript(scriptPath, args, messagecb, warningcb, donecb) {
+  // keep track of whether messagecb has been invoked to prevent multiple invocations
   var invoked = false;
   var process = childProcess.fork(scriptPath, args);
-  var output = ''
 
   // listen for errors as they may prevent the exit event from firing
-  process.on('error', function (err) {
-    if (invoked) return;
-    invoked = true;
-    callback(err);
+  process.on('warning', (err) => {
+    warningcb(err);
   });
 
-  //listen for general messages
-  process.on('message', function (data) {
-    if (invoked) return;
-    output.concat(data)
+  //listen for general messages (from process.send)
+  process.on('message', (data) => {
+    if (data)
+      messagecb(data);
   });
-  // execute the callback once the process has finished running
-  process.on('exit', function (code) {
-    if (invoked) return;
+
+  // execute the messagecb once the process has finished running
+  process.on('exit', (code) => {
+    if (invoked)
+      return;
     invoked = true;
     var err = code === 0 ? null : new Error('exit code ' + code);
-    callback(output);
+    donecb();
   });
 
 }
@@ -95,20 +100,109 @@ express()
   .use(errorHandler)
   .set('view engine', 'ejs')
   .get('/', (req, res) => res.render('pages/index.ejs', { user: req.user }))
+
+  //TODO: make this load filenames from the database and also load matching tags
+  .get('/showImages', (req, res) => {
+    res.render('pages/showImages.ejs', { 
+    image1: "dcef147ab2efacff940cb8ed1dd7eef0.jpg", 
+    image2: "2f468f5dcc735b77fca394331eea3547.jpg" 
+    }
+  )})
+
   .get('/login', (req, res) => res.render('pages/login.ejs', { user: req.user }))
   .get('/download', (req, res) => {
     //thread is set by the url (e.g .../download?thread=https://boards.4chan.org/sp/thread/103)
     let thread = req.query.thread
+    let output = { log: [], filenames: [], tags: [], tagids: [] }
+    runScript(chanDownloader, [thread],
+      (msg) => {
+        //This runs each time the script calls process.send
 
-    runScript(chanDownloader, [thread], function (err) {
-      //err is a json object returned from chan-downoader.js
-      //TODO: res.render(pages/chandownloaderoutput,{status: err}) or something
-      res.end('Output:\n' + JSON.stringify(err));
-    });
+        //Save the massage to the approptiate JSON tag
+        if (msg.log)//log message
+          output.log.push(msg.log);
+        if (msg.filenames)//chanDownloader sent a filename 
+          output.filenames.push(msg.filenames);
+        if (msg.tags) {//chanDownloader sent a tag
+          output.tags = msg.tags//tags is an array already
+          output.tagids = msg.tagids
+        }
+      },
+      (warn) => {
+        //This runs each time the script calls process.emitWarning
+        console.log(warn)
+      },
+      () => {
+        //This will get run after the script has finished
 
+        //upload is done in a separate function for readability
+        async function upload(filePath, md5) {
+          let ext = path.parse(filePath).ext;
+          await cloud.simpleUpload(md5 + ext, filePath);
+          return md5 + ext
+        }
+
+        function updatedb(fn, tags) {
+          //TODO: Implement this idea in the db repo files (pictures.add and pic_tag.addTagToPic)
+          const taglist = tags;
+          let picDescription = "No description"
+          let picRecord = db.pictures.add(picDescription, fn)
+            .then((picRecord) => {
+              console.log(picRecord)
+              for (var i = 0; i < tags.length; i++) {
+                if (tags[i]) {
+                  db.picTags.tagImage(picRecord.id, tags[i])
+                    .then((picTagRecord) => {
+                      console.log("Picture tagged successfully")
+                    })
+                    .catch((e) => {
+                      console.log("couldnt tag picture: " + e)
+                    });
+                }
+              }
+            })
+            .catch((e) => {
+              console.log("couldnt add picture to the database: " + e)
+            })
+
+        }
+
+        //rendering the output JSON file is done in a separate function for readability
+        function renderOutput() {
+          //TODO: res.render(pages/chandownloaderoutput,{status: output}) or something
+          console.log(output)
+          for (var i = 0; i < output.log.length; i++) {
+            if (output.log[i])//ignore undefined so that the server doesnt crash
+              res.write(output.log[i] + "\n")
+          }
+          res.end()
+        }
+
+        //This loop uploads the files to the cloud storage, while also setting the filename to its md5 sum
+        for (var i = 0; i < output.filenames.length; i++) {
+          //calculates MD5 of each pic asynchronously and uploads it when done, to prevent duplicate file uploads
+          //DO NOT CHANGE CONST. IT ENSURES FILEPATH IS PASSED TO THE .then()
+          const filePath = path.join(output.filenames[i])
+          md5File(filePath).
+            then((md5) => {
+              upload(filePath, md5).then((cloudname) => {
+                updatedb(cloudname, output.tagids)//TODO-ish:adds a record to the pictures table with the filename, and records to the tag table with tags.
+                console.log("Upload successful")
+                output.log.push("Upload successful")
+              })
+                .catch((reason) => {
+                  console.log("error in file upload promise: " + reason)
+                })
+            })
+            .catch((reason) => {
+              console.log("error with md5 while uploading to cloud:" + reason)
+            })
+        }
+
+        renderOutput();
+      })
   })
-  //TODO: fix this, it redirects when username incorrect, but does not login on username correct.
-  .post('/login', passport.authenticate('local', { failureRedirect: '/login' }),async (req, res) => {
+  .post('/login', passport.authenticate('local', { failureRedirect: '/login' }), async (req, res) => {
     console.log("logged in")
     res.redirect('/');
   })
@@ -122,6 +216,21 @@ express()
   })
   .get('/profile', require('connect-ensure-login').ensureLoggedIn(), (req, res) => {
     res.render('pages/profile', { user: req.user });
+  })
+  .get('/deleteallfiles', (req, res) => {
+    cloud.getBucketContents(async (err, data) => {
+      if (err) {
+        console.log("error getting item list from cos:" + err);
+        res.end("error");
+      } else {
+        let filenames = []
+        for (var i = 0; i < data.Contents.length; i++) {
+          filenames.push(data.Contents[i].Key)
+        }
+        await cloud.deleteItems(filenames);
+        res.end(filenames.toString());
+      }
+    });
   })
   .listen(PORT, () => console.log(`Listening on ${PORT}`))
 

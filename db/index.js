@@ -1,9 +1,10 @@
 const { Client } = require('pg')
 const promise = require('bluebird'); // best promise library today
 const pgPromise = require('pg-promise'); // pg-promise core library
-const {Users, Pictures} = require('./repo');
+const { Users, Pictures, Tags, PicTags, DatabaseManager } = require('./repo');
 
-const dbConfig={
+
+const dbConfig = {
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.DATABASE_URL ? true : false,
   ssl: {
@@ -18,12 +19,15 @@ const initOptions = {
   // Extending the database protocol with our custom repositories;
   // API: http://vitaly-t.github.io/pg-promise/global.html#event:extend
   extend(obj, dc) {
-      // Database Context (dc) is mainly useful when extending multiple databases with different access API-s.
+    // Database Context (dc) is mainly useful when extending multiple databases with different access API-s.
 
-      // Do not use 'require()' here, because this event occurs for every task and transaction being executed,
-      // which should be as fast as possible.
-      obj.users = new Users(obj, pgp);
-      obj.pictures = new Pictures(obj, pgp);
+    // Do not use 'require()' here, because this event occurs for every task and transaction being executed,
+    // which should be as fast as possible.
+    obj.users = new Users(obj, pgp);
+    obj.pictures = new Pictures(obj, pgp);
+    obj.tags = new Tags(obj,pgp);
+    obj.picTags = new PicTags(obj,pgp);
+    obj.databaseManager = new DatabaseManager(obj,pgp);
   }
 };
 
@@ -36,4 +40,4 @@ const db = pgp(dbConfig);
 
 // Alternatively, you can get access to pgp via db.$config.pgp
 // See: https://vitaly-t.github.io/pg-promise/Database.html#$config
-module.exports = {db, pgp};
+module.exports = { db, pgp };

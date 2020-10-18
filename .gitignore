@@ -3,10 +3,14 @@ node_modules
 npm-debug.log
 
 # Local development
+NOTES
 *.env
 *.dev
 .DS_Store
+credentials.json
+.bluemix
 
 # Docker
 Dockerfile
 docker-compose.yml
+

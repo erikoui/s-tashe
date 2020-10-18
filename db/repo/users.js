@@ -1,9 +1,13 @@
 //TODO: I just copied this, adapt for use with our db
 
+// To use this functions, use `const { db } = require('./db');` at the start of your file
+// All the functions in the class are promises (from async) so you 
+// can call them with `db.users.function(args).then(()=>{}).catch(()=>{})`,
+// or you can await them in async functions
 
-//add queries here similar to findByName, no need to add more sql files
+// add queries here similar to findByName, no need to add more sql files
 
-const {users: sql} = require('../sql');
+const { users: sql } = require('../sql');
 
 const cs = {}; // Reusable ColumnSet objects.
 
@@ -20,29 +24,12 @@ class UsersRepository {
         createColumnsets(pgp);
     }
 
-    // Creates the table;
-    async create() {
-        return this.db.none(sql.create);
-    }
-
-    // Initializes the table with some user records, and return their id-s;
-    async init() {
-        return this.db.map(sql.init, [], row => row.id);
-    }
-
-    // Drops the table;
-    async drop() {
-        return this.db.none(sql.drop);
-    }
-
-    // Removes all records from the table;
-    async empty() {
-        return this.db.none(sql.empty);
-    }
-
     // Adds a new user, and returns the new object;
-    async add(name,passwd) {
-        return this.db.one(sql.add, name,passwd);
+    async add(uname, passwd) {
+        return this.db.one(sql.add, {
+            username: uname,
+            password: passwd
+        });
     }
 
     // Tries to delete a user by id, and returns the number of records deleted;
@@ -79,9 +66,9 @@ function createColumnsets(pgp) {
     if (!cs.insert) {
         // Type TableName is useful when schema isn't default "public" ,
         // otherwise you can just pass in a string for the table name.
-        const table = new pgp.helpers.TableName({table: 'users', schema: 'public'});
+        const table = new pgp.helpers.TableName({ table: 'users', schema: 'public' });
 
-        cs.insert = new pgp.helpers.ColumnSet(['uname'], {table});
+        cs.insert = new pgp.helpers.ColumnSet(['uname'], { table });
         cs.update = cs.insert.extend(['?id']);
     }
     return cs;

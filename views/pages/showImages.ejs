@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <% include ../partials/header.ejs %>
+</head>
+
+<body>
+    <div class="col-md-6">
+        <img src=<%= "https://"+process.env.COS_ENDPOINT+"/"+process.env.COS_BUCKETNAME+"/"+image1 %>
+            class="img-responsive">
+    </div>
+    <div class="col-md-6">
+        <img src=<%= "https://"+process.env.COS_ENDPOINT+"/"+process.env.COS_BUCKETNAME+"/"+image2 %>
+            class="img-responsive">
+    </div>
+</body>
+
+</html>
