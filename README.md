@@ -44,3 +44,6 @@ ok so the site archives images from 4chan, and tags them using some keywords fro
 * `node index.js`
 * Open your browser to `localhost:5000`
 * Reach out for help if you need to
+
+### Recompile documentation
+`npm run createdocs`

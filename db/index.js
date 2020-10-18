@@ -1,15 +1,15 @@
-const { Client } = require('pg')
+const {Client} = require('pg');
 const promise = require('bluebird'); // best promise library today
 const pgPromise = require('pg-promise'); // pg-promise core library
-const { Users, Pictures, Tags, PicTags, DatabaseManager } = require('./repo');
+const {Users, Pictures, Tags, PicTags, DatabaseManager} = require('./repo');
 
 
 const dbConfig = {
   connectionString: process.env.DATABASE_URL_NOSSL,
   ssl: process.env.LOCAL ? true : false,
-    ssl: {
-      rejectUnauthorized: false
-    }
+  ssl: {
+    rejectUnauthorized: false,
+  },
 };
 
 // pg-promise initialization options:
@@ -28,7 +28,7 @@ const initOptions = {
     obj.tags = new Tags(obj, pgp);
     obj.picTags = new PicTags(obj, pgp);
     obj.databaseManager = new DatabaseManager(obj, pgp);
-  }
+  },
 };
 
 
@@ -40,4 +40,4 @@ const db = pgp(dbConfig);
 
 // Alternatively, you can get access to pgp via db.$config.pgp
 // See: https://vitaly-t.github.io/pg-promise/Database.html#$config
-module.exports = { db, pgp };
+module.exports = {db, pgp};

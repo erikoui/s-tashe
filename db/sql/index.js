@@ -1,7 +1,7 @@
 const {QueryFile} = require('pg-promise');
 const {join: joinPath} = require('path');
 
-///////////////////////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////////////////////
 // Criteria for deciding whether to place a particular query into an external SQL file or to
 // keep it in-line (hard-coded):
 //
@@ -14,50 +14,49 @@ const {join: joinPath} = require('path');
 // In fact, the only reason one might want to keep a query in-line within the code is to be able
 // to easily see the relation between the query logic and its formatting parameters. However, this
 // is very easy to overcome by using only Named Parameters for your query formatting.
-////////////////////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////////////////////
 
 module.exports = {
-    users: {
-        add: sql('users/add.sql')
-    },
-    pictures: {
-        add: sql('pictures/add.sql')
-    },
-    databasemanager: {
-        createdb: sql('databasemanager/createdb.sql')
-    }
+  users: {
+    add: sql('users/add.sql'),
+  },
+  pictures: {
+    add: sql('pictures/add.sql'),
+  },
+  databasemanager: {
+    createdb: sql('databasemanager/createdb.sql'),
+  },
 };
 
-///////////////////////////////////////////////
+// /////////////////////////////////////////////
 // Helper for linking to external query files;
 function sql(file) {
+  const fullPath = joinPath(__dirname, file); // generating full path;
 
-    const fullPath = joinPath(__dirname, file); // generating full path;
+  const options = {
 
-    const options = {
+    // minifying the SQL is always advised;
+    // see also option 'compress' in the API;
+    minify: true,
 
-        // minifying the SQL is always advised;
-        // see also option 'compress' in the API;
-        minify: true
+    // See also property 'params' for two-step template formatting
+  };
 
-        // See also property 'params' for two-step template formatting
-    };
+  const qf = new QueryFile(fullPath, options);
 
-    const qf = new QueryFile(fullPath, options);
+  if (qf.error) {
+    // Something is wrong with our query file :(
+    // Testing all files through queries can be cumbersome,
+    // so we also report it here, while loading the module:
+    console.error(qf.error);
+  }
 
-    if (qf.error) {
-        // Something is wrong with our query file :(
-        // Testing all files through queries can be cumbersome,
-        // so we also report it here, while loading the module:
-        console.error(qf.error);
-    }
+  return qf;
 
-    return qf;
-
-    // See QueryFile API:
-    // http://vitaly-t.github.io/pg-promise/QueryFile.html
+  // See QueryFile API:
+  // http://vitaly-t.github.io/pg-promise/QueryFile.html
 }
 
-///////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////
 // Possible alternative - enumerating all SQL files automatically:
 // http://vitaly-t.github.io/pg-promise/utils.html#.enumSql
