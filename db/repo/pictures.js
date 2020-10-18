@@ -22,10 +22,16 @@ class PicturesRepository {
     }
 
     // TODO: Tries to delete a picture by id, and returns the number of records deleted;
+    // TODO: delete picture by filename
     async remove(id) {
         //return this.db.result('DELETE FROM pictures WHERE id = $1', +id, r => r.rowCount);
         console.log("pictures.js remove not yet implemented")
         return 0;
+    }
+
+    // Returns 2 pictures at random
+    async twoRandomPics(){
+        return this.db.many('SELECT * FROM pictures ORDER BY RANDOM() LIMIT 2;');
     }
 
     // Tries to find a picture from picture filename;

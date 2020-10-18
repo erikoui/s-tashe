@@ -6,10 +6,10 @@ const { Users, Pictures, Tags, PicTags, DatabaseManager } = require('./repo');
 
 const dbConfig = {
   connectionString: process.env.DATABASE_URL_NOSSL,
-  ssl: false,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  ssl: process.env.LOCAL ? true : false,
+    ssl: {
+      rejectUnauthorized: false
+    }
 };
 
 // pg-promise initialization options:
@@ -25,9 +25,9 @@ const initOptions = {
     // which should be as fast as possible.
     obj.users = new Users(obj, pgp);
     obj.pictures = new Pictures(obj, pgp);
-    obj.tags = new Tags(obj,pgp);
-    obj.picTags = new PicTags(obj,pgp);
-    obj.databaseManager = new DatabaseManager(obj,pgp);
+    obj.tags = new Tags(obj, pgp);
+    obj.picTags = new PicTags(obj, pgp);
+    obj.databaseManager = new DatabaseManager(obj, pgp);
   }
 };
 

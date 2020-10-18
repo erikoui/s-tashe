@@ -101,11 +101,15 @@ express()
   .set('view engine', 'ejs')
   .get('/', (req, res) => res.render('pages/index.ejs', { user: req.user }))
 
-  //TODO: make this load filenames from the database and also load matching tags
   .get('/showImages', (req, res) => {
-    res.render('pages/showImages.ejs', { 
-    image1: "dcef147ab2efacff940cb8ed1dd7eef0.jpg", 
-    image2: "2f468f5dcc735b77fca394331eea3547.jpg" 
+    db.pictures.twoRandomPics().then((data)=>{
+      console.log(data);
+      res.render('pages/showImages.ejs', { 
+        image1: data[0].filename, 
+        image2: data[1].filename 
+        })
+    }).catch((err)=>{
+      res.end("Error fetching images: "+err);
     }
   )})
 
@@ -229,6 +233,20 @@ express()
           filenames.push(data.Contents[i].Key)
         }
         await cloud.deleteItems(filenames);
+        res.end(filenames.toString());
+      }
+    });
+  })
+  .get('/listallfiles', (req, res) => {
+    cloud.getBucketContents(async (err, data) => {
+      if (err) {
+        console.log("error getting item list from cos:" + err);
+        res.end("error");
+      } else {
+        let filenames = []
+        for (var i = 0; i < data.Contents.length; i++) {
+          filenames.push(data.Contents[i].Key)
+        }
         res.end(filenames.toString());
       }
     });
