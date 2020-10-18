@@ -1,7 +1,6 @@
 // Adapted from https://github.com/nuclearace/4chan-Image-Downloader
 // downloads the images from a 4chan thread.
 
-// TODO: match keywords from the thread title and set them as suggested
 // TODO: you should only be able to run this script as an admin or automatically
 
 
