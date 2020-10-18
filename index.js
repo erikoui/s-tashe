@@ -111,6 +111,7 @@ express()
 
   .get('/login', (req, res) => res.render('pages/login.ejs', { user: req.user }))
   .get('/download', (req, res) => {
+    res.end("running download script")
     //thread is set by the url (e.g .../download?thread=https://boards.4chan.org/sp/thread/103)
     let thread = req.query.thread
     let output = { log: [], filenames: [], tags: [], tagids: [] }
@@ -171,11 +172,11 @@ express()
         function renderOutput() {
           //TODO: res.render(pages/chandownloaderoutput,{status: output}) or something
           console.log(output)
-          for (var i = 0; i < output.log.length; i++) {
-            if (output.log[i])//ignore undefined so that the server doesnt crash
-              res.write(output.log[i] + "\n")
-          }
-          res.end()
+          // for (var i = 0; i < output.log.length; i++) {
+          //   if (output.log[i])//ignore undefined so that the server doesnt crash
+          //     res.write(output.log[i] + "\n")
+          // }
+          // res.end()
         }
 
         //This loop uploads the files to the cloud storage, while also setting the filename to its md5 sum
