@@ -1,22 +1,14 @@
 const {QueryFile} = require('pg-promise');
 const {join: joinPath} = require('path');
 
-// /////////////////////////////////////////////////////////////////////////////////////////////
-// Criteria for deciding whether to place a particular query into an external SQL file or to
-// keep it in-line (hard-coded):
-//
-// - Size / complexity of the query, because having it in a separate file will let you develop
-//   the query and see the immediate updates without having to restart your application.
-//
-// - The necessity to document your query, and possibly keeping its multiple versions commented
-//   out in the query file.
-//
-// In fact, the only reason one might want to keep a query in-line within the code is to be able
-// to easily see the relation between the query logic and its formatting parameters. However, this
-// is very easy to overcome by using only Named Parameters for your query formatting.
-// //////////////////////////////////////////////////////////////////////////////////////////////
-
+/**
+ * @module db
+ */
 module.exports = {
+  // Possible alternative - enumerating all SQL files automatically:
+  // http://vitaly-t.github.io/pg-promise/utils.html#.enumSql
+
+  // add query files as member functions here
   users: {
     add: sql('users/add.sql'),
   },
@@ -28,18 +20,18 @@ module.exports = {
   },
 };
 
-// /////////////////////////////////////////////
-// Helper for linking to external query files;
+/**
+ * Helper for linking to external query files.
+ * @param {String} file - the relative filepath of the sql file
+ *
+ * @return {QueryFile} qf - See QueryFile API:
+ * http://vitaly-t.github.io/pg-promise/QueryFile.html
+ */
 function sql(file) {
-  const fullPath = joinPath(__dirname, file); // generating full path;
+  const fullPath = joinPath(__dirname, file); // generating full path
 
   const options = {
-
-    // minifying the SQL is always advised;
-    // see also option 'compress' in the API;
     minify: true,
-
-    // See also property 'params' for two-step template formatting
   };
 
   const qf = new QueryFile(fullPath, options);
@@ -52,11 +44,4 @@ function sql(file) {
   }
 
   return qf;
-
-  // See QueryFile API:
-  // http://vitaly-t.github.io/pg-promise/QueryFile.html
 }
-
-// /////////////////////////////////////////////////////////////////
-// Possible alternative - enumerating all SQL files automatically:
-// http://vitaly-t.github.io/pg-promise/utils.html#.enumSql

@@ -1,13 +1,17 @@
-// load pictures.js but call it sql because we're cool like that
+// load pictures sql files but call it sql because we're cool like that
 const {pictures: sql} = require('../sql');
 
 /**
- * Manages the pictures table
- * All the functions in the class are promises (from async) so you
- * can call them with db.pictures.function(args).then(()=>{}).catch(()=>{}),
- * or you can await them in async functions
- * @module
+ * @module db
  */
+
+/**
+  * Manages the pictures table
+  * All the functions in the class are promises (from async) so you
+  * can call them with db.pictures.function(args).then(()=>{}).catch(()=>{}),
+  * or you can await them in async functions
+  * @class
+  */
 class PicturesRepository {
   /**
    * @constructor

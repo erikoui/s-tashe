@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: cos</title>
+    <title>JSDoc: Source: db/sql/index.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,139 +17,65 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: cos</h1>
+    <h1 class="page-title">Source: db/sql/index.js</h1>
 
     
 
 
 
-
-<section>
-
-<header>
     
-        
-            
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description">Interface between this app and the cloud server (IBM COS)</div>
-        
-
-        
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="cos_index.js.html">cos/index.js</a>, <a href="cos_index.js.html#line9">line 9</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Classes</h3>
-
-        <dl>
-            <dt><a href="module-cos-Cloud.html">Cloud</a></dt>
-            <dd></dd>
-        </dl>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const {QueryFile} = require('pg-promise');
+const {join: joinPath} = require('path');
+
+/**
+ * @module db
+ */
+module.exports = {
+  // Possible alternative - enumerating all SQL files automatically:
+  // http://vitaly-t.github.io/pg-promise/utils.html#.enumSql
+
+  // add query files as member functions here
+  users: {
+    add: sql('users/add.sql'),
+  },
+  pictures: {
+    add: sql('pictures/add.sql'),
+  },
+  databasemanager: {
+    createdb: sql('databasemanager/createdb.sql'),
+  },
+};
+
+/**
+ * Helper for linking to external query files.
+ * @param {String} file - the relative filepath of the sql file
+ *
+ * @return {QueryFile} qf - See QueryFile API:
+ * http://vitaly-t.github.io/pg-promise/QueryFile.html
+ */
+function sql(file) {
+  const fullPath = joinPath(__dirname, file); // generating full path
+
+  const options = {
+    minify: true,
+  };
+
+  const qf = new QueryFile(fullPath, options);
+
+  if (qf.error) {
+    // Something is wrong with our query file :(
+    // Testing all files through queries can be cumbersome,
+    // so we also report it here, while loading the module:
+    console.error(qf.error);
+  }
+
+  return qf;
+}
+</code></pre>
+        </article>
+    </section>
 
 
 

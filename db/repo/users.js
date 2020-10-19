@@ -1,77 +1,81 @@
-// TODO: I just copied this, adapt for use with our db
-
-// To use this functions, use `const { db } = require('./db');` at the start of your file
-// All the functions in the class are promises (from async) so you
-// can call them with `db.users.function(args).then(()=>{}).catch(()=>{})`,
-// or you can await them in async functions
-
-// add queries here similar to findByName, no need to add more sql files
-
+// load users sql files but call it sql because we're cool like that
 const {users: sql} = require('../sql');
-
-const cs = {}; // Reusable ColumnSet objects.
-
-/*
- This repository mixes hard-coded and dynamic SQL, primarily to show a diverse example of using both.
+/**
+ *
+ * @module db
  */
 
+/**
+  * Manages the users table
+  * All the functions in the class are promises (from async) so you
+  * can call them with db.users.function(args).then(()=>{}).catch(()=>{}),
+  * or you can await them in async functions
+  * @class
+  */
 class UsersRepository {
+  /**
+   * @constructor
+   * @param {*} db - the database object
+   * @param {*} pgp - probably unnescessary, check it out
+   */
   constructor(db, pgp) {
     this.db = db;
     this.pgp = pgp;
-
-    // set-up all ColumnSet objects, if needed:
-    createColumnsets(pgp);
   }
 
-  // Adds a new user, and returns the new object;
+  /**
+   * Adds a new user, and returns the new object;
+   * @param {String} uname - new username
+   * @param {String} passwd - new password in plaintext
+   */
   async add(uname, passwd) {
+    // TODO: hash password
     return this.db.one(sql.add, {
       username: uname,
       password: passwd,
     });
   }
 
-  // Tries to delete a user by id, and returns the number of records deleted;
+  /**
+   * Tries to delete a user by id
+   * @param {int} id - user id
+   * @return {int} the number of records deleted
+   */
   async remove(id) {
-    return this.db.result('DELETE FROM users WHERE id = $1', +id, (r) => r.rowCount);
+    return this.db.result(
+        'DELETE FROM users WHERE id = $1', +id, (r) => r.rowCount,
+    );
   }
 
-  // Tries to find a user from id;
+  /**
+   * Tries to find a user by id
+   * @param {int} id - user id
+   */
   async findById(id) {
     return this.db.oneOrNone('SELECT * FROM users WHERE id = $1', +id);
   }
 
-  // Tries to find a user from name;
-  async findByName(name) {
-    return this.db.oneOrNone('SELECT * FROM users WHERE uname = $1', name);
+  /**
+   * Tries to find a user by name
+   * @param {String} uname - The user name
+   */
+  async findByName(uname) {
+    return this.db.oneOrNone('SELECT * FROM users WHERE uname = $1', uname);
   }
 
-  // Returns all user records;
+  /**
+   * Returns all user records
+   */
   async all() {
     return this.db.any('SELECT * FROM users');
   }
 
-  // Returns the total number of users;
+  /**
+   * Returns the total number of users
+   */
   async total() {
     return this.db.one('SELECT count(*) FROM users', [], (a) => +a.count);
   }
-}
-
-// ////////////////////////////////////////////////////////
-// Example of statically initializing ColumnSet objects:
-
-function createColumnsets(pgp) {
-  // create all ColumnSet objects only once:
-  if (!cs.insert) {
-    // Type TableName is useful when schema isn't default "public" ,
-    // otherwise you can just pass in a string for the table name.
-    const table = new pgp.helpers.TableName({table: 'users', schema: 'public'});
-
-    cs.insert = new pgp.helpers.ColumnSet(['uname'], {table});
-    cs.update = cs.insert.extend(['?id']);
-  }
-  return cs;
 }
 
 module.exports = UsersRepository;

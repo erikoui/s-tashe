@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Global</title>
+    <title>JSDoc: Class: TagsRepository</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Global</h1>
+    <h1 class="page-title">Class: TagsRepository</h1>
 
     
 
@@ -28,7 +28,13 @@
 
 <header>
     
-        <h2></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>
+            <span class="ancestors"><a href="module-db.html">db</a>~</span>TagsRepository<span class="signature">(db, pgp)</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description">Manages the tags table
+All the functions in the class are promises (from async) so you
+can call them with db.tags.function(args).then(()=>{}).catch(()=>{}),
+or you can await them in async functions</div>
         
     
 </header>
@@ -38,73 +44,12 @@
     
         
 
-        
-
-
-<dl class="details">
-
+    
+    <h2>Constructor</h2>
     
 
     
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="runScript"><span class="type-signature"></span>runScript<span class="signature">(scriptPath, args, messagecb, warningcb, donecb)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="TagsRepository"><span class="type-signature"></span>new TagsRepository<span class="signature">(db, pgp)</span><span class="type-signature"></span></h4>
     
 
     
@@ -144,13 +89,13 @@
 
         <tr>
             
-                <td class="name"><code>scriptPath</code></td>
+                <td class="name"><code>db</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">*</span>
 
 
             
@@ -160,20 +105,20 @@
 
             
 
-            <td class="description last"></td>
+            <td class="description last">the database object</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>args</code></td>
+                <td class="name"><code>pgp</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">array.&lt;any></span>
+<span class="param-type">*</span>
 
 
             
@@ -183,76 +128,7 @@
 
             
 
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>messagecb</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">callback on message from process.send</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>warningcb</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">callback on warning from process.emitWarning</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>donecb</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">callback on finish</td>
+            <td class="description last">probably unnescessary, check it out</td>
         </tr>
 
     
@@ -293,7 +169,115 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line73">line 73</a>
+        <a href="db_repo_tags.js.html">db/repo/tags.js</a>, <a href="db_repo_tags.js.html#line13">line 13</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="all"><span class="type-signature">(async) </span>all<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns all tag records;
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="db_repo_tags.js.html">db/repo/tags.js</a>, <a href="db_repo_tags.js.html#line27">line 27</a>
     </li></ul></dd>
     
 

@@ -103,7 +103,6 @@ function runScript(scriptPath, args, messagecb, warningcb, donecb) {
 }
 
 express()
-// this is the folder with all resources
     .use(express.static(path.join(__dirname, 'public')))
     .use(require('morgan')('combined'))
     .use(require('body-parser').urlencoded({extended: true}))

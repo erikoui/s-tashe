@@ -1,4 +1,4 @@
-// Renaming and exporting all repository classes:
+// Rename and export all repository classes:
 module.exports = {
   DatabaseManager: require('./databasemanager'),
   Users: require('./users'),

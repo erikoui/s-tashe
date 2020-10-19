@@ -1,4 +1,3 @@
-const {Client} = require('pg');
 const promise = require('bluebird'); // best promise library today
 const pgPromise = require('pg-promise'); // pg-promise core library
 const {Users, Pictures, Tags, PicTags, DatabaseManager} = require('./repo');
@@ -19,10 +18,11 @@ const initOptions = {
   // Extending the database protocol with our custom repositories;
   // API: http://vitaly-t.github.io/pg-promise/global.html#event:extend
   extend(obj, dc) {
-    // Database Context (dc) is mainly useful when extending multiple databases with different access API-s.
+    // Database Context (dc) is mainly useful when extending multiple databases
+    // with different access API-s.
 
-    // Do not use 'require()' here, because this event occurs for every task and transaction being executed,
-    // which should be as fast as possible.
+    // Do not use 'require()' here, because this event occurs for every task
+    // and transaction being executed, which should be as fast as possible.
     obj.users = new Users(obj, pgp);
     obj.pictures = new Pictures(obj, pgp);
     obj.tags = new Tags(obj, pgp);
