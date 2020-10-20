@@ -125,12 +125,21 @@ express()
     .get('/showImages', (req, res) => {
       db.pictures.twoRandomPics().then((data) => {
         console.log(data);
-        res.render('pages/showImages.ejs', {
-          image1: data[0].filename,
-          image2: data[1].filename,
+        res.render('partials/showImages.ejs', {
+          image1: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[0].filename}`,
+          image2: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[1].filename}`,
+          // TODO: generate this tag object from the database
+          tags: [{id: 1, tag: 'test'}, {id: 2, tag: 'banei'}],
         });
       }).catch((err) => {
-        res.end('Error fetching images: ' + err);
+        // TODO: remove this render statement, its for testing only
+        // Or don't, and show 2 local images and the error.
+        res.render('partials/showImages.ejs', {
+          image1: 'images/a.jpg',
+          image2: 'images/b.jpg',
+          tags: [{id: 1, tag: 'test'}, {id: 2, tag: 'banei'}],
+        });
+        // res.end('Error fetching images: ' + err);
       },
       );
     })

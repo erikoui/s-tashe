@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <% include ./header.ejs %>
+</head>
+
+<body>
+    <div class="col-md-6">
+        <img src=<%= image1 %> class="img-responsive">
+        <% for( let i = 0; i < tags.length; i++ ) { %>
+        <a type="button" class="btn btn-lg btn-default" href="/tag?tagid=<%- tags[i].id%>"> <%- tags[i].tag%></a>
+        <% } %>
+    </div>
+    <div class="col-md-6">
+        <img src=<%= image2 %> class="img-responsive">
+    </div>
+</body>
+
+</html>
