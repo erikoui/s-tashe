@@ -1,9 +1,9 @@
 convert chan-downloader to a module
-password authentication
 register page
 user priviledge levels
 check if file exists on cloud before uploading (also check database records and add them if missing)
 rate limiter file uploads because they time out on slow connection
+nicer login front end (invalid login message or similar)
 
 Automatically delete pics after uploading
 
@@ -12,3 +12,5 @@ Load images based by tag
 
 check why this happens when downloading a thread: couldnt tag picture: error: duplicate key value violates unique constraint "picture_tag_id"
   -> this is when a tag appears twice in the thread title. solution is to use a set for tagids instead of an array.
+
+CHANGE ADMIN PASSWORD

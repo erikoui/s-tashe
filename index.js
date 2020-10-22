@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const sha1 = require('sha1');
 const {db} = require('./db');
 const md5File = require('md5-file');
 const childProcess = require('child_process');
@@ -21,23 +22,22 @@ const PORT = process.env.PORT || 5000;
 // (`username` and `password`) submitted by the user.  The function must verify
 // that the password is correct and then invoke `cb` with a user object, which
 // will be set at `req.user` in route handlers after authentication.
-passport.use(new Strategy(
-    async (username, password, cb) => {
-    // db.users.testDb();
-      let user;
-      try {
-        user = await db.users.findByName(username);
-        if (!user) {
-          console.log('Invalid login');
-          return cb(null, false, {message: 'No user by that name'});
-        }
-      } catch (e) {
-        return cb(e);
-      }
-      console.log('Found user ' + user.uname);
-      return cb(null, user);
-    },
-));
+passport.use(
+    new Strategy(
+        async (username, password, cb) => {
+          let user;
+          try {
+            hashPass = sha1(password);
+            user = await db.users.login(username, hashPass);
+            if (!user) {
+              return cb(null, false, {message: 'Invalid login'});
+            }
+          } catch (e) {
+            return cb(e);
+          }
+          return cb(null, user);
+        },
+    ));
 
 // Configure Passport authenticated session persistence.
 //
@@ -63,7 +63,7 @@ passport.deserializeUser(async (id, done) => {
 });
 
 /**
- *
+ * Runs a nodejs script and listens for messages.
  * @param {string} scriptPath
  * @param {array<any>} args
  * @param {Function} messagecb - callback on message from process.send
@@ -115,7 +115,7 @@ express()
     .use(passport.session())
     .use(errorHandler)
 
-    // this is the folder with all the ejs files
+// this is the folder with all the ejs files
     .set('views', path.join(__dirname, 'views'))
     .set('view engine', 'ejs')
 
@@ -134,14 +134,14 @@ express()
           tagids2: data[1].tagids,
         });
       }).catch((err) => {
-        // TODO: show 2 local images and the error.
+      // TODO: show 2 local images and the error.
         console.log(err);
         res.end('Error fetching images: ' + err);
       },
       );
     })
-    .get('/tag', (req, res)=>{
-      // TODO: this endpoint
+    .get('/tag', (req, res) => {
+    // TODO: this endpoint
       const tagid = req.query.tagid;
       res.end(`TODO: load all images of a given tag. Tagid: ${tagid}`);
     })
@@ -178,11 +178,11 @@ express()
             // This runs when the script is done
 
             /**
-             * Inserts image info and tags it in the database.
-             * @param {strint} filename - filename as in the cloud
-             *  (the md5 name). Also known as the key
-             * @param {array<int>} tagids - tag ids
-             */
+* Inserts image info and tags it in the database.
+* @param {strint} filename - filename as in the cloud
+*  (the md5 name). Also known as the key
+* @param {array<int>} tagids - tag ids
+*/
             async function updateDb(filename, tagids) {
               const desc = 'No description';
               try {
@@ -203,8 +203,8 @@ express()
             }
 
             /**
-             * Renders the output JSON file
-             */
+* Renders the output JSON file
+*/
             function renderOutput() {
               // TODO: show a web page with proper formatting etc
               // TODO: res.render(pages/chandownloaderoutput,{status: output})

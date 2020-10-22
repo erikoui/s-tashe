@@ -64,6 +64,19 @@ class UsersRepository {
   }
 
   /**
+   * Tries to find a user by name and password
+   * @param {String} uname - The user name
+   * @param {String} password - the SHA1 hashed password
+   */
+  async login(uname, password) {
+    return this.db.oneOrNone(
+        'SELECT * FROM users WHERE uname = ${username} AND password=${pass}',
+        {
+          username: uname, pass: password,
+        });
+  }
+
+  /**
    * Returns all user records
    */
   async all() {
