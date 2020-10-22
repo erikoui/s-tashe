@@ -9,7 +9,8 @@ const {pictures: sql} = require('../sql');
   * Manages the pictures table
   * All the functions in the class are promises (from async) so you
   * can call them with db.pictures.function(args).then(()=>{}).catch(()=>{}),
-  * or you can await them in async functions
+  * or you can await them in async functions. It does not use tempalte strings
+  * for queries for security.
   * @class
   */
 class PicturesRepository {
@@ -53,7 +54,62 @@ class PicturesRepository {
    * Returns 2 pictures at random
    */
   async twoRandomPics() {
-    return this.db.many('SELECT * FROM pictures ORDER BY RANDOM() LIMIT 2;');
+    // TODO: single SQL statement for this mess
+
+    const picData=await this.db.many(
+        'SELECT p.id,p.filename FROM pictures p ORDER BY RANDOM() LIMIT 2;',
+    );
+
+    const tagData1=await this.db.many(
+        'SELECT t.tag_id FROM picture_tag t WHERE t.pic_id=${picid}', {
+          picid: picData[0].id,
+        },
+    );
+    const tagData2=await this.db.many(
+        'SELECT t.tag_id FROM picture_tag t WHERE t.pic_id=${picid}', {
+          picid: picData[1].id,
+        },
+    );
+
+    const tagNames1=[];
+    const tagids1=[];
+    for (let i=0; i<tagData1.length; i++) {
+      const tag=await this.db.one(
+          'SELECT t.tag FROM tags t WHERE t.id=${tagid}', {
+            tagid: tagData1[i].tag_id,
+          },
+      );
+      tagNames1.push(tag.tag);
+      tagids1.push(tagData1[i].tag_id);
+    }
+
+    const tagNames2=[];
+    const tagids2=[];
+    for (let i=0; i<tagData2.length; i++) {
+      const tag=await this.db.one(
+          'SELECT t.tag FROM tags t WHERE t.id=${tagid}', {
+            tagid: tagData2[i].tag_id,
+          },
+      );
+      tagNames2.push(tag.tag);
+      tagids2.push(tagData2[i].tag_id);
+    }
+
+    const r=[
+      {
+        id: picData[0].id,
+        filename: picData[0].filename,
+        tags: tagNames1,
+        tagids: tagids1,
+      },
+      {
+        id: picData[1].id,
+        filename: picData[1].filename,
+        tags: tagNames2,
+        tagids: tagids2,
+      },
+    ];
+    return r;
   }
 
   /**
@@ -62,9 +118,10 @@ class PicturesRepository {
    * @param {string} fname - the filename on the cloud
    */
   async findByFilename(fname) {
-    return this.db.one('SELECT * FROM pictures WHERE filename = ${filename}', {
-      filename: fname,
-    });
+    return this.db.one(
+        'SELECT * FROM pictures WHERE filename = ${filename}', {
+          filename: fname,
+        });
   }
 
   /**

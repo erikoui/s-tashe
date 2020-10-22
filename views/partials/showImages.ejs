@@ -3,17 +3,21 @@
 
 <head>
     <% include ./header.ejs %>
+    <base target="_parent">
 </head>
 
 <body>
     <div class="col-md-6">
         <img src=<%= image1 %> class="img-responsive">
-        <% for( let i = 0; i < tags.length; i++ ) { %>
-        <a type="button" class="btn btn-lg btn-default" href="/tag?tagid=<%- tags[i].id%>"> <%- tags[i].tag%></a>
+        <% for( let i = 0; i < tags1.length; i++ ) { %>
+        <a type="button" class="btn btn-lg btn-default" href="/tag?tagid=<%- tagids1[i]%>"> <%- tags1[i]%></a>
         <% } %>
     </div>
     <div class="col-md-6">
         <img src=<%= image2 %> class="img-responsive">
+        <% for( let i = 0; i < tags2.length; i++ ) { %>
+        <a type="button" class="btn btn-lg btn-default" href="/tag?tagid=<%- tagids2[i]%>"> <%- tags2[i]%></a>
+        <% } %>
     </div>
 </body>
 

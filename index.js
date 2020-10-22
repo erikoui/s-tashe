@@ -124,30 +124,33 @@ express()
     })
     .get('/showImages', (req, res) => {
       db.pictures.twoRandomPics().then((data) => {
-        console.log(data);
+        console.log(data[0]);
         res.render('partials/showImages.ejs', {
           image1: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[0].filename}`,
           image2: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[1].filename}`,
-          // TODO: generate this tag object from the database
-          tags: [{id: 1, tag: 'test'}, {id: 2, tag: 'banei'}],
+          tags1: data[0].tags,
+          tags2: data[1].tags,
+          tagids1: data[0].tagids,
+          tagids2: data[1].tagids,
         });
       }).catch((err) => {
-        // TODO: remove this render statement, its for testing only
-        // Or don't, and show 2 local images and the error.
-        res.render('partials/showImages.ejs', {
-          image1: 'images/a.jpg',
-          image2: 'images/b.jpg',
-          tags: [{id: 1, tag: 'test'}, {id: 2, tag: 'banei'}],
-        });
-        // res.end('Error fetching images: ' + err);
+        // TODO: show 2 local images and the error.
+        console.log(err);
+        res.end('Error fetching images: ' + err);
       },
       );
+    })
+    .get('/tag', (req, res)=>{
+      // TODO: this endpoint
+      const tagid = req.query.tagid;
+      res.end(`TODO: load all images of a given tag. Tagid: ${tagid}`);
     })
     .get('/login', (req, res) => {
       res.render('pages/login.ejs', {user: req.user});
     })
     .get('/download', (req, res) => {
       res.end('running download script');
+      // TODO: redirect to the report page when finished
       // thread is set by the url (e.g .../download?thread=https://boards.4chan.org/sp/thread/103)
       const thread = req.query.thread;
       const output = {log: [], filenames: [], tags: [], tagids: []};
