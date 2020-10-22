@@ -4,28 +4,12 @@
       <li>
         <a href="/"><span class="glyphicon glyphicon-home"></span> Home</a>
       </li>
-      <li>
-        <a href=""><span class="glyphicon glyphicon-user"></span> link1</a>
-      </li>
-      <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span
-            class="glyphicon glyphicon-info-sign"></span> dropdown sample <span class="caret"></span></a>
-        <ul class="dropdown-menu" role="menu">
-          <li><a href="">Ge5y</a></li>
-          <li><a href="">Gettku witho</a></li>
-          <li><a href="">Gettinre</a></li>
-          <li><a href="">Getting </a></li>
-          <li class="divider"></li>
-          <li><a href="">benis sganvoo</a></li>
-          <li><a href="">asdasdsad</a></li>
-        </ul>
-      </li>
     </ul>
     <div class="navbar-right navbar-text">
-        <span class="glyphicon glyphicon-book"></span><% if (!user) { %>
+        <% if (!user) { %>
           Welcome! Please <a href="/login">log in</a>.
         <% } else { %>
-          Hello, <%= user.username %>. View your <a href="/profile">profile</a>.
+          Hello, <%= user.uname %>. View your <a href="/profile">profile</a> or <a href="/logout">Log out</a>.
         <% } %>
         </div>
   </div>
