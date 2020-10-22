@@ -137,6 +137,29 @@ class PicturesRepository {
   }
 
   /**
+   * Tries to find many pics from tag id list. This is an AND type query.
+   * @param {array<int>} tagids - some description as in the database.
+   */
+  async findByTag(tagids) {
+    // TODO: test this function
+    let tagstring='';
+    for (let i=0; i<tagids.length-1; i++) {
+      tagstring+=tagids[i];
+    }
+    tagstring+=tagids[tagids.length-1];
+
+    const q=`SELECT b.*
+      FROM picture_tag bt, pictures b, tags t
+      WHERE bt.tag_id = t.id
+      AND (t.id IN (${tagstring})
+      AND b.id = bt.pic_id
+      GROUP BY b.id
+      HAVING COUNT( b.id )=${tagids.length};`;
+    console.log(q);
+    return this.db.any(q);
+  }
+
+  /**
    * Returns all picture records
    */
   async all() {
