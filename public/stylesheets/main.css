@@ -24,5 +24,35 @@
     border: 2px solid white; }
     .jumbotron .lang-logo img {
       max-width: 100%; }
+      
+    .row {
+      margin: auto;
+      width: 90%;
+    }
+
+    .column {
+      float: left;
+      text-align: left;
+      padding: 10px;
+      border-radius: 5px;
+      background-color: #eff5ff;
+      color: black;
+    }
+
+    .left {
+      width: 14%;
+      margin-right: 10px;
+    }
+
+    .right {
+      width: 14%;
+      margin-left: 10px;
+    }
+
+    .middle {
+      border-radius: 5px;
+      background-color: #eff5ff;
+      width: 65%;
+    }
 
 
