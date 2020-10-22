@@ -4,8 +4,9 @@ user priviledge levels
 check if file exists on cloud before uploading (also check database records and add them if missing)
 rate limiter file uploads because they time out on slow connection
 nicer login front end (invalid login message or similar)
+pic voting
 
-Automatically delete pics after uploading
+Automatically delete local pics after uploading
 
 Load images based by tag
   -> also SFW mode (sfw tag)
