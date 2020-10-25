@@ -103,7 +103,6 @@ Grabber.prototype.findTags = function(json) {
   db.tags.all()
       .then((tags) => {
         const validTags = [];
-        const vtids = [];
         for (let i = 0; i < tags.length; i++) {
           let checkTags = [tags[i].tag];
           if (tags[i].alts != null) {
@@ -112,11 +111,10 @@ Grabber.prototype.findTags = function(json) {
           for (let j = 0; j < bag.length; j++) {
             if ((checkTags.includes(bag[j])) && !(validTags.includes(bag[j]))) {
               validTags.push(bag[j]);
-              vtids.push(tags[i].id);
             }
           }
         }
-        process.send({tags: validTags, tagids: vtids});
+        process.send({tags: validTags});
       })
       .catch((e) => {
         console.log('error with database getting tags:' + e);

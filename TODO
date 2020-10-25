@@ -11,9 +11,5 @@ Automatically delete local pics after uploading
 progress for the downloader script
 
 Load images based by tag
-  -> also SFW mode (sfw tag)
-
-check why this happens when downloading a thread: couldnt tag picture: error: duplicate key value violates unique constraint "picture_tag_id"
-  -> this is when a tag appears twice in the thread title. solution is to use a set for tagids instead of an array.
 
 CHANGE ADMIN PASSWORD

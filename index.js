@@ -151,7 +151,7 @@ express()
       // TODO: redirect to the report page when finished
       // thread is set by the url (e.g .../download?thread=https://boards.4chan.org/sp/thread/103)
       const thread = req.query.thread;
-      const output = {log: [], filenames: [], tags: [], tagids: []};
+      const output = {log: [], filenames: [], tags: []};
       runScript(chanDownloader, [thread],
           (msg) => {
             // This runs each time the script calls process.send
@@ -173,32 +173,6 @@ express()
           },
           () => {
             // This runs when the script is done
-
-            /**
-* Inserts image info and tags it in the database.
-* @param {strint} filename - filename as in the cloud
-*  (the md5 name). Also known as the key
-* @param {array<int>} tagids - tag ids
-*/
-            async function updateDb(filename, tagids) {
-              const desc = 'No description';
-              try {
-                const picRecord = await db.pictures.add(desc, filename, tags);
-                console.log(picRecord);
-              } catch (e) {
-                console.log(`error uploading image: ${e}`);
-              }
-            }
-
-            /**
-* Renders the output JSON file
-*/
-            function renderOutput() {
-              // TODO: show a web page with proper formatting etc
-              // TODO: res.render(pages/chandownloaderoutput,{status: output})
-              console.log(output);
-            }
-
             // This loop uploads the files to the cloud storage, while also
             // setting the filename to its md5 sum
             for (let i = 0; i < output.filenames.length; i++) {
@@ -211,12 +185,36 @@ express()
                     const ext = path.parse(filePath).ext;
                     const cloudname = md5 + ext;
                     await cloud.simpleUpload(md5 + ext, filePath);
-                    await updateDb(cloudname, output.tagids);
+                    await updateDb(cloudname, output.tags);
                     console.log('Upload successful');
                     output.log.push('Upload successful');
                   }).catch((reason) => {
                     console.log(`error while uploading to cloud:${reason}`);
                   });
+            }
+            /**
+              * Inserts image info and tags it in the database.
+              * @param {strint} filename - filename as in the cloud
+              *  (the md5 name). Also known as the key
+              * @param {array<string>} tags - tag array
+              */
+            async function updateDb(filename, tags) {
+              const desc = 'No description';
+              try {
+                const picRecord = await db.pictures.add(desc, filename, tags);
+                console.log(picRecord);
+              } catch (e) {
+                console.log(`error uploading image: ${e}`);
+              }
+            }
+
+            /**
+              * Renders the output JSON file
+              */
+            function renderOutput() {
+              // TODO: show a web page with proper formatting etc
+              // TODO: res.render(pages/chandownloaderoutput,{status: output})
+              console.log(output);
             }
 
             renderOutput();
