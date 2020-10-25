@@ -6,7 +6,9 @@ rate limiter file uploads because they time out on slow connection
 nicer login front end (invalid login message or similar)
 pic voting
 
+automaticaly download threads with 150 images
 Automatically delete local pics after uploading
+progress for the downloader script
 
 Load images based by tag
   -> also SFW mode (sfw tag)

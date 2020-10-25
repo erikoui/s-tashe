@@ -34,7 +34,8 @@
             <div class="class-description">Manages the pictures table
 All the functions in the class are promises (from async) so you
 can call them with db.pictures.function(args).then(()=>{}).catch(()=>{}),
-or you can await them in async functions</div>
+or you can await them in async functions. It does not use tempalte strings
+for queries for security.</div>
         
     
 </header>
@@ -169,7 +170,7 @@ or you can await them in async functions</div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line15">line 15</a>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line16">line 16</a>
     </li></ul></dd>
     
 
@@ -349,7 +350,7 @@ or you can await them in async functions</div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line31">line 31</a>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line32">line 32</a>
     </li></ul></dd>
     
 
@@ -437,7 +438,7 @@ or you can await them in async functions</div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line85">line 85</a>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line132">line 132</a>
     </li></ul></dd>
     
 
@@ -575,7 +576,7 @@ If it doesnt find it, the promise will go to `.catch((rej) => {...})`
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line75">line 75</a>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line99">line 99</a>
     </li></ul></dd>
     
 
@@ -713,7 +714,144 @@ If it doesnt find it, the promise will go to `.catch((rej) => {...})`
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line64">line 64</a>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line87">line 87</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="findByTag"><span class="type-signature">(async) </span>findByTag<span class="signature">(tagids)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Tries to find many pics from tag id list. This is an AND type query.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>tagids</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array.&lt;int></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">some description as in the database.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line110">line 110</a>
     </li></ul></dd>
     
 
@@ -851,7 +989,7 @@ delete the file from the cloud server.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line43">line 43</a>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line44">line 44</a>
     </li></ul></dd>
     
 
@@ -939,7 +1077,7 @@ delete the file from the cloud server.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line92">line 92</a>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line139">line 139</a>
     </li></ul></dd>
     
 
@@ -1027,7 +1165,7 @@ delete the file from the cloud server.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line55">line 55</a>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line56">line 56</a>
     </li></ul></dd>
     
 
@@ -1073,13 +1211,13 @@ delete the file from the cloud server.
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-cos.html">cos</a></li><li><a href="module-db.html">db</a></li></ul><h3>Classes</h3><ul><li><a href="module-cos-Cloud.html">Cloud</a></li><li><a href="module-db-DatabaseManager.html">DatabaseManager</a></li><li><a href="module-db-PicTagsRepository.html">PicTagsRepository</a></li><li><a href="module-db-PicturesRepository.html">PicturesRepository</a></li><li><a href="module-db-TagsRepository.html">TagsRepository</a></li><li><a href="module-db-UsersRepository.html">UsersRepository</a></li></ul><h3>Global</h3><ul><li><a href="global.html#runScript">runScript</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-cos.html">cos</a></li><li><a href="module-db.html">db</a></li></ul><h3>Classes</h3><ul><li><a href="module-cos-Cloud.html">Cloud</a></li><li><a href="module-db-PicturesRepository.html">PicturesRepository</a></li><li><a href="module-db-TagsRepository.html">TagsRepository</a></li><li><a href="module-db-UsersRepository.html">UsersRepository</a></li></ul><h3>Global</h3><ul><li><a href="global.html#runScript">runScript</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Mon Oct 19 2020 22:07:30 GMT+0300 (Eastern European Summer Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Oct 25 2020 12:42:22 GMT+0200 (Eastern European Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -124,14 +124,12 @@ express()
     })
     .get('/showImages', (req, res) => {
       db.pictures.twoRandomPics().then((data) => {
-        console.log(data[0]);
+        console.log(data);
         res.render('partials/showImages.ejs', {
           image1: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[0].filename}`,
           image2: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[1].filename}`,
           tags1: data[0].tags,
           tags2: data[1].tags,
-          tagids1: data[0].tagids,
-          tagids2: data[1].tagids,
         });
       }).catch((err) => {
       // TODO: show 2 local images and the error.
@@ -142,8 +140,8 @@ express()
     })
     .get('/tag', (req, res) => {
     // TODO: this endpoint
-      const tagid = req.query.tagid;
-      res.end(`TODO: load all images of a given tag. Tagid: ${tagid}`);
+      const tag = req.query.tag;
+      res.end(`TODO: load all images of a given tag. Tag: ${tag}`);
     })
     .get('/login', (req, res) => {
       res.render('pages/login.ejs', {user: req.user});
@@ -167,7 +165,6 @@ express()
             }
             if (msg.tags) {// chanDownloader sent a tag
               output.tags = msg.tags;// tags is an array already
-              output.tagids = msg.tagids;
             }
           },
           (warn) => {
@@ -186,17 +183,8 @@ express()
             async function updateDb(filename, tagids) {
               const desc = 'No description';
               try {
-                const picRecord = await db.pictures.add(desc, filename);
+                const picRecord = await db.pictures.add(desc, filename, tags);
                 console.log(picRecord);
-                for (let i = 0; i < tagids.length; i++) {
-                  if (tagids[i]) {
-                    try {
-                      await db.picTags.tagImage(picRecord.id, tagids[i]);
-                    } catch (e) {
-                      console.log(`error tagging image: ${e}`);
-                    }
-                  }
-                }
               } catch (e) {
                 console.log(`error uploading image: ${e}`);
               }

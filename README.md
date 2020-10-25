@@ -41,6 +41,7 @@ ok so the site archives images from 4chan, and tags them using some keywords fro
   * `COS_ACCESS_KEY_ID=<your HMAC key>`
 
   * `COS_SECRET_ACCESS_KEY=<your HMAC secret key>`
+* create the database by restoring `db/sql/databasemanager/createb.sql" as plaintext in pgAdmin4 after connecting to your (already set up) database
 * `node index.js`
 * Open your browser to `localhost:5000`
 * Reach out for help if you need to

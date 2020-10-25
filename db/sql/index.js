@@ -15,9 +15,6 @@ module.exports = {
   pictures: {
     add: sql('pictures/add.sql'),
   },
-  databasemanager: {
-    createdb: sql('databasemanager/createdb.sql'),
-  },
 };
 
 /**

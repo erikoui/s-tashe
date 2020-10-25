@@ -28,11 +28,13 @@ class PicturesRepository {
    *  Adds a new record and returns the full object
    * @param {string} desc - Description field
    * @param {string} fname - The filename on the cloud (the key).
+   * @param {array<string>} tags - array of tags
    */
-  async add(desc, fname) {
+  async add(desc, fname, tags) {
     return this.db.one(sql.add, {
       description: desc,
       filename: fname,
+      tags: tags,
     });
   }
 
@@ -57,56 +59,23 @@ class PicturesRepository {
     // TODO: single SQL statement for this mess
 
     const picData=await this.db.many(
-        'SELECT p.id,p.filename FROM pictures p ORDER BY RANDOM() LIMIT 2;',
+        `SELECT p.id,p.filename,p.tags
+        FROM pictures p
+        ORDER BY RANDOM() 
+        LIMIT 2;`,
     );
 
-    const tagData1=await this.db.many(
-        'SELECT t.tag_id FROM picture_tag t WHERE t.pic_id=${picid}', {
-          picid: picData[0].id,
-        },
-    );
-    const tagData2=await this.db.many(
-        'SELECT t.tag_id FROM picture_tag t WHERE t.pic_id=${picid}', {
-          picid: picData[1].id,
-        },
-    );
-
-    const tagNames1=[];
-    const tagids1=[];
-    for (let i=0; i<tagData1.length; i++) {
-      const tag=await this.db.one(
-          'SELECT t.tag FROM tags t WHERE t.id=${tagid}', {
-            tagid: tagData1[i].tag_id,
-          },
-      );
-      tagNames1.push(tag.tag);
-      tagids1.push(tagData1[i].tag_id);
-    }
-
-    const tagNames2=[];
-    const tagids2=[];
-    for (let i=0; i<tagData2.length; i++) {
-      const tag=await this.db.one(
-          'SELECT t.tag FROM tags t WHERE t.id=${tagid}', {
-            tagid: tagData2[i].tag_id,
-          },
-      );
-      tagNames2.push(tag.tag);
-      tagids2.push(tagData2[i].tag_id);
-    }
 
     const r=[
       {
         id: picData[0].id,
         filename: picData[0].filename,
-        tags: tagNames1,
-        tagids: tagids1,
+        tags: picData[0].tags,
       },
       {
         id: picData[1].id,
         filename: picData[1].filename,
-        tags: tagNames2,
-        tagids: tagids2,
+        tags: picData[1].tags,
       },
     ];
     return r;
@@ -141,21 +110,15 @@ class PicturesRepository {
    * @param {array<int>} tagids - some description as in the database.
    */
   async findByTag(tagids) {
-    // TODO: test this function
+    // TODO: make this function
     let tagstring='';
     for (let i=0; i<tagids.length-1; i++) {
       tagstring+=tagids[i];
     }
     tagstring+=tagids[tagids.length-1];
 
-    const q=`SELECT b.*
-      FROM picture_tag bt, pictures b, tags t
-      WHERE bt.tag_id = t.id
-      AND (t.id IN (${tagstring})
-      AND b.id = bt.pic_id
-      GROUP BY b.id
-      HAVING COUNT( b.id )=${tagids.length};`;
-    console.log(q);
+    const q='';
+    console.log(q, tagstring);
     return this.db.any(q);
   }
 
