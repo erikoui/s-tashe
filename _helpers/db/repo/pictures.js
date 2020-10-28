@@ -139,6 +139,18 @@ class PicturesRepository {
     return {pic1votes: voted.votes, pic1views: voted.views,
       pic2votes: other.votes, pic2views: other.views};
   }
+
+  /**
+   * returns the top n pics
+   * @param {int} n Number of pics
+   */
+  async topN(n) {
+    return this.db.many(
+        // eslint-disable-next-line max-len
+        'SELECT * FROM public.pictures ORDER BY votes DESC, views ASC LIMIT ${l};',
+        {l: n},
+    );
+  }
   /**
    * Returns all picture records
    */

@@ -13,10 +13,10 @@ const {nextTick} = require('process');
 const {db} = require('./_helpers/db');
 
 const Declutter = require('./_helpers/declutter');
-const declutter=new Declutter();
+const declutter = new Declutter();
 
 const Cloud = require('./_helpers/cos');
-const cloud=new Cloud();
+const cloud = new Cloud();
 
 // This is a standalone script, so just the file path is needed.
 const chanDownloader = './_helpers/chan-downloader';
@@ -56,8 +56,8 @@ passport.deserializeUser(async (id, done) => {
     if (!user) {
       return done(new Error('user not found'));
     }
-    const userExtras=declutter.makeRank(user);
-    user={...user, ...userExtras};
+    const userExtras = declutter.makeRank(user);
+    user = {...user, ...userExtras};
     done(null, user);
   } catch (e) {
     done(e);
@@ -121,7 +121,16 @@ express()
     .set('view engine', 'ejs')
 
     .get('/', (req, res) => {
-      res.render('pages/index.ejs', {user: req.user});
+      const linkify = `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/`;
+      db.pictures.topN(10).then((top) => {
+        res.render('pages/index.ejs', {
+          user: req.user,
+          top10: top,
+          prefix: linkify,
+        });
+      }).catch((e) => {
+        res.render('pages/index.ejs', {user: req.user});
+      });
     })
     .get('/showImages', (req, res) => {
       db.pictures.twoRandomPics().then((data) => {
@@ -139,33 +148,33 @@ express()
       },
       );
     })
-    .get('/vote', (req, res)=>{
+    .get('/vote', (req, res) => {
       const voteid = req.query.voteid;
       const otherid = req.query.otherid;
       let userid;
       try {
         userid = req.user.id;
       } catch (e) {
-        // TODO: tell the user about this
+      // TODO: tell the user about this
         console.log('User not looged in');
       }
       db.pictures.vote(
           voteid, otherid,
-      ).then((data)=>{
+      ).then((data) => {
         res.json(data);
         if (userid) {// if user logged in
           db.users.addPoints(
               userid, declutter.votePointIncrement,
-          ).then((data)=>{
+          ).then((data) => {
             console.log(data);
-          }).catch((e)=>{
-            console.log('error increasing points: '+e);
+          }).catch((e) => {
+            console.log('error increasing points: ' + e);
             res.end();
           });
         }
       },
-      ).catch((e)=>{
-        console.log('error voting:'+e);
+      ).catch((e) => {
+        console.log('error voting:' + e);
         res.end();
       });
     })
@@ -224,11 +233,11 @@ express()
                   });
             }
             /**
-              * Inserts image info and tags it in the database.
-              * @param {strint} filename - filename as in the cloud
-              *  (the md5 name). Also known as the key
-              * @param {array<string>} tags - tag array
-              */
+          * Inserts image info and tags it in the database.
+          * @param {strint} filename - filename as in the cloud
+          *  (the md5 name). Also known as the key
+          * @param {array<string>} tags - tag array
+          */
             async function updateDb(filename, tags) {
               const desc = 'No description';
               try {
@@ -240,8 +249,8 @@ express()
             }
 
             /**
-              * Renders the output JSON file
-              */
+          * Renders the output JSON file
+          */
             function renderOutput() {
               // TODO: show a web page with proper formatting etc
               // TODO: res.render(pages/chandownloaderoutput,{status: output})
