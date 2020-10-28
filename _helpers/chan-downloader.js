@@ -10,7 +10,7 @@ const https = require('https');
 const domain = require('domain');
 const request = require('request');
 const path = require('path');
-const {db} = require('../db');
+const {db} = require('./db');
 
 const imageLimiter = new RateLimiter(1, 'second');
 let threadFolder = __dirname;
