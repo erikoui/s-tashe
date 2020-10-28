@@ -123,6 +123,7 @@ CREATE TABLE public.users (
     password text NOT NULL,
     id integer NOT NULL,
     deleted boolean,
+    admin boolean,
     joinedon timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 

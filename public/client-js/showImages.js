@@ -17,8 +17,8 @@ onload = function() {
   // Show images based on the /showImages response
   $.getJSON('/showImages', function(data) {
     if (data) {
-      const lpc = document.getElementById('leftpictainer');
-      const rpc = document.getElementById('rightpictainer');
+      const lpt = document.getElementById('tags1');
+      const rpt = document.getElementById('tags2');
       const lp = showImage(data.image1, data.desc1, 'leftpic');
       const rp = showImage(data.image2, data.desc2, 'rightpic');
 
@@ -29,7 +29,7 @@ onload = function() {
           currentTag.setAttribute('href', `/tag?tag=${data.tags1[i]}`);
           currentTag.setAttribute('class', 'btn btn-sm btn-default');
           currentTag.innerText=data.tags1[i];
-          lpc.appendChild(currentTag);
+          lpt.appendChild(currentTag);
         }
       }
       if (data.tags2) {
@@ -39,7 +39,7 @@ onload = function() {
           currentTag.setAttribute('href', `/tag?tag=${data.tags2[i]}`);
           currentTag.setAttribute('class', 'btn btn-sm btn-default');
           currentTag.innerText=data.tags2[i];
-          rpc.appendChild(currentTag);
+          rpt.appendChild(currentTag);
         }
       }
       lp.onclick = function() {

@@ -1,61 +1,63 @@
+// Load dependencies
 const express = require('express');
 const path = require('path');
 const sha1 = require('sha1');
-const {db} = require('./db');
 const md5File = require('md5-file');
 const childProcess = require('child_process');
 const passport = require('passport');
 const Strategy = require('passport-local').Strategy;
-const errorHandler = require('./_helpers/error-handler');
+// eslint-disable-next-line no-unused-vars
+const {nextTick} = require('process');
 
-// /////////////IBM COS////////////////////
+// Load custom modules
+const {db} = require('./db');
+
+const Declutter = require('./declutter');
+const declutter=new Declutter();
+
 const Cloud = require('./cos');
-cloud = new Cloud();
-// ////////////////////////////////////////
+const cloud=new Cloud();
 
+// This is a standalone script, so just the file path is needed.
 const chanDownloader = './_helpers/chan-downloader';
+
+// Server port to listen on
 const PORT = process.env.PORT || 5000;
 
 // Configure the local strategy for use by Passport.
-//
-// The local strategy require a `verify` function which receives the credentials
-// (`username` and `password`) submitted by the user.  The function must verify
-// that the password is correct and then invoke `cb` with a user object, which
-// will be set at `req.user` in route handlers after authentication.
 passport.use(
     new Strategy(
         async (username, password, cb) => {
-          let user;
           try {
             hashPass = sha1(password);
-            user = await db.users.login(username, hashPass);
+            // we actually only need the user id from db.users.login
+            // so that passport can serialize them.
+            const user = await db.users.login(username, hashPass);
             if (!user) {
               return cb(null, false, {message: 'Invalid login'});
+            } else {
+              return cb(null, user);
             }
           } catch (e) {
             return cb(e);
           }
-          return cb(null, user);
         },
     ));
 
 // Configure Passport authenticated session persistence.
-//
-// In order to restore authentication state across HTTP requests, Passport needs
-// to serialize users into and deserialize users out of the session.  The
-// typical implementation of this is as simple as supplying the user ID when
-// serializing, and querying the user record by ID from the database when
-// deserializing.
 passport.serializeUser((user, cb) => {
   cb(null, user.id);
 });
 
+// Define user info as req.user
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await db.users.findById(id);
+    let user = await db.users.findById(id);
     if (!user) {
       return done(new Error('user not found'));
     }
+    const userExtras=declutter.makeRank(user);
+    user={...user, ...userExtras};
     done(null, user);
   } catch (e) {
     done(e);
@@ -113,9 +115,8 @@ express()
     }))
     .use(passport.initialize())
     .use(passport.session())
-    .use(errorHandler)
+    .use(declutter.errorHandler)
 
-// this is the folder with all the ejs files
     .set('views', path.join(__dirname, 'views'))
     .set('view engine', 'ejs')
 
@@ -124,7 +125,6 @@ express()
     })
     .get('/showImages', (req, res) => {
       db.pictures.twoRandomPics().then((data) => {
-        console.log(data);
         res.json({
           image1: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[0].filename}`,
           image2: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[1].filename}`,
@@ -134,7 +134,6 @@ express()
       }).catch((err) => {
       // TODO: show 2 local images and the error.
         console.log(err);
-        errorHandler(err);
       },
       );
     })
@@ -227,28 +226,39 @@ express()
     .get('/admin',
         require('connect-ensure-login').ensureLoggedIn(),
         (req, res) => {
-          res.render('pages/admin', {user: req.user});
+          if (req.user.admin) {
+            res.render('pages/admin', {user: req.user});
+          } else {
+            res.end('ok fuck off u not an admin');
+          }
         })
     .get('/profile',
         require('connect-ensure-login').ensureLoggedIn(),
         (req, res) => {
+          console.log(req.user);
           res.render('pages/profile', {user: req.user});
         })
-    .get('/deleteallfiles', (req, res) => {
-      cloud.getBucketContents(
-      ).then(async (data) => {
-        console.log(data);
-        const filenames = [];
-        for (let i = 0; i < data.Contents.length; i++) {
-          filenames.push(data.Contents[i].Key);
-        }
-        await cloud.deleteItems(filenames);
-        res.end(filenames.toString());
-      }).catch((err) => {
-        console.log('error getting item list from cos:' + err);
-        res.end(`Error: ${err}`);
-      });
-    })
+    .get('/deleteallfiles',
+        require('connect-ensure-login').ensureLoggedIn(),
+        (req, res) => {
+          if (req.user.admin) {
+            cloud.getBucketContents(
+            ).then(async (data) => {
+              console.log(data);
+              const filenames = [];
+              for (let i = 0; i < data.Contents.length; i++) {
+                filenames.push(data.Contents[i].Key);
+              }
+              await cloud.deleteItems(filenames);
+              res.end(filenames.toString());
+            }).catch((err) => {
+              console.log('error getting item list from cos:' + err);
+              res.end(`Error: ${err}`);
+            });
+          } else {
+            res.end('ok fuck off u not an admin');
+          }
+        })
     .get('/listallfiles', (req, res) => {
       cloud.getBucketContents(
       ).then((data) => {
