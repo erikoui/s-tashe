@@ -108,7 +108,7 @@ express()
     .use(express.static(path.join(__dirname, 'public')))
     .use(require('morgan')('combined'))
     .use(require('body-parser').urlencoded({extended: true}))
-    .use(require('express-session')({
+    .use(require('cookie-session')({
       secret: 'VS7nXTfOGbbvvM26',
       resave: false,
       saveUninitialized: false,
