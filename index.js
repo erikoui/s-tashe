@@ -125,7 +125,7 @@ express()
     .get('/showImages', (req, res) => {
       db.pictures.twoRandomPics().then((data) => {
         console.log(data);
-        res.render('partials/showImages.ejs', {
+        res.json({
           image1: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[0].filename}`,
           image2: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[1].filename}`,
           tags1: data[0].tags,
@@ -134,7 +134,7 @@ express()
       }).catch((err) => {
       // TODO: show 2 local images and the error.
         console.log(err);
-        res.end('Error fetching images: ' + err);
+        errorHandler(err);
       },
       );
     })
