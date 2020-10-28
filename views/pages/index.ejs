@@ -20,11 +20,12 @@
           <div class="col-sm-12 bg-mid">
             <div class="row">
               <div class="col-sm-6" id='leftpictainer'>
-                <img src="https://via.placeholder.com/200" id="leftpic" class="img-responsive" style="width:100%" >
+                <img src="https://via.placeholder.com/200" id="leftpic" class="img-responsive" style="width:100%">
                 <div id='tags1'></div>
               </div>
               <div class="col-sm-6" id='rightpictainer'>
-                <img src="https://via.placeholder.com/200" id="rightpic" class="pull-right img-responsive" style="width:100%" >
+                <img src="https://via.placeholder.com/200" id="rightpic" class="pull-right img-responsive"
+                  style="width:100%">
                 <div id='tags2'></div>
               </div>
             </div>
@@ -33,7 +34,12 @@
       </div>
       <div class="col-sm-2">
         <div class="col-sm-12 bg-right">
-          leadreborad here
+          <h3 style="text-align: center;">Leaderboard</h3>
+          <ul>
+            <% for(let i=0;i<top10.length;i++){ %>
+            <li><a href="<%= prefix+top10[i].filename %>">Number <%=i+1%></a></li>
+            <% } %>
+          </ul>
         </div>
       </div>
     </div>

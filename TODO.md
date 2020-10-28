@@ -1,6 +1,6 @@
 # Critical
 register page
-Leaderboard
+/showimage endpoint for leaderboard links
 hide images while loading new ones
 
 # New Features
