@@ -10,12 +10,12 @@ const Strategy = require('passport-local').Strategy;
 const {nextTick} = require('process');
 
 // Load custom modules
-const {db} = require('./db');
+const {db} = require('./_helpers/db');
 
-const Declutter = require('./declutter');
+const Declutter = require('./_helpers/declutter');
 const declutter=new Declutter();
 
-const Cloud = require('./cos');
+const Cloud = require('./_helpers/cos');
 const cloud=new Cloud();
 
 // This is a standalone script, so just the file path is needed.
@@ -109,7 +109,7 @@ express()
     .use(require('morgan')('combined'))
     .use(require('body-parser').urlencoded({extended: true}))
     .use(require('express-session')({
-      secret: 'benis_shabenis', // TODO: find out what 'secret' is here
+      secret: 'VS7nXTfOGbbvvM26',
       resave: false,
       saveUninitialized: false,
     }))
