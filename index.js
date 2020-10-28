@@ -130,12 +130,44 @@ express()
           image2: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[1].filename}`,
           tags1: data[0].tags,
           tags2: data[1].tags,
+          id1: data[0].id,
+          id2: data[1].id,
         });
       }).catch((err) => {
       // TODO: show 2 local images and the error.
         console.log(err);
       },
       );
+    })
+    .get('/vote', (req, res)=>{
+      const voteid = req.query.voteid;
+      const otherid = req.query.otherid;
+      let userid;
+      try {
+        userid = req.user.id;
+      } catch (e) {
+        // TODO: tell the user about this
+        console.log('User not looged in');
+      }
+      db.pictures.vote(
+          voteid, otherid,
+      ).then((data)=>{
+        res.json(data);
+        if (userid) {// if user logged in
+          db.users.addPoints(
+              userid, declutter.votePointIncrement,
+          ).then((data)=>{
+            console.log(data);
+          }).catch((e)=>{
+            console.log('error increasing points: '+e);
+            res.end();
+          });
+        }
+      },
+      ).catch((e)=>{
+        console.log('error voting:'+e);
+        res.end();
+      });
     })
     .get('/tag', (req, res) => {
     // TODO: this endpoint

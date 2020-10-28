@@ -77,6 +77,17 @@ class UsersRepository {
   }
 
   /**
+   * increases a user's points.
+   * @param {int} id - user id
+   * @param {int} points - points to add (can be negative)
+   */
+  async addPoints(id, points) {
+    console.log(`adding ${points} points to ${id}`);
+    // eslint-disable-next-line max-len
+    return this.db.one('UPDATE users SET points=points+('+points+') WHERE id=${uid} RETURNING *;', {uid: id});
+  }
+
+  /**
    * Returns all user records
    */
   async all() {

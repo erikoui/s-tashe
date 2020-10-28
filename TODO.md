@@ -1,6 +1,5 @@
 # Critical
 register page
-pic voting
 
 # New Features
 Load images based by tag
@@ -16,6 +15,7 @@ check if file exists on cloud before uploading (also check database records and 
 
 # Bugs
 rate limiter file uploads because they time out on slow connection
+tags of voted pictures should get cleared, instead they are added to the tags of the next pic
 
 # Don't forget
 CHANGE ADMIN PASSWORD

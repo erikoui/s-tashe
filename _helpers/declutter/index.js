@@ -11,6 +11,7 @@ class Declutter {
    * @constructor
    */
   constructor() {
+    this.votePointIncrement=1;
     // Some globals could be defined here
     console.log('Declutter loaded');
   }

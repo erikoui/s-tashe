@@ -56,16 +56,12 @@ class PicturesRepository {
    * Returns 2 pictures at random
    */
   async twoRandomPics() {
-    // TODO: single SQL statement for this mess
-
     const picData=await this.db.many(
         `SELECT p.id,p.filename,p.tags
         FROM pictures p
         ORDER BY RANDOM() 
         LIMIT 2;`,
     );
-
-
     const r=[
       {
         id: picData[0].id,
@@ -122,6 +118,27 @@ class PicturesRepository {
     return this.db.any(q);
   }
 
+  /**
+   * Increments the votes of a pic and the views of both pics
+   * @param {int} voteid - image id to vote
+   * @param {int} otherid - image id to increase views
+   */
+  async vote(voteid, otherid) {
+    const voted = await this.db.one(
+        // eslint-disable-next-line max-len
+        'UPDATE pictures SET votes=votes+1, views=views+1 WHERE id=${picid} RETURNING *;',
+        {picid: voteid},
+    );
+    if (!voted) {
+      return {pic1votes: -1, pic1views: -1, pic2votes: -1, pic2views: -1};
+    }
+    const other=await this.db.one(
+        'UPDATE pictures SET views=views+1 WHERE id=${picid} RETURNING *;',
+        {picid: otherid},
+    );
+    return {pic1votes: voted.votes, pic1views: voted.views,
+      pic2votes: other.votes, pic2views: other.views};
+  }
   /**
    * Returns all picture records
    */
