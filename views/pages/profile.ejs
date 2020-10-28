@@ -7,15 +7,23 @@
 
 <body>
   <% include ../partials/nav.ejs %>
+  <div class="container-fluid" style="width:90%">
+    <div class="row">
+      <div class="col-sm-2">
+        User settings here (change password etc)
+      </div>
+      <div class="col-sm-8">
+        <p>
+          Username: <%= user.uname %><br/>
+          Points: <%= user.points %><br/>
+          Rank: <%= user.rank %><br/>       
+          Joined on: <%= user.joinedon %><br/>
+          </p>
+      </div>
+      <div class="col-sm-2">
+        User leaderboad here
+      </div>
+    </div>
 
-<p>
-    ID: <%= user.id %><br/>
-    Username: <%= user.username %><br/>
-    Name: <%= user.displayName %><br/>
-    <% if (user.emails) { %>
-    Email: <%= user.emails[0].value %><br/>
-    <% } %>
-    </p>
-    <a href="/logout">Log out</a>
 </body>
 </html>
