@@ -1,6 +1,6 @@
 # Critical
-/showimage endpoint for leaderboard links
-Load images based by tag
+/showimage endpoint for leaderboard links and otheres
+Load images based by tag - Save image thumbnails (500px) and load those as a gallery, clicking leads to the /showimage endpoint
 
 # New Features
 score next to leaderboard pics (score=votes/views)
@@ -12,6 +12,8 @@ automaticaly download threads with 150 images
 automatically download threads from /s/
 upload page (maybe could take a zip file with the tags as a field or the filename, for multiple uploads)
 show user points on the navigation bar
+show a loading message while no pics on screen
+ads
 
 # Nice-to-haves
 convert chan-downloader to a module

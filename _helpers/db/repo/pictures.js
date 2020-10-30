@@ -102,20 +102,14 @@ class PicturesRepository {
   }
 
   /**
-   * Tries to find many pics from tag list. This is an AND type query.
-   * @param {array<string>} tags - some description as in the database.
+   * Tries to find many pics from a single tag
+   * @param {array<string>} tag - some description as in the database.
    */
-  async findByTag(tags) {
-    // TODO: make this function
-    let tagstring='';
-    for (let i=0; i<tags.length-1; i++) {
-      tagstring+=tags[i]+' ';
-    }
-    tagstring+=tags[tags.length-1];
-
-    const q='';
-    console.log(q, tagstring);
-    return this.db.any(q);
+  async listByTag(tag) {
+    return this.db.any(
+        'SELECT filename FROM pictures WHERE ${tag} = ANY (tags);',
+        {tag: tag},
+    );
   }
 
   /**

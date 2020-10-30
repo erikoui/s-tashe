@@ -166,7 +166,7 @@ express()
           db.users.addPoints(
               userid, declutter.votePointIncrement,
           ).then((data) => {
-            console.log(data);
+            // console.log(data);
           }).catch((e) => {
             console.log('error increasing points: ' + e);
             res.end();
@@ -179,9 +179,13 @@ express()
       });
     })
     .get('/tag', (req, res) => {
-    // TODO: this endpoint
       const tag = req.query.tag;
-      res.end(`TODO: load all images of a given tag. Tag: ${tag}`);
+      db.pictures.listByTag(tag)
+          .then((picList)=>{
+            res.end(`TODO: load the followint pics ${JSON.stringify(picList)}`);
+          }).catch((e)=>{
+            res.end(`Error while oading tag ${tag}`);
+          });
     })
     .get('/login', (req, res) => {
       res.render('pages/login.ejs', {user: req.user});
