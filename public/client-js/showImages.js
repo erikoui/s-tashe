@@ -31,6 +31,15 @@ onload = function() {
   }
 
   /**
+   * Adds 1 point to the point display only. points are added to the database
+   * via the /vote endpoint.
+   */
+  function updatePoints() {
+    const pointsDiv=document.getElementById('points');
+    const currentPoints=parseInt(pointsDiv.innerText);
+    pointsDiv.innerText=currentPoints+1;
+  }
+  /**
    * Show images based on the /showImages response
    */
   function loadImages() {
@@ -69,6 +78,7 @@ onload = function() {
         lp.onclick = function() {
           if (!voted) {// prevent voting for both
             hideImages();
+            updatePoints();
             $.getJSON(`/vote?voteid=${data.id1}&otherid=${data.id2}`, (data)=>{
               // TODO: flash a vote bar or something before the new pics load
               loadImages();
@@ -80,6 +90,7 @@ onload = function() {
           if (!voted) {// prevent voting for both
             // hide the images
             hideImages();
+            updatePoints();
             // update votes
             $.getJSON(`/vote?voteid=${data.id2}&otherid=${data.id1}`, (data)=>{
             // TODO: flash a vote bar or something before the new pics load

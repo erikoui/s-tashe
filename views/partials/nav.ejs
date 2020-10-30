@@ -7,9 +7,9 @@
     </ul>
     <div class="navbar-right navbar-text">
         <% if (!user) { %>
-          Welcome! Please <a href="/login">log in</a>.
+          Welcome! Please <a href="/login">Log in</a> or <a href="/register">Register</a>.
         <% } else { %>
-          Hello, <%= user.uname %>. View your <a href="/profile">profile</a> or <a href="/logout">Log out</a>.
+          Logged in as <%= user.uname %>. Your points: <div id="points" style="display:inline"><%=user.points%></div>. View your <a href="/profile">profile</a> or <a href="/logout">Log out</a>.
         <% } %>
         </div>
   </div>

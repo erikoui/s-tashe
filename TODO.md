@@ -11,9 +11,9 @@ user priviledge levels allow tagging, removing tags, adding descriptions, upload
 automaticaly download threads with 150 images
 automatically download threads from /s/
 upload page (maybe could take a zip file with the tags as a field or the filename, for multiple uploads)
-show user points on the navigation bar
 show a loading message while no pics on screen
 ads
+report incorrect tag button
 
 # Nice-to-haves
 convert chan-downloader to a module
