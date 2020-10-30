@@ -11,7 +11,23 @@ onload = function() {
     const img = document.getElementById(id);
     img.src = src;
     img.alt = alt;
+    img.onload=function() {
+      $(img).fadeIn(500);
+    };
+    img.style.display='none';
     return img;
+  }
+
+  /**
+   * Hides the images so people cant click them
+   */
+  function hideImages() {
+    const limg=document.getElementById('leftpic');
+    const rimg=document.getElementById('rightpic');
+    limg.style.display='none';
+    rimg.style.display='none';
+    limg.onload=function() {};
+    rimg.onload=function() {};
   }
 
   /**
@@ -23,10 +39,13 @@ onload = function() {
       if (data) {
         const lpt = document.getElementById('tags1');
         const rpt = document.getElementById('tags2');
-        const lp = showImage(data.image1, data.desc1, 'leftpic');
-        const rp = showImage(data.image2, data.desc2, 'rightpic');
         lpt.innerHTML='';
         rpt.innerHTML='';
+
+
+        const lp = showImage(data.image1, data.desc1, 'leftpic');
+        const rp = showImage(data.image2, data.desc2, 'rightpic');
+
         if (data.tags1) {
           for (let i = 0; i < data.tags1.length; i++ ) {
             const currentTag=document.createElement('a');
@@ -49,6 +68,7 @@ onload = function() {
         }
         lp.onclick = function() {
           if (!voted) {// prevent voting for both
+            hideImages();
             $.getJSON(`/vote?voteid=${data.id1}&otherid=${data.id2}`, (data)=>{
               // TODO: flash a vote bar or something before the new pics load
               loadImages();
@@ -58,6 +78,9 @@ onload = function() {
         };
         rp.onclick = function() {
           if (!voted) {// prevent voting for both
+            // hide the images
+            hideImages();
+            // update votes
             $.getJSON(`/vote?voteid=${data.id2}&otherid=${data.id1}`, (data)=>{
             // TODO: flash a vote bar or something before the new pics load
               loadImages();

@@ -1,15 +1,17 @@
 # Critical
 /showimage endpoint for leaderboard links
-hide images while loading new ones
+Load images based by tag
 
 # New Features
-Load images based by tag
+score next to leaderboard pics (score=votes/views)
+allow the user to view previous pics (like a history feature)
 Automatically delete local pics after uploading
 nicer login front end (invalid login message or similar)
 user priviledge levels allow tagging, removing tags, adding descriptions, uploading images, etc.
 automaticaly download threads with 150 images
 automatically download threads from /s/
 upload page (maybe could take a zip file with the tags as a field or the filename, for multiple uploads)
+show user points on the navigation bar
 
 # Nice-to-haves
 convert chan-downloader to a module
