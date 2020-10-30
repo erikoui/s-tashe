@@ -25,7 +25,8 @@ onload = function() {
         const rpt = document.getElementById('tags2');
         const lp = showImage(data.image1, data.desc1, 'leftpic');
         const rp = showImage(data.image2, data.desc2, 'rightpic');
-
+        lpt.innerHTML='';
+        rpt.innerHTML='';
         if (data.tags1) {
           for (let i = 0; i < data.tags1.length; i++ ) {
             const currentTag=document.createElement('a');

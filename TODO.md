@@ -1,5 +1,4 @@
 # Critical
-register page
 /showimage endpoint for leaderboard links
 hide images while loading new ones
 
@@ -19,7 +18,6 @@ check if file exists on cloud before uploading (also check database records and 
 
 # Bugs
 rate limiter file uploads because they time out on slow connection - i cannot reproduce this
-tags of voted pictures should get cleared, instead they are added to the tags of the next pic
 https://medium.com/developer-rants/how-to-handle-sessions-properly-in-express-js-with-heroku-c35ea8c0e500
 
 # Don't forget
