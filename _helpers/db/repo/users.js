@@ -26,10 +26,9 @@ class UsersRepository {
   /**
    * Adds a new user, and returns the new object;
    * @param {String} uname - new username
-   * @param {String} passwd - new password in plaintext
+   * @param {String} passwd - new password sha1 encoded
    */
   async add(uname, passwd) {
-    // TODO: hash password
     return this.db.one(sql.add, {
       username: uname,
       password: passwd,

@@ -186,6 +186,9 @@ express()
     .get('/login', (req, res) => {
       res.render('pages/login.ejs', {user: req.user});
     })
+    .get('/register', (req, res)=>{
+      res.render('pages/register.ejs', {user: req.user});
+    })
     .get('/download', (req, res) => {
       res.end('running download script');
       // TODO: redirect to the report page when finished
@@ -320,6 +323,14 @@ express()
       console.log('logged in');
       res.redirect('/');
     })
-
+    .post('/register', (req, res) => {
+      const hashedPass=sha1(req.body.password);
+      db.users.add(req.body.username, hashedPass).then(()=>{
+        res.redirect('/login');
+      }).catch((e)=>{
+        console.log(e);
+        res.redirect('/register');
+      });
+    })
     .listen(PORT, () => console.log(`Listening on ${PORT}`));
 
