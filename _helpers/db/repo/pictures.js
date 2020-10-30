@@ -141,7 +141,7 @@ class PicturesRepository {
   async topN(n) {
     return this.db.many(
         // eslint-disable-next-line max-len
-        'SELECT * FROM public.pictures ORDER BY votes DESC, views ASC LIMIT ${l};',
+        'SELECT *, CAST(votes+1 AS real) / CAST(views+1 AS real) AS score FROM public.pictures ORDER BY votes DESC, views ASC LIMIT ${l};',
         {l: n},
     );
   }

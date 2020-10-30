@@ -3,7 +3,6 @@
 Load images based by tag - Save image thumbnails (500px) and load those as a gallery, clicking leads to the /showimage endpoint
 
 # New Features
-score next to leaderboard pics (score=votes/views)
 allow the user to view previous pics (like a history feature)
 Automatically delete local pics after uploading
 nicer login front end (invalid login message or similar)

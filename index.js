@@ -129,6 +129,7 @@ express()
           prefix: linkify,
         });
       }).catch((e) => {
+        console.log(e);
         res.render('pages/index.ejs', {user: req.user});
       });
     })

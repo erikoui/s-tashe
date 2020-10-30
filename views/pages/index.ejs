@@ -37,7 +37,7 @@
           <h3 style="text-align: center;">Leaderboard</h3>
           <ul>
             <% for(let i=0;i<top10.length;i++){ %>
-            <li><a href="<%= prefix+top10[i].filename %>">Number <%=i+1%></a></li>
+            <li><a href="<%= prefix+top10[i].filename %>">Number <%=i+1%></a> (<%= top10[i].votes%>/<%=top10[i].views%> - <%= top10[i].score.toFixed(2) %>)</li>
             <% } %>
           </ul>
         </div>
