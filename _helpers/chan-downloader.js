@@ -1,9 +1,6 @@
 // Adapted from https://github.com/nuclearace/4chan-Image-Downloader
 // downloads the images from a 4chan thread.
 
-// TODO: you should only be able to run this script as an admin or automatically
-
-
 const RateLimiter = require('limiter').RateLimiter;
 const fs = require('fs');
 const https = require('https');

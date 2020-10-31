@@ -17,8 +17,6 @@ const fs = require('fs');
 
 const bucketName = process.env.COS_BUCKETNAME;
 
-// TODO: Convert everything to promises (no callbacks)
-
 /**
  * @class
  */

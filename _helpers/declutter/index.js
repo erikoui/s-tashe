@@ -27,7 +27,6 @@ class Declutter {
       return {level: 10, rank: 'Master baiter (admin)'};
     }
 
-    // TODO: this could be loaded from the database
     const rankingData = {
       ranks: ['newfag', 'pleb', 'rookie', 'new recruit',
         'experienced', 'veteran', 'coomer', 'wizard'],

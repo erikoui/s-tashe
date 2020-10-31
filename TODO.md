@@ -10,7 +10,7 @@ user priviledge levels allow tagging, removing tags, adding descriptions, upload
 automaticaly download threads with 150 images
 automatically download threads from /s/
 upload page (maybe could take a zip file with the tags as a field or the filename, for multiple uploads)
-show a loading message while no pics on screen
+show a loading message while no pics on screen (maybe showing vote and edit stats)
 ads
 report incorrect tag button
 
@@ -20,6 +20,7 @@ progress for the downloader script
 check if file exists on cloud before uploading (also check database records and add them if missing)
 
 # Bugs
+images do not reload after clicking when not logged in
 rate limiter file uploads because they time out on slow connection - i cannot reproduce this
 https://medium.com/developer-rants/how-to-handle-sessions-properly-in-express-js-with-heroku-c35ea8c0e500
 

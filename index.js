@@ -144,7 +144,14 @@ express()
           id2: data[1].id,
         });
       }).catch((err) => {
-      // TODO: show 2 local images and the error.
+        res.json({
+          image1: `images/a.jpg`,
+          image2: `images/b.jpg`,
+          tags1: [err],
+          tags2: ['error'],
+          id1: 1337,
+          id2: 32202,
+        });
         console.log(err);
       },
       );
@@ -194,80 +201,83 @@ express()
     .get('/register', (req, res)=>{
       res.render('pages/register.ejs', {user: req.user});
     })
-    .get('/download', (req, res) => {
-      res.end('running download script');
-      // TODO: redirect to the report page when finished
-      // thread is set by the url (e.g .../download?thread=https://boards.4chan.org/sp/thread/103)
-      const thread = req.query.thread;
-      const output = {log: [], filenames: [], tags: []};
-      runScript(chanDownloader, [thread],
-          (msg) => {
-            // This runs each time the script calls process.send
+    .get('/download',
+        require('connect-ensure-login').ensureLoggedIn(),
+        (req, res) => {
+          res.end('running download script');
+          // TODO: redirect to the report page when finished
+          // thread is set by the url (e.g .../download?thread=https://boards.4chan.org/sp/thread/103)
+          const thread = req.query.thread;
+          const output = {log: [], filenames: [], tags: []};
+          runScript(chanDownloader, [thread],
+              (msg) => {
+                // This runs each time the script calls process.send
 
-            // Save the massage to the approptiate JSON tag
-            if (msg.log) {// log message
-              output.log.push(msg.log);
-            }
-            if (msg.filenames) {// chanDownloader sent a filename
-              output.filenames.push(msg.filenames);
-            }
-            if (msg.tags) {// chanDownloader sent a tag
-              output.tags = msg.tags;// tags is an array already
-            }
-          },
-          (warn) => {
-            // This runs each time the script calls process.emitWarning
-            console.log(warn);
-          },
-          () => {
-            // This runs when the script is done
-            // This loop uploads the files to the cloud storage, while also
-            // setting the filename to its md5 sum
-            for (let i = 0; i < output.filenames.length; i++) {
-              // calculates MD5 of each pic  and uploads it when done
-              const filePath = path.join(output.filenames[i]);
-              console.log(`calculating md5: ${filePath}`);
-              md5File(filePath).
-                  then(async (md5) => {
-                    console.log(`file md5: ${md5}`);
-                    const ext = path.parse(filePath).ext;
-                    const cloudname = md5 + ext;
-                    await cloud.simpleUpload(md5 + ext, filePath);
-                    await updateDb(cloudname, output.tags);
-                    console.log('Upload successful');
-                    output.log.push('Upload successful');
-                  }).catch((reason) => {
-                    console.log(`error while uploading to cloud:${reason}`);
+                // Save the massage to the approptiate JSON tag
+                if (msg.log) {// log message
+                  output.log.push(msg.log);
+                }
+                if (msg.filenames) {// chanDownloader sent a filename
+                  output.filenames.push(msg.filenames);
+                }
+                if (msg.tags) {// chanDownloader sent a tag
+                  output.tags = msg.tags;// tags is an array already
+                }
+              },
+              (warn) => {
+                // This runs each time the script calls process.emitWarning
+                console.log(warn);
+              },
+              () => {
+                // This runs when the script is done
+                // This loop uploads the files to the cloud storage, while also
+                // setting the filename to its md5 sum
+                for (let i = 0; i < output.filenames.length; i++) {
+                  // calculates MD5 of each pic  and uploads it when done
+                  const filePath = path.join(output.filenames[i]);
+                  console.log(`calculating md5: ${filePath}`);
+                  md5File(filePath).
+                      then(async (md5) => {
+                        console.log(`file md5: ${md5}`);
+                        const ext = path.parse(filePath).ext;
+                        const cloudname = md5 + ext;
+                        await cloud.simpleUpload(md5 + ext, filePath);
+                        await updateDb(cloudname, output.tags);
+                        console.log('Upload successful');
+                        output.log.push('Upload successful');
+                      }).catch((reason) => {
+                        console.log(`error while uploading to cloud:${reason}`);
+                      });
+                }
+
+                /**
+                * Inserts image info and tags it in the database.
+                * @param {strint} filename - filename as in the cloud
+                *  (the md5 name). Also known as the key
+                * @param {array<string>} tags - tag array
+                */
+                async function updateDb(filename, tags) {
+                  // TODO: Add descriptions with AI lmao
+                  const desc = 'No description';
+                  db.pictures.add(desc, filename, tags).then((data)=>{
+                    console.log(`${data.filename} uploaded.`);
+                  }).catch((e)=>{
+                    console.log(`error uploading image: ${e}`);
                   });
-            }
-            /**
-          * Inserts image info and tags it in the database.
-          * @param {strint} filename - filename as in the cloud
-          *  (the md5 name). Also known as the key
-          * @param {array<string>} tags - tag array
-          */
-            async function updateDb(filename, tags) {
-              const desc = 'No description';
-              try {
-                const picRecord = await db.pictures.add(desc, filename, tags);
-                console.log(picRecord);
-              } catch (e) {
-                console.log(`error uploading image: ${e}`);
-              }
-            }
+                }
 
-            /**
-          * Renders the output JSON file
-          */
-            function renderOutput() {
-              // TODO: show a web page with proper formatting etc
-              // TODO: res.render(pages/chandownloaderoutput,{status: output})
-              console.log(output);
-            }
+                /**
+                * Renders the output JSON file
+                */
+                function renderOutput() {
+                  // TODO: show a web page with proper formatting etc
+                  // TODO: res.render(pages/chandownloadinfo,{status: output})
+                  console.log(output);
+                }
 
-            renderOutput();
-          });
-    })
+                renderOutput();
+              });
+        })
     .get('/logout', (req, res) => {
       req.logout();
       res.redirect('/');
