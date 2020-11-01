@@ -23,6 +23,7 @@ const chanDownloader = './_helpers/chan-downloader';
 
 // Server port to listen on
 const PORT = process.env.PORT || 5000;
+const linkify = `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/`;
 
 // Configure the local strategy for use by Passport.
 passport.use(
@@ -121,12 +122,11 @@ express()
     .set('view engine', 'ejs')
 
     .get('/', (req, res) => {
-      const linkify = `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/`;
       db.pictures.topN(10).then((top) => {
         res.render('pages/index.ejs', {
           user: req.user,
           top10: top,
-          prefix: linkify,
+          prefix: '/showImage/',
         });
       }).catch((e) => {
         console.log(e);
@@ -178,15 +178,13 @@ express()
             // console.log(data);
           }).catch((e) => {
             console.log('error increasing points: ' + e);
-            res.end();
           });
         }
       },
       ).catch((e) => {
         console.log('error voting:' + e);
-        res.end();
+        res.end('error voting: ' + e);
       });
-      res.end();
     })
     .get('/tag', (req, res) => {
       const tag = req.query.tag;
@@ -333,7 +331,10 @@ express()
         res.end(`Error: ${err}`);
       });
     })
-
+    .get('/showImage/:fn', (req, res)=>{
+      const filename = req.params['fn'];
+      res.render('pages/showImage', {user: req.user, fn: linkify+filename});
+    })
     .post('/login', passport.authenticate('local', {
       failureRedirect: '/login',
     }), async (req, res) => {
