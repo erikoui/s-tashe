@@ -20,7 +20,6 @@ progress for the downloader script
 check if file exists on cloud before uploading (also check database records and add them if missing)
 
 # Bugs
-images do not reload after clicking when not logged in
 rate limiter file uploads because they time out on slow connection - i cannot reproduce this
 https://medium.com/developer-rants/how-to-handle-sessions-properly-in-express-js-with-heroku-c35ea8c0e500
 

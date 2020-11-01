@@ -33,12 +33,20 @@ onload = function() {
   /**
    * Adds 1 point to the point display only. points are added to the database
    * via the /vote endpoint.
+   *
+   * @param {String} clickedId - The id of the element to which to show the
+   * notification
    */
   function updatePoints() {
     const pointsDiv=document.getElementById('points');
     if (pointsDiv) {
       const currentPoints=parseInt(pointsDiv.innerText);
       pointsDiv.innerText=currentPoints+1;
+    } else {
+      $('#login-link').notify(
+          'You are not logged in. Your points are not being stored.',
+          'info',
+      );
     }
   }
   /**
@@ -52,7 +60,6 @@ onload = function() {
         const rpt = document.getElementById('tags2');
         lpt.innerHTML='';
         rpt.innerHTML='';
-
 
         const lp = showImage(data.image1, data.desc1, 'leftpic');
         const rp = showImage(data.image2, data.desc2, 'rightpic');
@@ -82,7 +89,6 @@ onload = function() {
             hideImages();
             updatePoints();
             $.getJSON(`/vote?voteid=${data.id1}&otherid=${data.id2}`, (data)=>{
-              // TODO: flash a vote bar or something before the new pics load
               loadImages();
             });
           }
@@ -90,12 +96,9 @@ onload = function() {
         };
         rp.onclick = function() {
           if (!voted) {// prevent voting for both
-            // hide the images
             hideImages();
             updatePoints();
-            // update votes
             $.getJSON(`/vote?voteid=${data.id2}&otherid=${data.id1}`, (data)=>{
-            // TODO: flash a vote bar or something before the new pics load
               loadImages();
             });
           }

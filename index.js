@@ -162,15 +162,16 @@ express()
       let userid;
       try {
         userid = req.user.id;
-      } catch (e) {
-      // TODO: tell the user about this
-        console.log('User not looged in');
-      }
+      } catch (e) {}
+
+      // Vote even if user not logged in
       db.pictures.vote(
           voteid, otherid,
       ).then((data) => {
+        // Return the votes to the client
         res.json(data);
-        if (userid) {// if user logged in
+        // Add points to the user if they are logged in
+        if (userid) {
           db.users.addPoints(
               userid, declutter.votePointIncrement,
           ).then((data) => {
@@ -185,6 +186,7 @@ express()
         console.log('error voting:' + e);
         res.end();
       });
+      res.end();
     })
     .get('/tag', (req, res) => {
       const tag = req.query.tag;
