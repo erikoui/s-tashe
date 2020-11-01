@@ -12,9 +12,11 @@ automatically download threads from /s/
 upload page (maybe could take a zip file with the tags as a field or the filename, for multiple uploads)
 show a loading message while no pics on screen (maybe showing vote and edit stats)
 ads
+moderation for pic uploads
 report incorrect tag button
 
 # Nice-to-haves
+Tell the user when registering when the username is already in use
 convert chan-downloader to a module
 progress for the downloader script
 check if file exists on cloud before uploading (also check database records and add them if missing)
