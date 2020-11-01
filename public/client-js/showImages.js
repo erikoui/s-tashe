@@ -36,8 +36,10 @@ onload = function() {
    */
   function updatePoints() {
     const pointsDiv=document.getElementById('points');
-    const currentPoints=parseInt(pointsDiv.innerText);
-    pointsDiv.innerText=currentPoints+1;
+    if (pointsDiv) {
+      const currentPoints=parseInt(pointsDiv.innerText);
+      pointsDiv.innerText=currentPoints+1;
+    }
   }
   /**
    * Show images based on the /showImages response
