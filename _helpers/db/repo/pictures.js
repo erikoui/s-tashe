@@ -104,10 +104,12 @@ class PicturesRepository {
   /**
    * Tries to find many pics from a single tag
    * @param {array<string>} tag - some description as in the database.
+   * @param {int} minviews - minmimum views to be shown as sorted
    */
-  async listByTag(tag) {
+  async listByTag(tag, minviews) {
     return this.db.any(
-        'SELECT filename FROM pictures WHERE ${tag} = ANY (tags);',
+        // eslint-disable-next-line max-len
+        'SELECT *, CAST(votes+1 AS real) / CAST(views+1 AS real) AS score FROM pictures WHERE ${tag} = ANY (tags) ORDER BY CASE WHEN views >= '+minviews+' THEN 0 ELSE 1 END, score DESC;',
         {tag: tag},
     );
   }
@@ -137,12 +139,16 @@ class PicturesRepository {
   /**
    * returns the top n pics
    * @param {int} n Number of pics
+   * @param {int} minviews - minmimum views to be shown as sorted
    */
-  async topN(n) {
+  async topN(n, minviews) {
     return this.db.many(
         // eslint-disable-next-line max-len
-        'SELECT *, CAST(votes+1 AS real) / CAST(views+1 AS real) AS score FROM public.pictures ORDER BY votes DESC, views ASC LIMIT ${l};',
-        {l: n},
+        'SELECT *, CAST(votes+1 AS real) / CAST(views+1 AS real) AS score FROM public.pictures ORDER BY CASE WHEN views >= ${m} THEN 0 ELSE 1 END, score DESC LIMIT ${l};',
+        {
+          m: minviews,
+          l: n,
+        },
     );
   }
   /**

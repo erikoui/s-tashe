@@ -129,7 +129,7 @@ express()
     .set('view engine', 'ejs')
 
     .get('/', (req, res) => {
-      db.pictures.topN(10).then((top) => {
+      db.pictures.topN(10, 10).then((top) => {
         res.render('pages/index.ejs', {
           user: req.user,
           top10: top,
@@ -195,9 +195,13 @@ express()
     })
     .get('/tag', (req, res) => {
       const tag = req.query.tag;
-      db.pictures.listByTag(tag)
+      db.pictures.listByTag(tag, 10)
           .then((picList) => {
-            res.end(`TODO: load the followint pics ${JSON.stringify(picList)}`);
+            res.render('pages/tag.ejs', {
+              prefix: '/showImage/',
+              picList: picList,
+              user: req.user,
+            });
           }).catch((e) => {
             res.end(`Error while oading tag ${tag}`);
           });

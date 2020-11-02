@@ -1,5 +1,4 @@
 # Critical
-Load images based by tag - Save image thumbnails (500px) and load those as a gallery, clicking leads to the /showimage endpoint
 upload zip
 
 # New Features
@@ -13,6 +12,7 @@ ads
 moderation for pic uploads
 report incorrect tag button
 better scoring for leaderboard (currently just sorts by votes instead of score) - minimum vote requirement
+image thumbnails and better css in /tag endpoint
 
 # Nice-to-haves
 dark theme
