@@ -12,7 +12,12 @@ class Declutter {
    */
   constructor() {
     this.votePointIncrement=1;
-    // Some globals could be defined here
+    this.rankingData = {
+      ranks: ['newfag', 'pleb', 'rookie', 'new recruit',
+        'experienced', 'veteran', 'coomer', 'wizard'],
+      pointBreaks: [20, 100, 250, 500, 1000, 2000, 5000, 1000000],
+      levels: [0, 1, 2, 3, 4, 5, 6, 7],
+    };
     console.log('Declutter loaded');
   }
 
@@ -20,22 +25,20 @@ class Declutter {
    * Converts the users points to a text description
    * @param {any} user - the user object returned by login
    *
-   * @return {string} the user rank
+   * @return {Object} the user rank
    */
   makeRank(user) {
     if (user.admin) {
       return {level: 10, rank: 'Master baiter (admin)'};
     }
 
-    const rankingData = {
-      ranks: ['newfag', 'pleb', 'rookie', 'new recruit',
-        'experienced', 'veteran', 'coomer', 'wizard'],
-      pointBreaks: [20, 100, 250, 500, 1000, 2000, 5000, 1000000],
-      levels: [0, 1, 2, 3, 4, 5, 6, 7],
-    };
-    for (let i = 0; i < rankingData.ranks.length; i++) {
-      if (user.points < rankingData.pointBreaks[i]) {
-        return {level: rankingData.levels[i], rank: rankingData.ranks[i]};
+    
+    for (let i = 0; i < this.rankingData.ranks.length; i++) {
+      if (user.points < this.rankingData.pointBreaks[i]) {
+        return {
+          level: this.rankingData.levels[i],
+          rank: this.rankingData.ranks[i],
+        };
       }
     }
     // this is returned when a user maxed out points with a hack

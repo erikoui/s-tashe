@@ -6,6 +6,10 @@ const md5File = require('md5-file');
 const childProcess = require('child_process');
 const passport = require('passport');
 const Strategy = require('passport-local').Strategy;
+const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
+const multer = require('multer');
+const upload = multer({dest: 'uploads/'});
+const fs = require('fs');
 // eslint-disable-next-line no-unused-vars
 const {nextTick} = require('process');
 
@@ -23,7 +27,9 @@ const chanDownloader = './_helpers/chan-downloader';
 
 // Server port to listen on
 const PORT = process.env.PORT || 5000;
-const linkify = `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/`;
+// Image links prefix
+const imgPrefixURL = `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/`;
+
 
 // Configure the local strategy for use by Passport.
 passport.use(
@@ -162,20 +168,20 @@ express()
       let userid;
       try {
         userid = req.user.id;
-      } catch (e) {}
+      } catch (e) { }
 
       // Vote even if user not logged in
       db.pictures.vote(
           voteid, otherid,
       ).then((data) => {
-        // Return the votes to the client
+      // Return the votes to the client
         res.json(data);
         // Add points to the user if they are logged in
         if (userid) {
           db.users.addPoints(
               userid, declutter.votePointIncrement,
           ).then((data) => {
-            // console.log(data);
+          // console.log(data);
           }).catch((e) => {
             console.log('error increasing points: ' + e);
           });
@@ -189,20 +195,20 @@ express()
     .get('/tag', (req, res) => {
       const tag = req.query.tag;
       db.pictures.listByTag(tag)
-          .then((picList)=>{
+          .then((picList) => {
             res.end(`TODO: load the followint pics ${JSON.stringify(picList)}`);
-          }).catch((e)=>{
+          }).catch((e) => {
             res.end(`Error while oading tag ${tag}`);
           });
     })
     .get('/login', (req, res) => {
       res.render('pages/login.ejs', {user: req.user});
     })
-    .get('/register', (req, res)=>{
+    .get('/register', (req, res) => {
       res.render('pages/register.ejs', {user: req.user});
     })
     .get('/download',
-        require('connect-ensure-login').ensureLoggedIn(),
+        ensureLoggedIn(),
         (req, res) => {
           res.end('running download script');
           // TODO: redirect to the report page when finished
@@ -213,7 +219,7 @@ express()
               (msg) => {
                 // This runs each time the script calls process.send
 
-                // Save the massage to the approptiate JSON tag
+                // Save the massage to the aproppriate JSON tag
                 if (msg.log) {// log message
                   output.log.push(msg.log);
                 }
@@ -251,24 +257,24 @@ express()
                 }
 
                 /**
-                * Inserts image info and tags it in the database.
-                * @param {strint} filename - filename as in the cloud
-                *  (the md5 name). Also known as the key
-                * @param {array<string>} tags - tag array
-                */
+          * Inserts image info and tags it in the database.
+          * @param {strint} filename - filename as in the cloud
+          *  (the md5 name). Also known as the key
+          * @param {array<string>} tags - tag array
+          */
                 async function updateDb(filename, tags) {
                   // TODO: Add descriptions with AI lmao
                   const desc = 'No description';
-                  db.pictures.add(desc, filename, tags).then((data)=>{
+                  db.pictures.add(desc, filename, tags).then((data) => {
                     console.log(`${data.filename} uploaded.`);
-                  }).catch((e)=>{
+                  }).catch((e) => {
                     console.log(`error uploading image: ${e}`);
                   });
                 }
 
                 /**
-                * Renders the output JSON file
-                */
+          * Renders the output JSON file
+          */
                 function renderOutput() {
                   // TODO: show a web page with proper formatting etc
                   // TODO: res.render(pages/chandownloadinfo,{status: output})
@@ -278,12 +284,26 @@ express()
                 renderOutput();
               });
         })
+    .get('/upload',
+        ensureLoggedIn(),
+        (req, res) => {
+          const userPriviledge = declutter.makeRank(req.user);
+          const requiredLevel = 5;
+          if (userPriviledge.level > requiredLevel) {
+            res.render('pages/upload', {user: req.user});
+          } else {
+            res.end(`You have to be at least a \
+${declutter.rankingData.ranks[requiredLevel + 1]} \
+(${declutter.rankingData.pointBreaks[requiredLevel + 1]} \
+points) to upload files`);
+          }
+        })
     .get('/logout', (req, res) => {
       req.logout();
       res.redirect('/');
     })
     .get('/admin',
-        require('connect-ensure-login').ensureLoggedIn(),
+        ensureLoggedIn(),
         (req, res) => {
           if (req.user.admin) {
             res.render('pages/admin', {user: req.user});
@@ -292,13 +312,12 @@ express()
           }
         })
     .get('/profile',
-        require('connect-ensure-login').ensureLoggedIn(),
+        ensureLoggedIn(),
         (req, res) => {
-          console.log(req.user);
           res.render('pages/profile', {user: req.user});
         })
     .get('/deleteallfiles',
-        require('connect-ensure-login').ensureLoggedIn(),
+        ensureLoggedIn(),
         (req, res) => {
           if (req.user.admin) {
             cloud.getBucketContents(
@@ -331,9 +350,12 @@ express()
         res.end(`Error: ${err}`);
       });
     })
-    .get('/showImage/:fn', (req, res)=>{
+    .get('/showImage/:fn', (req, res) => {
       const filename = req.params['fn'];
-      res.render('pages/showImage', {user: req.user, fn: linkify+filename});
+      res.render('pages/showImage', {
+        user: req.user,
+        fn: imgPrefixURL + filename,
+      });
     })
     .post('/login', passport.authenticate('local', {
       failureRedirect: '/login',
@@ -341,14 +363,46 @@ express()
       console.log('logged in');
       res.redirect('/');
     })
+    .post('/upload', upload.array('files[]'), (req, res) => {
+    // upload.array('files', <maxcount>) is also a thing
+
+      // Uploads the files to the folder set in `const upload`.
+      // TODO: set description (req.body contains the other text fields of
+      // upload.ejs)
+      let err=false;
+      let message='OK';
+      for (let i = 0; i < req.files.length; i++) {
+        // Add the extension to the file
+        const fp = path.join(req.files[i].destination, req.files[i].filename);
+        const ext = path.parse(req.files[i].originalname).ext;
+        fs.renameSync(fp, fp + ext);
+
+        if (ext=='.zip') {
+          // TODO: handle zip files
+        } else if ((/\.(gif|jpe?g|tiff?|png|webp|bmp|webm)$/i).test(ext)) {
+          // TODO: upload image to cloud and update database
+        } else {
+          console.log("unhandled image");
+          err=true;
+          message='unknown file extension for some files';
+        }
+      }
+
+      // Tell the frontend that everything is fine
+      res.json({
+        success: !err,
+        error: message,
+      });
+    })
     .post('/register', (req, res) => {
-      const hashedPass=sha1(req.body.password);
-      db.users.add(req.body.username, hashedPass).then(()=>{
+      const hashedPass = sha1(req.body.password);
+      db.users.add(req.body.username, hashedPass).then(() => {
         res.redirect('/login');
-      }).catch((e)=>{
+      }).catch((e) => {
         console.log(e);
         res.redirect('/register');
       });
     })
+
     .listen(PORT, () => console.log(`Listening on ${PORT}`));
 
