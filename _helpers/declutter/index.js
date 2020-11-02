@@ -1,3 +1,7 @@
+const md5File = require('md5-file');
+const path = require('path');
+const fs = require('fs');
+
 /**
  * @module Declutter
  */
@@ -9,9 +13,14 @@
 class Declutter {
   /**
    * @constructor
+   *
+   * @param {db} database - the db object in index.js
+   * @param {Cloud} cloudStorage - the cloud object in index.js
    */
-  constructor() {
-    this.votePointIncrement=1;
+  constructor(database, cloudStorage) {
+    this.db=database;
+    this.cloud=cloudStorage;
+    this.votePointIncrement = 1;
     this.rankingData = {
       ranks: ['newfag', 'pleb', 'rookie', 'new recruit',
         'experienced', 'veteran', 'coomer', 'wizard'],
@@ -32,7 +41,6 @@ class Declutter {
       return {level: 10, rank: 'Master baiter (admin)'};
     }
 
-    
     for (let i = 0; i < this.rankingData.ranks.length; i++) {
       if (user.points < this.rankingData.pointBreaks[i]) {
         return {
@@ -46,17 +54,58 @@ class Declutter {
   }
 
   /**
- * handles errors
- * @function
- * @param{Error} err - the error to handle
- * @param{Request} req - the request to process
- * @param{Response} res - the response to send back
- * @param{Function} next - i have no idea
- * @return{void}
- */
+   * Uploads a file to the this.cloud storage and adds a record in
+   * the pictures table.
+   * @param {string} localFilePath - local filenmame
+   * @param {string} desc - description
+   * @param {array<string>} tags - tag array
+   */
+  uploadAndUpdateDb(localFilePath, desc, tags) {
+    const filePath = path.join(localFilePath);// normalize the path just in case
+    console.log(`calculating md5: ${filePath}`);
+    md5File(filePath).
+        then(async (md5) => {
+          console.log(`file md5: ${md5}`);
+          const ext = path.parse(filePath).ext;
+          const cloudname = md5 + ext;
+          await this.cloud.simpleUpload(md5 + ext, filePath);
+          await this.addPicToDb(cloudname, tags, desc);
+          fs.unlink(filePath, () => {
+            console.log('file deleted from local');
+          });
+          console.log('Upload successful');
+        }).catch((reason) => {
+          console.log(`error while uploading to cloud:${reason}`);
+        });
+  }
+
+  /**
+  * Inserts image info and tags it in the database.
+  * @param {string} filename - filename as in the cloud
+  *  (the md5 name). Also known as the key
+  * @param {array<string>} tags - tag array
+  * @param {string} desc - Description
+  */
+  async addPicToDb(filename, tags, desc) {
+    this.db.pictures.add(desc, filename, tags).then((data) => {
+      console.log(`${data.filename} added to database.`);
+    }).catch((e) => {
+      console.log(`error adding to database: ${e}`);
+    });
+  }
+
+  /**
+* handles errors
+* @function
+* @param{Error} err - the error to handle
+* @param{Request} req - the request to process
+* @param{Response} res - the response to send back
+* @param{Function} next - i have no idea
+* @return{void}
+*/
   errorHandler(err, req, res, next) {
     if (typeof (err) === 'string') {
-      // custom application error
+    // custom application error
       return res.status(400).json({message: err});
     }
 

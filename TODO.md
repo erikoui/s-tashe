@@ -4,7 +4,6 @@ upload zip
 
 # New Features
 allow the user to view previous pics (like a history feature)
-Automatically delete local pics after uploading
 nicer login front end (invalid login message or similar)
 user priviledge levels allow tagging, removing tags, adding descriptions, uploading images, etc. This happens in index.ejs and showImage.ejs
 automaticaly download threads with 150 images
@@ -16,10 +15,11 @@ report incorrect tag button
 better scoring for leaderboard (currently just sorts by votes instead of score) - minimum vote requirement
 
 # Nice-to-haves
+dark theme
 Tell the user when registering when the username is already in use
 convert chan-downloader to a module
 progress for the downloader script
-check if file exists on cloud before uploading (also check database records and add them if missing)
+check if file exists on cloud before uploading (also check database records and add them if missing) - same goes for its database record
 upload page css
 move some global functions into declutter (pass cloud and db to the declutter constructor)
 

@@ -2,7 +2,7 @@
 const express = require('express');
 const path = require('path');
 const sha1 = require('sha1');
-const md5File = require('md5-file');
+
 const childProcess = require('child_process');
 const passport = require('passport');
 const Strategy = require('passport-local').Strategy;
@@ -16,11 +16,11 @@ const {nextTick} = require('process');
 // Load custom modules
 const {db} = require('./_helpers/db');
 
-const Declutter = require('./_helpers/declutter');
-const declutter = new Declutter();
-
 const Cloud = require('./_helpers/cos');
 const cloud = new Cloud();
+
+const Declutter = require('./_helpers/declutter');
+const declutter = new Declutter(db, cloud);
 
 // This is a standalone script, so just the file path is needed.
 const chanDownloader = './_helpers/chan-downloader';
@@ -108,44 +108,6 @@ function runScript(scriptPath, args, messagecb, warningcb, donecb) {
       throw new Error(`Process ${scriptPath} error with exit code ${code}`);
     }
     donecb();
-  });
-}
-
-/**
- * Uploads a file to the cloud storage and adds a record in the pictures table.
- * @param {string} localFilePath - local filenmame
- * @param {string} desc - description
- * @param {array<string>} tags - tag array
- */
-function uploadAndUpdateDb(localFilePath, desc, tags) {
-  const filePath = path.join(localFilePath);// normalize the path just in case
-  console.log(`calculating md5: ${filePath}`);
-  md5File(filePath).
-      then(async (md5) => {
-        console.log(`file md5: ${md5}`);
-        const ext = path.parse(filePath).ext;
-        const cloudname = md5 + ext;
-        await cloud.simpleUpload(md5 + ext, filePath);
-        await updateDb(cloudname, tags, desc);
-        console.log('Upload successful');
-      }).catch((reason) => {
-        console.log(`error while uploading to cloud:${reason}`);
-      });
-}
-
-/**
-  * Inserts image info and tags it in the database.
-  * @param {strint} filename - filename as in the cloud
-  *  (the md5 name). Also known as the key
-  * @param {array<string>} tags - tag array
-  * @param {string} desc - Description
-  */
-async function updateDb(filename, tags, desc) {
-  // TODO: Add descriptions with AI lmao
-  db.pictures.add(desc, filename, tags).then((data) => {
-    console.log(`${data.filename} uploaded.`);
-  }).catch((e) => {
-    console.log(`error uploading image: ${e}`);
   });
 }
 
@@ -279,7 +241,7 @@ express()
                 // setting the filename to its md5 sum
                 for (let i = 0; i < output.filenames.length; i++) {
                   // calculates MD5 of each pic  and uploads it when done
-                  uploadAndUpdateDb(
+                  declutter.uploadAndUpdateDb(
                       output.filenames[i],
                       'no description',
                       output.tags,
@@ -287,8 +249,8 @@ express()
                 }
 
                 /**
-    * Renders the output JSON file
-    */
+                  * Renders the output JSON file
+                  */
                 function renderOutput() {
                   // TODO: show a web page with proper formatting etc
                   // TODO: res.render(pages/chandownloadinfo,{status: output})
@@ -392,7 +354,7 @@ points) to upload files`);
         if (ext == '.zip') {
         // TODO: handle zip files
         } else if ((/\.(gif|jpe?g|tiff?|png|webp|bmp|webm)$/i).test(ext)) {
-          uploadAndUpdateDb(fp+ext, req.files[i].originalname, []);
+          declutter.uploadAndUpdateDb(fp+ext, req.files[i].originalname, []);
           fs.unlink(fp+ext, ()=>{
             console.log('file deleted from local');
           });
