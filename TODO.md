@@ -1,6 +1,6 @@
 # Critical
-upload page (maybe could take a zip file with the tags as a field or the filename, for multiple uploads)
 Load images based by tag - Save image thumbnails (500px) and load those as a gallery, clicking leads to the /showimage endpoint
+upload zip
 
 # New Features
 allow the user to view previous pics (like a history feature)
@@ -13,6 +13,7 @@ show a loading message while no pics on screen (maybe showing vote and edit stat
 ads
 moderation for pic uploads
 report incorrect tag button
+better scoring for leaderboard (currently just sorts by votes instead of score) - minimum vote requirement
 
 # Nice-to-haves
 Tell the user when registering when the username is already in use
@@ -20,8 +21,10 @@ convert chan-downloader to a module
 progress for the downloader script
 check if file exists on cloud before uploading (also check database records and add them if missing)
 upload page css
+move some global functions into declutter (pass cloud and db to the declutter constructor)
 
 # Bugs
+many errors go unnoticed
 rate limiter file uploads because they time out on slow connection - i cannot reproduce this
 https://medium.com/developer-rants/how-to-handle-sessions-properly-in-express-js-with-heroku-c35ea8c0e500
 

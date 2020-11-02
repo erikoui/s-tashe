@@ -111,6 +111,45 @@ function runScript(scriptPath, args, messagecb, warningcb, donecb) {
   });
 }
 
+/**
+ * Uploads a file to the cloud storage and adds a record in the pictures table.
+ * @param {string} localFilePath - local filenmame
+ * @param {string} desc - description
+ * @param {array<string>} tags - tag array
+ */
+function uploadAndUpdateDb(localFilePath, desc, tags) {
+  const filePath = path.join(localFilePath);// normalize the path just in case
+  console.log(`calculating md5: ${filePath}`);
+  md5File(filePath).
+      then(async (md5) => {
+        console.log(`file md5: ${md5}`);
+        const ext = path.parse(filePath).ext;
+        const cloudname = md5 + ext;
+        await cloud.simpleUpload(md5 + ext, filePath);
+        await updateDb(cloudname, tags, desc);
+        console.log('Upload successful');
+      }).catch((reason) => {
+        console.log(`error while uploading to cloud:${reason}`);
+      });
+}
+
+/**
+  * Inserts image info and tags it in the database.
+  * @param {strint} filename - filename as in the cloud
+  *  (the md5 name). Also known as the key
+  * @param {array<string>} tags - tag array
+  * @param {string} desc - Description
+  */
+async function updateDb(filename, tags, desc) {
+  // TODO: Add descriptions with AI lmao
+  db.pictures.add(desc, filename, tags).then((data) => {
+    console.log(`${data.filename} uploaded.`);
+  }).catch((e) => {
+    console.log(`error uploading image: ${e}`);
+  });
+}
+
+
 express()
     .use(express.static(path.join(__dirname, 'public')))
     .use(require('morgan')('combined'))
@@ -240,41 +279,16 @@ express()
                 // setting the filename to its md5 sum
                 for (let i = 0; i < output.filenames.length; i++) {
                   // calculates MD5 of each pic  and uploads it when done
-                  const filePath = path.join(output.filenames[i]);
-                  console.log(`calculating md5: ${filePath}`);
-                  md5File(filePath).
-                      then(async (md5) => {
-                        console.log(`file md5: ${md5}`);
-                        const ext = path.parse(filePath).ext;
-                        const cloudname = md5 + ext;
-                        await cloud.simpleUpload(md5 + ext, filePath);
-                        await updateDb(cloudname, output.tags);
-                        console.log('Upload successful');
-                        output.log.push('Upload successful');
-                      }).catch((reason) => {
-                        console.log(`error while uploading to cloud:${reason}`);
-                      });
+                  uploadAndUpdateDb(
+                      output.filenames[i],
+                      'no description',
+                      output.tags,
+                  );
                 }
 
                 /**
-          * Inserts image info and tags it in the database.
-          * @param {strint} filename - filename as in the cloud
-          *  (the md5 name). Also known as the key
-          * @param {array<string>} tags - tag array
-          */
-                async function updateDb(filename, tags) {
-                  // TODO: Add descriptions with AI lmao
-                  const desc = 'No description';
-                  db.pictures.add(desc, filename, tags).then((data) => {
-                    console.log(`${data.filename} uploaded.`);
-                  }).catch((e) => {
-                    console.log(`error uploading image: ${e}`);
-                  });
-                }
-
-                /**
-          * Renders the output JSON file
-          */
+    * Renders the output JSON file
+    */
                 function renderOutput() {
                   // TODO: show a web page with proper formatting etc
                   // TODO: res.render(pages/chandownloadinfo,{status: output})
@@ -367,24 +381,25 @@ points) to upload files`);
     // upload.array('files', <maxcount>) is also a thing
 
       // Uploads the files to the folder set in `const upload`.
-      // TODO: set description (req.body contains the other text fields of
-      // upload.ejs)
-      let err=false;
-      let message='OK';
+      let err = false;
+      let message = 'OK';
       for (let i = 0; i < req.files.length; i++) {
-        // Add the extension to the file
+      // Add the extension to the file
         const fp = path.join(req.files[i].destination, req.files[i].filename);
         const ext = path.parse(req.files[i].originalname).ext;
         fs.renameSync(fp, fp + ext);
 
-        if (ext=='.zip') {
-          // TODO: handle zip files
+        if (ext == '.zip') {
+        // TODO: handle zip files
         } else if ((/\.(gif|jpe?g|tiff?|png|webp|bmp|webm)$/i).test(ext)) {
-          // TODO: upload image to cloud and update database
+          uploadAndUpdateDb(fp+ext, req.files[i].originalname, []);
+          fs.unlink(fp+ext, ()=>{
+            console.log('file deleted from local');
+          });
         } else {
-          console.log("unhandled image");
-          err=true;
-          message='unknown file extension for some files';
+          console.log('unhandled file uploaded');
+          err = true;
+          message = 'unknown file extension for some files';
         }
       }
 
