@@ -14,6 +14,7 @@ better scoring for leaderboard (currently just sorts by votes instead of score) 
 image thumbnails and better css in /tag endpoint
 tag field for uploaded pictures
 diagram explaining how zip file tagging works
+truncate pictures table on /deleteallfiles
 
 # Nice-to-haves
 dark theme

@@ -139,7 +139,11 @@ express()
         });
       }).catch((e) => {
         console.log(e);
-        res.render('pages/index.ejs', {user: req.user});
+        res.render('pages/index.ejs', {
+          user: req.user,
+          top10: [],
+          prefix: '/showImage/',
+        });
       });
     })
     .get('/showImages', (req, res) => {
@@ -372,12 +376,14 @@ points) to upload files`);
             console.log('Extraction complete');
             // Scan uploads/zipfile folder for images
             taggedFiles=declutter.scanAndTag(extractDir);
-            // console.log(taggedFiles);
+
+            // Upload images and delete them after they are uploaded
             for (let i=0; i<taggedFiles.length; i++) {
               declutter.uploadAndUpdateDb(
                   taggedFiles[i].filename,
                   'No description',
                   taggedFiles[i].tags,
+                  true,
               );
             }
 
@@ -385,22 +391,17 @@ points) to upload files`);
             fs.unlink(fp+ext, ()=>{
               console.log('Zip file deleted from local');
             });
-
-            // Delete extracted data
-            for (let i=0; i<taggedFiles.length; i++) {
-              fs.unlink(taggedFiles[i].filename, ()=>{
-                console.log('Image file deleted from local');
-              });
-            }
           }).catch((e)=>{
             console.error(e);
           });
         } else if ((/\.(gif|jpe?g|tiff?|png|webp|bmp|webm)$/i).test(ext)) {
           // Handle images
-          declutter.uploadAndUpdateDb(fp+ext, req.files[i].originalname, []);
-          fs.unlink(fp+ext, ()=>{
-            console.log('file deleted from local');
-          });
+          declutter.uploadAndUpdateDb(
+              fp+ext,
+              req.files[i].originalname,
+              [],
+              true,
+          );
         } else {
           // Error
           console.log('unhandled file uploaded');

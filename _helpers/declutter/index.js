@@ -59,8 +59,9 @@ class Declutter {
    * @param {string} localFilePath - local filenmame
    * @param {string} desc - description
    * @param {array<string>} tags - tag array
+   * @param {boolean} del - if true, will delete the file after uploading
    */
-  uploadAndUpdateDb(localFilePath, desc, tags) {
+  uploadAndUpdateDb(localFilePath, desc, tags, del) {
     const filePath = path.join(localFilePath);// normalize the path just in case
     console.log(`calculating md5: ${filePath}`);
     md5File(filePath).
@@ -70,10 +71,12 @@ class Declutter {
           const cloudname = md5 + ext;
           await this.cloud.simpleUpload(md5 + ext, filePath);
           await this.addPicToDb(cloudname, tags, desc);
-          fs.unlink(filePath, () => {
-            console.log('file deleted from local');
-          });
-          console.log('Upload successful');
+          if (del) {
+            fs.unlink(filePath, () => {
+              console.log('file deleted from local');
+            });
+          }
+          console.log(`Upload of ${localFilePath} successful`);
         }).catch((reason) => {
           console.log(`error while uploading to cloud:${reason}`);
         });
