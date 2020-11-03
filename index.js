@@ -1,5 +1,6 @@
 // Load dependencies
 const express = require('express');
+const fs = require('fs');
 const path = require('path');
 const sha1 = require('sha1');
 
@@ -7,9 +8,11 @@ const childProcess = require('child_process');
 const passport = require('passport');
 const Strategy = require('passport-local').Strategy;
 const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
+const extract = require('extract-zip');
+
 const multer = require('multer');
 const upload = multer({dest: 'uploads/'});
-const fs = require('fs');
+
 // eslint-disable-next-line no-unused-vars
 const {nextTick} = require('process');
 
@@ -29,7 +32,6 @@ const chanDownloader = './_helpers/chan-downloader';
 const PORT = process.env.PORT || 5000;
 // Image links prefix
 const imgPrefixURL = `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/`;
-
 
 // Configure the local strategy for use by Passport.
 passport.use(
@@ -344,32 +346,70 @@ points) to upload files`);
       res.redirect('/');
     })
     .post('/upload', upload.array('files[]'), (req, res) => {
-    // upload.array('files', <maxcount>) is also a thing
-
+      // Note: upload.array('files[]', <maxcount>) is also a thing
       // Uploads the files to the folder set in `const upload`.
       let err = false;
       let message = 'OK';
       for (let i = 0; i < req.files.length; i++) {
-      // Add the extension to the file
+        // Add the extension to the file
         const fp = path.join(req.files[i].destination, req.files[i].filename);
         const ext = path.parse(req.files[i].originalname).ext;
         fs.renameSync(fp, fp + ext);
 
         if (ext == '.zip') {
-        // TODO: handle zip files
+          // Handle zip files
+          const zipFile = path.resolve(fp+ext);
+          const extractDir = path.resolve(
+              path.join(
+                  req.files[i].destination,
+                  declutter.randomString(8),
+              ),
+          );
+          // Extract
+          extract(zipFile, {
+            dir: extractDir,
+          }).then(()=>{
+            console.log('Extraction complete');
+            // Scan uploads/zipfile folder for images
+            taggedFiles=declutter.scanAndTag(extractDir);
+            // console.log(taggedFiles);
+            for (let i=0; i<taggedFiles.length; i++) {
+              declutter.uploadAndUpdateDb(
+                  taggedFiles[i].filename,
+                  'No description',
+                  taggedFiles[i].tags,
+              );
+            }
+
+            // Delete zip file
+            fs.unlink(fp+ext, ()=>{
+              console.log('Zip file deleted from local');
+            });
+
+            // Delete extracted data
+            for (let i=0; i<taggedFiles.length; i++) {
+              fs.unlink(taggedFiles[i].filename, ()=>{
+                console.log('Image file deleted from local');
+              });
+            }
+          }).catch((e)=>{
+            console.error(e);
+          });
         } else if ((/\.(gif|jpe?g|tiff?|png|webp|bmp|webm)$/i).test(ext)) {
+          // Handle images
           declutter.uploadAndUpdateDb(fp+ext, req.files[i].originalname, []);
           fs.unlink(fp+ext, ()=>{
             console.log('file deleted from local');
           });
         } else {
+          // Error
           console.log('unhandled file uploaded');
           err = true;
           message = 'unknown file extension for some files';
         }
       }
 
-      // Tell the frontend that everything is fine
+      // Tell the frontend what happened
       res.json({
         success: !err,
         error: message,

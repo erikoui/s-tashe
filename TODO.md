@@ -1,5 +1,4 @@
 # Critical
-upload zip
 
 # New Features
 allow the user to view previous pics (like a history feature)
@@ -13,6 +12,8 @@ moderation for pic uploads
 report incorrect tag button
 better scoring for leaderboard (currently just sorts by votes instead of score) - minimum vote requirement
 image thumbnails and better css in /tag endpoint
+tag field for uploaded pictures
+diagram explaining how zip file tagging works
 
 # Nice-to-haves
 dark theme

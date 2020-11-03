@@ -18,8 +18,8 @@ class Declutter {
    * @param {Cloud} cloudStorage - the cloud object in index.js
    */
   constructor(database, cloudStorage) {
-    this.db=database;
-    this.cloud=cloudStorage;
+    this.db = database;
+    this.cloud = cloudStorage;
     this.votePointIncrement = 1;
     this.rankingData = {
       ranks: ['newfag', 'pleb', 'rookie', 'new recruit',
@@ -95,17 +95,82 @@ class Declutter {
   }
 
   /**
-* handles errors
-* @function
-* @param{Error} err - the error to handle
-* @param{Request} req - the request to process
-* @param{Response} res - the response to send back
-* @param{Function} next - i have no idea
-* @return{void}
-*/
+   * Generates a string of random characters
+   * @param {int} length - string length
+   * @return {string} - the random string
+   */
+  randomString(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
+
+  /**
+   * Creates an array of {tags,filename} objects
+   * @param {string} dir - Directory to scan
+   * @return {array} The array of {tags,filename} objects
+   */
+  scanAndTag(dir) {
+    /**
+      * Creates an array files in the dir
+      * @param {string} dir - Directory to scan
+      * @param {array} files_ - Used internally, dont pass any argument
+      * @return {array} The array of files in the dir
+     */
+    const getFiles = function(dir, files_) {
+      files_ = files_ || [];
+      const files = fs.readdirSync(dir);
+      for (const i in files) {
+        if (Object.prototype.hasOwnProperty.call(files, i)) {
+          const name = path.join(dir, files[i]);
+          if (fs.statSync(name).isDirectory()) {
+            getFiles(name, files_);
+          } else {
+            files_.push(name);
+          }
+        }
+      }
+      return files_;
+    };
+
+    const taggedFileKVPArray=[];
+    const rawFiles=getFiles(dir);
+    const absPathLength=dir.split(path.sep).length;
+    for (let i = 0; i<rawFiles.length; i++) {
+      // Reset the KVP
+      const tempKVP={filename: '', tags: []};
+
+      // Extract the tags from the path
+      const tagList=[];
+      const pathArray=rawFiles[i].split(path.sep);
+      for (let j=absPathLength; j<pathArray.length-1; j++) {
+        tagList.push(pathArray[j]);
+      }
+
+      // Save the KVP of the current file
+      tempKVP.filename=rawFiles[i];
+      tempKVP.tags=tagList;
+      taggedFileKVPArray.push(tempKVP);
+    }
+
+    return taggedFileKVPArray;
+  }
+
+  /**
+    * handles errors
+    * @param{Error} err - the error to handle
+    * @param{Request} req - the request to process
+    * @param{Response} res - the response to send back
+    * @param{Function} next - i have no idea
+    * @return{void}
+    */
   errorHandler(err, req, res, next) {
     if (typeof (err) === 'string') {
-    // custom application error
+      // custom application error
       return res.status(400).json({message: err});
     }
 
