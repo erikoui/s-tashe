@@ -135,16 +135,31 @@ express()
         res.render('pages/index.ejs', {
           user: req.user,
           top10: top,
+          tags: declutter.tags,
           prefix: '/showImage/',
         });
       }).catch((e) => {
-        console.log(e);
+        console.error(e);
         res.render('pages/index.ejs', {
           user: req.user,
           top10: [],
+          tags: declutter.tags,
           prefix: '/showImage/',
         });
       });
+    })
+    .get('/changeTagId', (req, res)=>{
+      const tagId = req.query.newid;
+      if (req.user) {
+        db.users.changeTagId(req.user.id, tagId).then(()=>{
+          res.end('Tag selection changed successfully. Go back and refresh to see the change.');
+          console.log(`tag changed to ${tagId}`);
+        }).catch((e)=>{
+          res.end('Tag selection failed');
+          console.error(`Error changing tag: ${e}`);
+        });
+      }
+      
     })
     .get('/showImages', (req, res) => {
       db.pictures.twoRandomPics().then((data) => {

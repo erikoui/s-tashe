@@ -3,6 +3,7 @@
     user priviledge levels allow tagging, removing tags, adding descriptions, uploading images, etc. This happens in index.ejs and showImage.ejs
     moderation for pic uploads
     Put things in the side panel
+    make selected tag actually load images of that tag
 
 # New Features
 

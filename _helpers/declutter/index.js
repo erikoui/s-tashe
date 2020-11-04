@@ -27,6 +27,7 @@ class Declutter {
       pointBreaks: [20, 100, 250, 500, 1000, 2000, 5000, 1000000],
       levels: [0, 1, 2, 3, 4, 5, 6, 7],
     };
+    this.tags=this.refreshTags();
     console.log('Declutter loaded');
   }
 
@@ -179,6 +180,13 @@ class Declutter {
 
     // default to 500 server error
     return res.status(500).json({message: err.message});
+  }
+
+  /**
+   * Reloads the tags from the tags table
+   */
+  async refreshTags() {
+    this.tags=await this.db.tags.all();
   }
 }
 

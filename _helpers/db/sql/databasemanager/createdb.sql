@@ -124,7 +124,8 @@ CREATE TABLE public.users (
     id integer NOT NULL,
     deleted boolean,
     admin boolean,
-    joinedon timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    joinedon timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    selectedTagId integer DEFAULT 1
 );
 
 

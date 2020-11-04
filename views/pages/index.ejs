@@ -12,7 +12,16 @@
     <div class="row">
       <div class="col-sm-2">
         <div class="col-sm-12 bg-left" id="left-bar">
-          tags, rules, settings here
+          <h3 style="text-align: center;">Select tag to vote for</h3>
+          <% for(let i=0;i<tags.length;i++){ if(user){ %>
+          <% if(tags[i].id==user.selectedtag){ %>
+          <a href="/changeTagId?newid=<%= tags[i].id %>" class="btn-primary btn-sm btn-default"><%= tags[i].tag %></a>
+          <% }else{ %>
+          <a href="/changeTagId?newid=<%= tags[i].id  %>" class="btn btn-sm btn-default"><%= tags[i].tag %></a>
+          <% } %>
+          <% }} %>
+          <br>
+          rules, settings here
         </div>
       </div>
       <div class="col-sm-8">
@@ -33,11 +42,12 @@
         </div>
       </div>
       <div class="col-sm-2">
-        <div class="col-sm-12 bg-right"id="right-bar">
+        <div class="col-sm-12 bg-right" id="right-bar">
           <h3 style="text-align: center;">Leaderboard</h3>
           <ul>
             <% for(let i=0;i<top10.length;i++){ %>
-            <li><a href="<%= prefix+top10[i].filename %>">Number <%=i+1%></a> (<%= top10[i].votes%>/<%=top10[i].views%> - <%= top10[i].score.toFixed(2) %>)</li>
+            <li><a href="<%= prefix+top10[i].filename %>">Number <%=i+1%></a> (<%= top10[i].votes%>/<%=top10[i].views%>
+              - <%= top10[i].score.toFixed(2) %>)</li>
             <% } %>
           </ul>
         </div>

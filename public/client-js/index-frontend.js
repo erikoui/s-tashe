@@ -109,5 +109,6 @@ onload = function() {
       }
     });
   }
+
   loadImages();
 };

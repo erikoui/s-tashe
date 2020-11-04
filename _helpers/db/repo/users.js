@@ -47,6 +47,20 @@ class UsersRepository {
   }
 
   /**
+   * changes the selected tag id for the current user
+   * @param {int} userId -
+   * @param {int} tagId -
+   */
+  async changeTagId(userId, tagId) {
+    return this.db.none(
+        'UPDATE users SET selectedtag=${newtag} WHERE id=${uid};', {
+          newtag: tagId,
+          uid: userId,
+        },
+    );
+  }
+
+  /**
    * Tries to find a user by id
    * @param {int} id - user id
    */
