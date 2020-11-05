@@ -152,17 +152,27 @@ express()
       const tagId = req.query.newid;
       if (req.user) {
         db.users.changeTagId(req.user.id, tagId).then(()=>{
-          res.end('Tag selection changed successfully. Go back and refresh to see the change.');
-          console.log(`tag changed to ${tagId}`);
+          res.json({
+            message: 'Tag changed',
+            error: false,
+          });
+          console.log(`Tag changed to ${tagId}`);
         }).catch((e)=>{
-          res.end('Tag selection failed');
+          res.json({
+            message: `Tag change failed: ${e}`,
+            error: true,
+          });
           console.error(`Error changing tag: ${e}`);
         });
+      } else {
+        res.json({
+          message: 'Not logged in',
+          error: true,
+        });
       }
-      
     })
     .get('/showImages', (req, res) => {
-      db.pictures.twoRandomPics().then((data) => {
+      db.pictures.twoRandomPics(req.user.selectedtag || 2).then((data) => {
         res.json({
           image1: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[0].filename}`,
           image2: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[1].filename}`,
@@ -175,12 +185,12 @@ express()
         res.json({
           image1: `images/a.jpg`,
           image2: `images/b.jpg`,
-          tags1: [err],
-          tags2: ['error'],
+          tags1: ['Database error'],
+          tags2: [err.message],
           id1: 1337,
           id2: 32202,
         });
-        console.log(err);
+        console.error(err);
       },
       );
     })

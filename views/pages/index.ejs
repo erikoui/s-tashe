@@ -13,13 +13,16 @@
       <div class="col-sm-2">
         <div class="col-sm-12 bg-left" id="left-bar">
           <h3 style="text-align: center;">Select tag to vote for</h3>
-          <% for(let i=0;i<tags.length;i++){ if(user){ %>
-          <% if(tags[i].id==user.selectedtag){ %>
-          <a href="/changeTagId?newid=<%= tags[i].id %>" class="btn-primary btn-sm btn-default"><%= tags[i].tag %></a>
-          <% }else{ %>
-          <a href="/changeTagId?newid=<%= tags[i].id  %>" class="btn btn-sm btn-default"><%= tags[i].tag %></a>
-          <% } %>
-          <% }} %>
+          <div id="tag-list">
+            <% for(let i=0;i<tags.length;i++){ if(user){ %>
+            <% if(tags[i].id==user.selectedtag){ %>
+            <a href="/changeTagId?newid=<%= tags[i].id %>" class="changetag btn-primary btn-sm btn-default"><%= tags[i].tag %></a>
+            <% }else{ %>
+            <a href="/changeTagId?newid=<%= tags[i].id %>" class="changetag btn btn-sm btn-default"><%= tags[i].tag %></a>
+            <% } %>
+            <% }} %>
+            }
+          </div>
           <br>
           rules, settings here
         </div>

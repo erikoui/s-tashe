@@ -54,11 +54,15 @@ class PicturesRepository {
 
   /**
    * Returns 2 pictures at random
+   * @param {int} selectedtag - The tag id that the current user has selected.
    */
-  async twoRandomPics() {
+  async twoRandomPics(selectedtag) {
     const picData=await this.db.many(
         `SELECT p.id,p.filename,p.tags
         FROM pictures p
+        WHERE (
+          SELECT tag FROM tags WHERE id=${selectedtag} LIMIT 1
+          ) = ANY (tags)
         ORDER BY RANDOM() 
         LIMIT 2;`,
     );

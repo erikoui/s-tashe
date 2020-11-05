@@ -11,10 +11,10 @@ onload = function() {
     const img = document.getElementById(id);
     img.src = src;
     img.alt = alt;
-    img.onload=function() {
+    img.onload = function() {
       $(img).fadeIn(500);
     };
-    img.style.display='none';
+    img.style.display = 'none';
     return img;
   }
 
@@ -22,12 +22,12 @@ onload = function() {
    * Hides the images so people cant click them
    */
   function hideImages() {
-    const limg=document.getElementById('leftpic');
-    const rimg=document.getElementById('rightpic');
-    limg.style.display='none';
-    rimg.style.display='none';
-    limg.onload=function() {};
-    rimg.onload=function() {};
+    const limg = document.getElementById('leftpic');
+    const rimg = document.getElementById('rightpic');
+    limg.style.display = 'none';
+    rimg.style.display = 'none';
+    limg.onload = function() { };
+    rimg.onload = function() { };
   }
 
   /**
@@ -38,10 +38,10 @@ onload = function() {
    * notification
    */
   function updatePoints() {
-    const pointsDiv=document.getElementById('points');
+    const pointsDiv = document.getElementById('points');
     if (pointsDiv) {
-      const currentPoints=parseInt(pointsDiv.innerText);
-      pointsDiv.innerText=currentPoints+1;
+      const currentPoints = parseInt(pointsDiv.innerText);
+      pointsDiv.innerText = currentPoints + 1;
     } else {
       $('#login-link').notify(
           'You are not logged in. Your points are not being stored.',
@@ -54,33 +54,33 @@ onload = function() {
    */
   function loadImages() {
     $.getJSON('/showImages', function(data) {
-      let voted=false;
+      let voted = false;
       if (data) {
         const lpt = document.getElementById('tags1');
         const rpt = document.getElementById('tags2');
-        lpt.innerHTML='';
-        rpt.innerHTML='';
+        lpt.innerHTML = '';
+        rpt.innerHTML = '';
 
         const lp = showImage(data.image1, data.desc1, 'leftpic');
         const rp = showImage(data.image2, data.desc2, 'rightpic');
 
         if (data.tags1) {
-          for (let i = 0; i < data.tags1.length; i++ ) {
-            const currentTag=document.createElement('a');
+          for (let i = 0; i < data.tags1.length; i++) {
+            const currentTag = document.createElement('a');
             currentTag.setAttribute('type', 'button');
             currentTag.setAttribute('href', `/tag?tag=${data.tags1[i]}`);
             currentTag.setAttribute('class', 'btn btn-sm btn-default');
-            currentTag.innerText=data.tags1[i];
+            currentTag.innerText = data.tags1[i];
             lpt.appendChild(currentTag);
           }
         }
         if (data.tags2) {
-          for (let i = 0; i < data.tags2.length; i++ ) {
-            const currentTag=document.createElement('a');
+          for (let i = 0; i < data.tags2.length; i++) {
+            const currentTag = document.createElement('a');
             currentTag.setAttribute('type', 'button');
             currentTag.setAttribute('href', `/tag?tag=${data.tags2[i]}`);
             currentTag.setAttribute('class', 'btn btn-sm btn-default');
-            currentTag.innerText=data.tags2[i];
+            currentTag.innerText = data.tags2[i];
             rpt.appendChild(currentTag);
           }
         }
@@ -88,21 +88,25 @@ onload = function() {
           if (!voted) {// prevent voting for both
             hideImages();
             updatePoints();
-            $.getJSON(`/vote?voteid=${data.id1}&otherid=${data.id2}`, (data)=>{
-              loadImages();
-            });
+            $.getJSON(
+                `/vote?voteid=${data.id1}&otherid=${data.id2}`,
+                (data) => {
+                  loadImages();
+                });
           }
-          voted=true;
+          voted = true;
         };
         rp.onclick = function() {
           if (!voted) {// prevent voting for both
             hideImages();
             updatePoints();
-            $.getJSON(`/vote?voteid=${data.id2}&otherid=${data.id1}`, (data)=>{
-              loadImages();
-            });
+            $.getJSON(
+                `/vote?voteid=${data.id2}&otherid=${data.id1}`,
+                (data) => {
+                  loadImages();
+                });
           }
-          voted=true;
+          voted = true;
         };
       } else {
         console.log('error fetching images from server');
@@ -111,4 +115,13 @@ onload = function() {
   }
 
   loadImages();
+
+  // Make left panel tag buttons call
+  // the /changetag endpoint without changing page
+  $('.changetag').click((e) => {
+    e.preventDefault();
+    $.getJSON(e.target.href, ()=>{
+      location.reload();
+    });
+  });
 };
