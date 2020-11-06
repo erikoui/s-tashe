@@ -137,6 +137,7 @@ express()
           top10: top,
           tags: declutter.tags,
           prefix: '/showImage/',
+          rankingData: declutter.rankingData,
         });
       }).catch((e) => {
         console.error(e);
@@ -145,6 +146,7 @@ express()
           top10: [],
           tags: declutter.tags,
           prefix: '/showImage/',
+          rankingData: declutter.rankingData,
         });
       });
     })
@@ -172,7 +174,6 @@ express()
       }
     })
     .get('/showImages', (req, res) => {
-      // TODO: keep track of selected tag for users that are not logged in
       let selectedTag=2;
       if (req.user) {// if logged in, load the users' selected tag
         selectedTag=req.user.selectedtag;

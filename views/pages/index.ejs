@@ -12,19 +12,29 @@
     <div class="row">
       <div class="col-sm-2">
         <div class="col-sm-12 bg-left" id="left-bar">
+          <% if(user){ %>
           <h3 style="text-align: center;">Select tag to vote for</h3>
           <div id="tag-list">
-            <% for(let i=0;i<tags.length;i++){ if(user){ %>
+            <% for(let i=0;i<tags.length;i++){ %>
             <% if(tags[i].id==user.selectedtag){ %>
-            <a href="/changeTagId?newid=<%= tags[i].id %>" class="changetag btn-primary btn-sm btn-default"><%= tags[i].tag %></a>
+            <a href="/changeTagId?newid=<%= tags[i].id %>"
+              class="changetag btn-primary btn-sm btn-default"><%= tags[i].tag %></a>
             <% }else{ %>
-            <a href="/changeTagId?newid=<%= tags[i].id %>" class="changetag btn btn-sm btn-default"><%= tags[i].tag %></a>
+            <a href="/changeTagId?newid=<%= tags[i].id %>"
+              class="changetag btn btn-sm btn-default"><%= tags[i].tag %></a>
             <% } %>
-            <% }} %>
-            }
+            <% } %>
           </div>
+          <% } %>
           <br>
-          rules, settings here
+          Click on the better picture of the two to vote for it. If you are logged in, you gain one point per vote. With
+          points, your level increases which then allows you to add/change tags, upload pictures, add descriptions and
+          more, which award more points.<br>
+          <h6>
+          <% for (let i=0;i<rankingData.pointBreaks.length-1;i++){ %>
+          <%= rankingData.pointBreaks[i] %> points : <%= rankingData.ranks[i] %><br>
+          <% } %>
+        </h6>
         </div>
       </div>
       <div class="col-sm-8">

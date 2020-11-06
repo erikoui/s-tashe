@@ -2,7 +2,6 @@
     check if file exists on cloud before uploading (also check database records and add them if missing) - same goes for its database record
     user priviledge levels allow tagging, removing tags, adding descriptions, uploading images, etc. This happens in index.ejs and showImage.ejs
     moderation for pic uploads
-    Put things in the side panel
 
 # New Features
 
@@ -14,6 +13,7 @@
     tag field for uploaded pictures
     report incorrect tag button
     diagram explaining how zip file tagging works
+    webm support
 
 ## Operational
     automaticaly download threads with 150 images
@@ -24,6 +24,7 @@
     ads
 
 # Nice-to-haves
+    keep track of users selected tag when not logged in (with cookie)
     dark theme
     Tell the user when registering when the username is already in use
     convert chan-downloader to a module
