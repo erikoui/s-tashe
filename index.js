@@ -172,7 +172,12 @@ express()
       }
     })
     .get('/showImages', (req, res) => {
-      db.pictures.twoRandomPics(req.user.selectedtag || 2).then((data) => {
+      // TODO: keep track of selected tag for users that are not logged in
+      let selectedTag=2;
+      if (req.user) {// if logged in, load the users' selected tag
+        selectedTag=req.user.selectedtag;
+      }
+      db.pictures.twoRandomPics(selectedTag).then((data) => {
         res.json({
           image1: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[0].filename}`,
           image2: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[1].filename}`,
