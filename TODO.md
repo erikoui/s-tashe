@@ -1,8 +1,7 @@
 # Critical
-    make chan-downloader into a module so it can use the global ratelimiter in declutter.
+    check if file exists on cloud before uploading (also check database records and add them if missing) - same goes for its database record
 
     ->user priviledge levels allow tagging, removing tags, adding descriptions, uploading images, etc. This happens in index.ejs and showImage.ejs
-    check if file exists on cloud before uploading (also check database records and add them if missing) - same goes for its database record
     moderation for pic uploads & upload link
     webm support
     image thumbnails and better css in /tag endpoint (also archive link in front page)
