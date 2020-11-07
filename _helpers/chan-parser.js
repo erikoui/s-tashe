@@ -1,8 +1,9 @@
 /**
  * @module chan-parser
  */
+// TODO: replace got with needle
 const got = require('got');
-const {db} = require('../db');
+const {db} = require('./db');
 
 /**
  * checks 4chan and returns an array of interesting thread urls.
@@ -22,7 +23,7 @@ class ChanParser {
    * @param {string} board - `'a'`, `'b'`, `'gif'`,...
    */
   async loadBoardJson(board) {
-    const checkTags = await this.getTagsFromDbAndCleanup();
+    const checkTags = await this.getAllTagsAndAltsArray();
 
     const urls = [];
     // remove any slashes that may have been passed by accident
@@ -31,6 +32,7 @@ class ChanParser {
     const boardUrl = `https://a.4cdn.org/${board}/catalog.json`;
 
     try {
+      // TODO: replace got with needle
       const parsedData = await got(boardUrl).json();
       for (let i = 0; i < parsedData.length; i++) {// page
         for (let j = 0; j < parsedData[i].threads.length; j++) {// thread
@@ -40,7 +42,7 @@ class ChanParser {
           const subject = `${parsedData[i].threads[j].sub || ''} ${parsedData[i].threads[j].com || ''}`;
 
           // Check if thread has our tags in the subject or comment
-          if (this.intresting(subject, checkTags)) {
+          if (this.isInteresting(subject, checkTags)) {
             urls.push(thisthread);
           }
         }
@@ -50,10 +52,11 @@ class ChanParser {
       console.error(`Got error: ${e.message}`);
     }
   }
+
   /**
    * @return {array} - tag list including alts
    */
-  async getTagsFromDbAndCleanup() {
+  async getAllTagsAndAltsArray() {
     // Load tags from database
     const tags = await db.tags.all();
     // Clean them up to use as a single array of words
@@ -78,7 +81,7 @@ class ChanParser {
    *
    * @return {boolean} - wether the tread is interesting
    */
-  intresting(subCom, tagList) {
+  isInteresting(subCom, tagList) {
     // make bag of words from the title post including its subject
     let tbag = subCom;
 

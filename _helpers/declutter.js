@@ -2,11 +2,8 @@ const md5File = require('md5-file');
 const path = require('path');
 const fs = require('fs');
 
-const childProcess = require('child_process');
 const RateLimiter = require('limiter').RateLimiter;
-
-// This is a standalone script, so just the file path is needed.
-const chanDownloader = '_helpers/chan-downloader';
+const ChanDownloader = require('./chan-downloader');
 
 /**
  * @module Declutter
@@ -24,7 +21,7 @@ class Declutter {
    * @param {Cloud} cloudStorage - the cloud object in index.js
    */
   constructor(database, cloudStorage) {
-    this.imageLimiter=new RateLimiter(1, 1200);
+    this.imageLimiter = new RateLimiter(1, 1100);
     this.db = database;
     this.cloud = cloudStorage;
     this.votePointIncrement = 1;
@@ -35,6 +32,7 @@ class Declutter {
       levels: [0, 1, 2, 3, 4, 5, 6, 7],
     };
     this.tags = this.refreshTags();
+    this.chanDownloader = new ChanDownloader(this);
     console.log('Declutter loaded');
   }
 
@@ -71,7 +69,6 @@ class Declutter {
    */
   uploadAndUpdateDb(localFilePath, desc, tags, del) {
     const filePath = path.join(localFilePath);// normalize the path just in case
-    console.log(`calculating md5: ${filePath}`);
     md5File(filePath).
         then(async (md5) => {
           console.log(`file md5: ${md5}`);
@@ -197,80 +194,11 @@ class Declutter {
   }
 
   /**
- * Runs a nodejs script and listens for messages.
- * @param {string} scriptPath
- * @param {array<any>} args
- * @param {Function} messagecb - callback on message from process.send
- * @param {Function} warningcb - callback on warning from process.emitWarning
- * @param {Function} donecb - callback on finish
- */
-  runScript(scriptPath, args, messagecb, warningcb, donecb) {
-    // Keep track of invocations to prevent multiple of them
-    let invoked = false;
-
-    // Run the script
-    const process = childProcess.fork(scriptPath, args);
-
-    // listen for errors as they may prevent the exit event from firing
-    process.on('warning', (err) => {
-      warningcb(err);
-    });
-
-    // listen for general messages (from process.send)
-    process.on('message', (data) => {
-      if (data) {
-        messagecb(data);
-      }
-    });
-
-    // execute the messagecb once the process has finished running
-    process.on('exit', (code) => {
-      if (invoked) {
-        return;
-      }
-      invoked = true;
-      if (code !== 0) {
-        throw new Error(`Process ${scriptPath} error with exit code ${code}`);
-      }
-      donecb();
-    });
-  }
-
-  /**
    *
    * @param {string} thread - thread url
    */
-  async downloadThread(thread) {
-    const output = {log: [], filenames: [], tags: []};
-    this.runScript(chanDownloader, [thread], (msg) => {
-      // This runs each time the script calls process.send
-
-      // Save the massage to the aproppriate JSON tag
-      if (msg.log) {// log message
-        output.log.push(msg.log);
-      }
-      if (msg.filenames) {// chanDownloader sent a filename
-        output.filenames.push(msg.filenames);
-      }
-      if (msg.tags) {// chanDownloader sent a tag
-        output.tags = msg.tags;// tags is an array already
-      }
-    }, (warn) => {
-      // This runs each time the script calls process.emitWarning
-      console.log(warn);
-    }, () => {
-      // This runs when the script is done
-      // This loop uploads the files to the cloud storage, while also
-      // setting the filename to its md5 sum
-      for (let i = 0; i < output.filenames.length; i++) {
-        // calculates MD5 of each pic  and uploads it when done
-        this.uploadAndUpdateDb(
-            output.filenames[i],
-            'no description',
-            output.tags,
-        );
-      }
-    });
+  async downloadThreadAndSaveToCloud(thread) {
+    this.chanDownloader.downloadThread(thread);
   }
 }
 module.exports = Declutter;

@@ -71,22 +71,24 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-
 // Set up 4chan scanner to run every 24 hrs
-// setInterval(
-setImmediate(
-    ()=>{
-      chanParser.loadBoardJson('/s/').then((data)=>{
-        // for (let i=0; i<data.length; i++) {
-        //   declutter.imageLimiter.removeTokens(1, () => {
-        //     declutter.downloadThread(data[i]);
-        //   });
-        // }
-      }).catch((e)=>{
-        console.error('error with loadBoardJson: '+e);
+setInterval(
+    () => {
+      chanParser.loadBoardJson('/s/').then((data) => {
+        for (let i = 0; i < data.length; i++) {
+          declutter.imageLimiter.removeTokens(1, () => {
+            declutter.downloadThreadAndSaveToCloud(data[i]).then((log) => {
+            }).catch((e)=>{
+              console.error(e);
+              console.error('error with download thread:'+e);
+            });
+          });
+        }
+      }).catch((e) => {
+        console.error('error with loadBoardJson: ' + e);
       });
     },
-    10*60*1000,
+    10 * 60 * 1000,
 );
 
 
@@ -126,16 +128,16 @@ express()
         });
       });
     })
-    .get('/changeTagId', (req, res)=>{
+    .get('/changeTagId', (req, res) => {
       const tagId = req.query.newid;
       if (req.user) {
-        db.users.changeTagId(req.user.id, tagId).then(()=>{
+        db.users.changeTagId(req.user.id, tagId).then(() => {
           res.json({
             message: 'Tag changed',
             error: false,
           });
           console.log(`Tag changed to ${tagId}`);
-        }).catch((e)=>{
+        }).catch((e) => {
           res.json({
             message: `Tag change failed: ${e}`,
             error: true,
@@ -150,14 +152,14 @@ express()
       }
     })
     .get('/showImages', (req, res) => {
-      let selectedTag=2;
+      let selectedTag = 2;
       if (req.user) {// if logged in, load the users' selected tag
-        selectedTag=req.user.selectedtag;
+        selectedTag = req.user.selectedtag;
       }
       db.pictures.twoRandomPics(selectedTag).then((data) => {
         res.json({
-          // image1: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[0].filename}`,
-          // image2: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[1].filename}`,
+          image1: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[0].filename}`,
+          image2: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[1].filename}`,
           tags1: data[0].tags,
           tags2: data[1].tags,
           id1: data[0].id,
@@ -230,11 +232,13 @@ express()
         (req, res) => {
           res.end('running download script');
           // TODO: redirect to the report page when finished
-          declutter.downloadThread(req.query.thread).then((output)=>{
+          declutter.downloadThreadAndSaveToCloud(
+              req.query.thread,
+          ).then((output) => {
             // TODO: show a web page with proper formatting etc
             // TODO: res.render(pages/chandownloadinfo,{status: output})
             console.log(output);
-          }).catch((e)=>{
+          }).catch((e) => {
             console.error(e);
           });
         })
@@ -318,19 +322,19 @@ points) to upload files`);
       res.redirect('/');
     })
     .post('/upload', upload.array('files[]'), (req, res) => {
-      // Note: upload.array('files[]', <maxcount>) is also a thing
-      // Uploads the files to the folder set in `const upload`.
+    // Note: upload.array('files[]', <maxcount>) is also a thing
+    // Uploads the files to the folder set in `const upload`.
       let err = false;
       let message = 'OK';
       for (let i = 0; i < req.files.length; i++) {
-        // Add the extension to the file
+      // Add the extension to the file
         const fp = path.join(req.files[i].destination, req.files[i].filename);
         const ext = path.parse(req.files[i].originalname).ext;
         fs.renameSync(fp, fp + ext);
 
         if (ext == '.zip') {
-          // Handle zip files
-          const zipFile = path.resolve(fp+ext);
+        // Handle zip files
+          const zipFile = path.resolve(fp + ext);
           const extractDir = path.resolve(
               path.join(
                   req.files[i].destination,
@@ -340,13 +344,13 @@ points) to upload files`);
           // Extract
           extract(zipFile, {
             dir: extractDir,
-          }).then(()=>{
+          }).then(() => {
             console.log('Extraction complete');
             // Scan uploads/zipfile folder for images
-            taggedFiles=declutter.scanAndTag(extractDir);
+            taggedFiles = declutter.scanAndTag(extractDir);
 
             // Upload images and delete them after they are uploaded
-            for (let i=0; i<taggedFiles.length; i++) {
+            for (let i = 0; i < taggedFiles.length; i++) {
               declutter.uploadAndUpdateDb(
                   taggedFiles[i].filename,
                   'No description',
@@ -356,22 +360,22 @@ points) to upload files`);
             }
 
             // Delete zip file
-            fs.unlink(fp+ext, ()=>{
+            fs.unlink(fp + ext, () => {
               console.log('Zip file deleted from local');
             });
-          }).catch((e)=>{
+          }).catch((e) => {
             console.error(e);
           });
         } else if ((/\.(gif|jpe?g|tiff?|png|webp|bmp|webm)$/i).test(ext)) {
-          // Handle images
+        // Handle images
           declutter.uploadAndUpdateDb(
-              fp+ext,
+              fp + ext,
               req.files[i].originalname,
               [],
               true,
           );
         } else {
-          // Error
+        // Error
           console.log('unhandled file uploaded');
           err = true;
           message = 'unknown file extension for some files';
