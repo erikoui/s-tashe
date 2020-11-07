@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <% include ../partials/header.ejs %>
+    <meta charset="utf-8">
+    <title>Login Form</title>
+    <style>
+        .login-form {
+            width: 300px;
+            margin: 0 auto;
+            font-family: Tahoma, Geneva, sans-serif;
+        }
+
+        .login-form h1 {
+            text-align: center;
+            color: #4d4d4d;
+            font-size: 24px;
+            padding: 20px 0 20px 0;
+        }
+
+        .login-form input[type="password"],
+        .login-form input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #dddddd;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        .login-form input[type="submit"] {
+            width: 100%;
+            padding: 15px;
+            background-color: #6666ff;
+            border: 0;
+            box-sizing: border-box;
+            cursor: pointer;
+            font-weight: bold;
+            color: #ffffff;
+        }
+    </style>
+</head>
+
+<body>
+    <% include ../partials/nav.ejs %>
+    <div class="login-form">
+        <% if(user){ %>
+        <h1>You are already registered, <%user.uname%>.</h1>
+        <%}else{%>
+        <h1>Registration Form</h1>
+        <form action="/register" method="POST">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" id='p1' name="password" placeholder="Password" required>
+            <input type="password" id='p2' name="confirm" placeholder="Confirm Password" required>
+            <input type="submit" value="Register" id="sub-button">
+        </form>
+        <%}%>
+        <script>
+            onload = function () {
+                registerButton = document.getElementById("sub-button");
+                p1 = document.getElementById("p1");
+                p2 = document.getElementById("p2");
+                document.addEventListener('keyup', logKey);
+                function logKey(e) {
+                    if (p1.value != p2.value) {
+                        let b = document.getElementById('sub-button');
+                        b.disabled = true;
+                        b.value = "Passwords must match"
+                        b.style ="background-color:#ff1a75"
+                    }
+                    else {
+                        let b = document.getElementById('sub-button');
+                        b.disabled = false;
+                        b.value = "Register"
+                        b.style ="background-color:#6666ff"
+                    }
+                }
+            }
+        </script>
+	</div>
+</body>
+
+</html>

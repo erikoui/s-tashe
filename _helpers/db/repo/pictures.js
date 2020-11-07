@@ -54,11 +54,15 @@ class PicturesRepository {
 
   /**
    * Returns 2 pictures at random
+   * @param {int} selectedtag - The tag id that the current user has selected.
    */
-  async twoRandomPics() {
+  async twoRandomPics(selectedtag) {
     const picData=await this.db.many(
         `SELECT p.id,p.filename,p.tags
         FROM pictures p
+        WHERE (
+          SELECT tag FROM tags WHERE id=${selectedtag} LIMIT 1
+          ) = ANY (tags)
         ORDER BY RANDOM() 
         LIMIT 2;`,
     );
@@ -102,20 +106,16 @@ class PicturesRepository {
   }
 
   /**
-   * Tries to find many pics from tag list. This is an AND type query.
-   * @param {array<string>} tags - some description as in the database.
+   * Tries to find many pics from a single tag
+   * @param {array<string>} tag - some description as in the database.
+   * @param {int} minviews - minmimum views to be shown as sorted
    */
-  async findByTag(tags) {
-    // TODO: make this function
-    let tagstring='';
-    for (let i=0; i<tags.length-1; i++) {
-      tagstring+=tags[i]+' ';
-    }
-    tagstring+=tags[tags.length-1];
-
-    const q='';
-    console.log(q, tagstring);
-    return this.db.any(q);
+  async listByTag(tag, minviews) {
+    return this.db.any(
+        // eslint-disable-next-line max-len
+        'SELECT *, CAST(votes+1 AS real) / CAST(views+1 AS real) AS score FROM pictures WHERE ${tag} = ANY (tags) ORDER BY CASE WHEN views >= '+minviews+' THEN 0 ELSE 1 END, score DESC;',
+        {tag: tag},
+    );
   }
 
   /**
@@ -143,12 +143,16 @@ class PicturesRepository {
   /**
    * returns the top n pics
    * @param {int} n Number of pics
+   * @param {int} minviews - minmimum views to be shown as sorted
    */
-  async topN(n) {
+  async topN(n, minviews) {
     return this.db.many(
         // eslint-disable-next-line max-len
-        'SELECT * FROM public.pictures ORDER BY votes DESC, views ASC LIMIT ${l};',
-        {l: n},
+        'SELECT *, CAST(votes+1 AS real) / CAST(views+1 AS real) AS score FROM public.pictures ORDER BY CASE WHEN views >= ${m} THEN 0 ELSE 1 END, score DESC LIMIT ${l};',
+        {
+          m: minviews,
+          l: n,
+        },
     );
   }
   /**

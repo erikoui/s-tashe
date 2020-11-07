@@ -26,10 +26,9 @@ class UsersRepository {
   /**
    * Adds a new user, and returns the new object;
    * @param {String} uname - new username
-   * @param {String} passwd - new password in plaintext
+   * @param {String} passwd - new password sha1 encoded
    */
   async add(uname, passwd) {
-    // TODO: hash password
     return this.db.one(sql.add, {
       username: uname,
       password: passwd,
@@ -44,6 +43,20 @@ class UsersRepository {
   async remove(id) {
     return this.db.result(
         'DELETE FROM users WHERE id = $1', +id, (r) => r.rowCount,
+    );
+  }
+
+  /**
+   * changes the selected tag id for the current user
+   * @param {int} userId -
+   * @param {int} tagId -
+   */
+  async changeTagId(userId, tagId) {
+    return this.db.none(
+        'UPDATE users SET selectedtag=${newtag} WHERE id=${uid};', {
+          newtag: tagId,
+          uid: userId,
+        },
     );
   }
 

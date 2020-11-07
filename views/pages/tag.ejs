@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <% include ../partials/header.ejs %>
+</head>
+
+<body>
+  <% include ../partials/nav.ejs %>
+  <ol>
+    <% for(let i=0;i<picList.length;i++){ %>
+    <li><a href="<%= prefix+picList[i].filename %>"><%=picList[i].description%></a> (<%= picList[i].votes%>/<%=picList[i].views%> - <%= picList[i].score.toFixed(2) %>)</li>
+    <% } %>
+  </ol>
+</body>
