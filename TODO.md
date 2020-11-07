@@ -1,7 +1,14 @@
 # Critical
+    make chan-downloader into a module so it can use the global ratelimiter in declutter.
+
+    ->user priviledge levels allow tagging, removing tags, adding descriptions, uploading images, etc. This happens in index.ejs and showImage.ejs
     check if file exists on cloud before uploading (also check database records and add them if missing) - same goes for its database record
-    user priviledge levels allow tagging, removing tags, adding descriptions, uploading images, etc. This happens in index.ejs and showImage.ejs
-    moderation for pic uploads
+    moderation for pic uploads & upload link
+    webm support
+    image thumbnails and better css in /tag endpoint (also archive link in front page)
+    report wrong tag button
+    user profile page
+    
 
 # New Features
 
@@ -9,19 +16,16 @@
     allow the user to view previous pics (like a history feature)
     nicer login front end (invalid login message or similar)
     show a loading message while no pics on screen (maybe showing vote and edit stats)
-    image thumbnails and better css in /tag endpoint
     tag field for uploaded pictures
     report incorrect tag button
     diagram explaining how zip file tagging works
-    webm support
+    
 
 ## Operational
-    automaticaly download threads with 150 images
-    automatically download threads from /s/
     truncate pictures table on /deleteallfiles
 
 ## money
-    ads
+    ads - exoclick probably
 
 # Nice-to-haves
     keep track of users selected tag when not logged in (with cookie)
@@ -30,6 +34,7 @@
     convert chan-downloader to a module
     progress for the downloader script
     upload page css
+    suggest tag feature
     move some global functions into declutter (pass cloud and db to the declutter constructor)
 
 # Bugs

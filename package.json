@@ -45,7 +45,7 @@
   "devDependencies": {
     "eslint": "^7.11.0",
     "eslint-config-google": "^0.14.0",
-    "got": "^11.3.0",
+    "got": "^11.8.0",
     "tape": "^4.7.0"
   },
   "repository": {

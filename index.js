@@ -3,8 +3,6 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const sha1 = require('sha1');
-
-const childProcess = require('child_process');
 const passport = require('passport');
 const Strategy = require('passport-local').Strategy;
 const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
@@ -25,8 +23,8 @@ const cloud = new Cloud();
 const Declutter = require('./_helpers/declutter');
 const declutter = new Declutter(db, cloud);
 
-// This is a standalone script, so just the file path is needed.
-const chanDownloader = './_helpers/chan-downloader';
+const ChanParser = require('./_helpers/chan-parser');
+const chanParser = new ChanParser();
 
 // Server port to listen on
 const PORT = process.env.PORT || 5000;
@@ -73,45 +71,23 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-/**
- * Runs a nodejs script and listens for messages.
- * @param {string} scriptPath
- * @param {array<any>} args
- * @param {Function} messagecb - callback on message from process.send
- * @param {Function} warningcb - callback on warning from process.emitWarning
- * @param {Function} donecb - callback on finish
- */
-function runScript(scriptPath, args, messagecb, warningcb, donecb) {
-  // Keep track of invocations to prevent multiple of them
-  let invoked = false;
 
-  // Run the script
-  const process = childProcess.fork(scriptPath, args);
-
-  // listen for errors as they may prevent the exit event from firing
-  process.on('warning', (err) => {
-    warningcb(err);
-  });
-
-  // listen for general messages (from process.send)
-  process.on('message', (data) => {
-    if (data) {
-      messagecb(data);
-    }
-  });
-
-  // execute the messagecb once the process has finished running
-  process.on('exit', (code) => {
-    if (invoked) {
-      return;
-    }
-    invoked = true;
-    if (code !== 0) {
-      throw new Error(`Process ${scriptPath} error with exit code ${code}`);
-    }
-    donecb();
-  });
-}
+// Set up 4chan scanner to run every 24 hrs
+// setInterval(
+setImmediate(
+    ()=>{
+      chanParser.loadBoardJson('/s/').then((data)=>{
+        // for (let i=0; i<data.length; i++) {
+        //   declutter.imageLimiter.removeTokens(1, () => {
+        //     declutter.downloadThread(data[i]);
+        //   });
+        // }
+      }).catch((e)=>{
+        console.error('error with loadBoardJson: '+e);
+      });
+    },
+    10*60*1000,
+);
 
 
 express()
@@ -180,8 +156,8 @@ express()
       }
       db.pictures.twoRandomPics(selectedTag).then((data) => {
         res.json({
-          image1: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[0].filename}`,
-          image2: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[1].filename}`,
+          // image1: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[0].filename}`,
+          // image2: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[1].filename}`,
           tags1: data[0].tags,
           tags2: data[1].tags,
           id1: data[0].id,
@@ -254,52 +230,13 @@ express()
         (req, res) => {
           res.end('running download script');
           // TODO: redirect to the report page when finished
-          // thread is set by the url (e.g .../download?thread=https://boards.4chan.org/sp/thread/103)
-          const thread = req.query.thread;
-          const output = {log: [], filenames: [], tags: []};
-          runScript(chanDownloader, [thread],
-              (msg) => {
-                // This runs each time the script calls process.send
-
-                // Save the massage to the aproppriate JSON tag
-                if (msg.log) {// log message
-                  output.log.push(msg.log);
-                }
-                if (msg.filenames) {// chanDownloader sent a filename
-                  output.filenames.push(msg.filenames);
-                }
-                if (msg.tags) {// chanDownloader sent a tag
-                  output.tags = msg.tags;// tags is an array already
-                }
-              },
-              (warn) => {
-                // This runs each time the script calls process.emitWarning
-                console.log(warn);
-              },
-              () => {
-                // This runs when the script is done
-                // This loop uploads the files to the cloud storage, while also
-                // setting the filename to its md5 sum
-                for (let i = 0; i < output.filenames.length; i++) {
-                  // calculates MD5 of each pic  and uploads it when done
-                  declutter.uploadAndUpdateDb(
-                      output.filenames[i],
-                      'no description',
-                      output.tags,
-                  );
-                }
-
-                /**
-                  * Renders the output JSON file
-                  */
-                function renderOutput() {
-                  // TODO: show a web page with proper formatting etc
-                  // TODO: res.render(pages/chandownloadinfo,{status: output})
-                  console.log(output);
-                }
-
-                renderOutput();
-              });
+          declutter.downloadThread(req.query.thread).then((output)=>{
+            // TODO: show a web page with proper formatting etc
+            // TODO: res.render(pages/chandownloadinfo,{status: output})
+            console.log(output);
+          }).catch((e)=>{
+            console.error(e);
+          });
         })
     .get('/upload',
         ensureLoggedIn(),
