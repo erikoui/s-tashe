@@ -7,6 +7,7 @@
     image thumbnails and better css in /tag endpoint (also archive link in front page)
     report wrong tag button
     user profile page
+    make it check more boards
     
 
 # New Features
