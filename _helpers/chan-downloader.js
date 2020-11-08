@@ -82,57 +82,64 @@ class ChanDownloader {
           }
         }
       }
-      console.log('Detegted tags: '+JSON.stringify(validTags));
+      console.log('Detected tags: '+JSON.stringify(validTags));
 
       const that=this;
       // TODO: remove the consts and the if(fname)
       // For each post download the file
       for (let i = 0; i < posts.length; i++) {
         if ('filename' in posts[i]) {
+          const md5 = this.declutter.b64md52hex(posts[i]['md5']);
           const ext = posts[i]['ext'];
           const fname = posts[i]['tim'];
           const imageUrl = `https://i.4cdn.org/${board}/${fname + ext}`;
-          if (fname) {
+          if (!(await this.declutter.checkMd5ExistsInDb(md5, ext))) {
           // save the variables as constants to prevent async race conditions
             const imageName = fname;
             const imageExtension = ext;
             const filePath = threadFolder + imageName + imageExtension; ;
             if (fs.existsSync(threadFolder + imageName + imageExtension)) {
-              console.log(`Image ${imageName}${imageExtension} \
-  already exists, not saving this image. (${i+1}/${posts.length})`);
+              console.log(`(${i+1}/${posts.length}) \
+Image ${imageName}${imageExtension} already exists on local, \
+not saving this image.`);
             } else {
               this.imageLimiter.removeTokens(1, () => {
                 try {
                   console.log(
-                      `Downloading ${imageUrl} (${i+1}/${posts.length})`,
+                      `(${i+1}/${posts.length}) Downloading ${imageUrl}`,
                   );
                   const out = fs.createWriteStream(filePath);
                   const res = needle.get(imageUrl);
                   res.pipe(out);
                   res.on('end', function(err) {
                     if (err) {
-                      console.log('An error ocurred: ' + err.message);
+                      console.log(`(${i+1}/${posts.length}) \
+An error ocurred: ${err.message}`);
                     } else {
                       console.log(
-                          `Image ${imageName} saved (${i+1}/${posts.length})`,
+                          `(${i+1}/${posts.length}) Image ${imageName} saved.`,
                       );
+                      // Upload the file and delete it
                       that.declutter.uploadAndUpdateDb(
                           filePath,
                           'no description',
                           validTags,
+                          true,
                       );
                     }
                   });
                 } catch (e) {
-                  console.error(e);
+                  console.error(`Error while downloading image: ${e}`);
                 }
               });
             }
+          } else {
+            console.log(`(${i+1}/${posts.length}) File already in database`);
           }
         }
       }
     } catch (e) {
-      console.log(e);
+      console.error(`Error while downloading thread json: ${e}`);
     }
   }
 }

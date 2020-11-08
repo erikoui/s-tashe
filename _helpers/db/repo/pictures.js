@@ -87,7 +87,7 @@ class PicturesRepository {
    * @param {string} fname - the filename on the cloud
    */
   async findByFilename(fname) {
-    return this.db.one(
+    return this.db.many(
         'SELECT * FROM pictures WHERE filename = ${filename}', {
           filename: fname,
         });

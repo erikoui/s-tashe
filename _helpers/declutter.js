@@ -69,22 +69,40 @@ class Declutter {
    */
   uploadAndUpdateDb(localFilePath, desc, tags, del) {
     const filePath = path.join(localFilePath);// normalize the path just in case
-    md5File(filePath).
-        then(async (md5) => {
-          console.log(`file md5: ${md5}`);
-          const ext = path.parse(filePath).ext;
-          const cloudname = md5 + ext;
+    md5File(filePath).then(async (md5) => {
+      const ext = path.parse(filePath).ext;
+      const cloudname = md5 + ext;
+      console.log(`${cloudname} : Uploading file...`);
+
+      // Upload
+      const exists=await this.checkMd5ExistsInDb(md5, ext);
+      if (!exists) {
+        try {
           await this.cloud.simpleUpload(md5 + ext, filePath);
-          await this.addPicToDb(cloudname, tags, desc);
+          console.log(`${cloudname} : upload successful`);
+
+          // Delete the file if del is true
           if (del) {
             fs.unlink(filePath, () => {
-              console.log('file deleted from local');
+              console.log(`${cloudname} : file deleted from local`);
             });
           }
-          console.log(`Upload of ${localFilePath} successful`);
-        }).catch((reason) => {
-          console.log(`error while uploading to cloud:${reason}`);
-        });
+
+          // Update database
+          try {
+            await this.addPicToDb(cloudname, tags, desc);
+          } catch (e) {
+            console.error(`${cloudname} : error while updating database: ${e}`);
+          }
+        } catch (e) {
+          console.error(`${cloudname} : error while uploading to cloud: ${e}`);
+        }
+      } else {
+        console.log(`image already in database`);
+      }
+    }).catch((e) => {
+      console.error(`${filePath} : error callculating MD5: ${e}`);
+    });
   }
 
   /**
@@ -166,6 +184,31 @@ class Declutter {
     }
 
     return taggedFileKVPArray;
+  }
+
+  /**
+   * converts b64 md5 to hexadecimal
+   * @param {string} b64md5 - base64 encoded md5 sum
+   * @return {string} - hexadecimal 24 digit md5
+   */
+  b64md52hex(b64md5) {
+    const buffer = Buffer.from(b64md5, 'base64');
+    return buffer.toString('hex');
+  }
+
+  /**
+   *
+   * @param {string} md5 - hex encoded md5
+   * @param {string} ext - file extension ('.jpg')
+   * @return {boolean} - wether it exists
+   */
+  async checkMd5ExistsInDb(md5, ext) {
+    try {
+      await this.db.pictures.findByFilename(md5+ext);
+    } catch (e) {
+      return false;
+    }
+    return true;
   }
 
   /**

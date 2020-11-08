@@ -8,6 +8,7 @@
     report wrong tag button
     user profile page
     make it check more boards
+    persistent login
     
 
 # New Features
