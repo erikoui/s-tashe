@@ -78,9 +78,9 @@ setInterval(
         for (let i = 0; i < data.length; i++) {
           declutter.imageLimiter.removeTokens(1, () => {
             declutter.downloadThreadAndSaveToCloud(data[i]).then((log) => {
-            }).catch((e)=>{
+            }).catch((e) => {
               console.error(e);
-              console.error('error with download thread:'+e);
+              console.error('error with download thread:' + e);
             });
           });
         }
@@ -295,6 +295,26 @@ points) to upload files`);
             res.end('ok fuck off u not an admin');
           }
         })
+    .get('/cleanupdb',
+        ensureLoggedIn(),
+        (req, res) => {
+          if (req.user.admin) {
+            cloud.getBucketContents(
+            ).then((data) => {
+              const filenames = [];
+              for (let i = 0; i < data.Contents.length; i++) {
+                filenames.push(data.Contents[i].Key);
+              }
+              db.pictures.cleanup(filenames);
+            }).catch((err) => {
+              console.log('error getting item list from cos:' + err);
+              res.end(`Error: ${err}`);
+            });
+            res.end('done');
+          } else {
+            res.end('ok fuck off u not an admin');
+          }
+        })
     .get('/listallfiles', (req, res) => {
       cloud.getBucketContents(
       ).then((data) => {
@@ -302,7 +322,7 @@ points) to upload files`);
         for (let i = 0; i < data.Contents.length; i++) {
           filenames.push(data.Contents[i].Key);
         }
-        res.end(filenames.toString());
+        res.end(filenames.toString()+'\n'+filenames.length+' total files');
       }).catch((err) => {
         console.log('error getting item list from cos:' + err);
         res.end(`Error: ${err}`);

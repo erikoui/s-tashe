@@ -106,6 +106,43 @@ class PicturesRepository {
   }
 
   /**
+   * cleans up table
+   * deletes all
+   * duplicate picture records,
+   * records with no matching file on the cloud,
+   * records with tags not in the tag table.
+   *
+   * @param {array} cloudfiles - array of filenames of all files on the cloud
+   */
+  async cleanup(cloudfiles) {
+    // Duplicates
+    try {
+      const d=await this.db.any(
+          `DELETE FROM pictures
+WHERE id IN
+(SELECT id
+FROM 
+(SELECT id,
+ROW_NUMBER() OVER( PARTITION BY filename
+ORDER BY  id DESC ) AS row_num
+FROM pictures ) t
+WHERE t.row_num > 1 )
+RETURNING *;`,
+      );
+      console.log(`${d.length} rows deleted`);
+
+      // records with no matching files on the cloud
+      const qsstr=`DELETE FROM pictures AS m WHERE m.filename NOT IN (${JSON.stringify(cloudfiles).replace('[', '').replace(']', '').replace(/"/g, '\'')}) RETURNING *;`;
+      console.log(qsstr);
+      const c=await this.db.any(
+          qsstr,
+      );
+      console.log(c.length+' files not on the cloud');
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  /**
    * Tries to find many pics from a single tag
    * @param {array<string>} tag - some description as in the database.
    * @param {int} minviews - minmimum views to be shown as sorted

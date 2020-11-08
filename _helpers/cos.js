@@ -70,7 +70,8 @@ class Cloud {
       console.log('file ' + itemName + ' uplaoded.');
     })
         .catch((err) => {
-          console.error(`ERROR: ${err.code} - ${err.message}\n`);
+          console.error('error in simpleupload: '+err);
+          throw err;
         });
   }
 

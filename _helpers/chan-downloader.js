@@ -63,13 +63,9 @@ class ChanDownloader {
       // Get tags of this thread
       const titlePost = posts[0];
       let tbag = titlePost.sub + ' ' + titlePost.com;
-      console.log(tbag);
       tbag = tbag.replace(/\//g, ' ');
-      console.log(tbag);
       tbag = tbag.replace(/[^a-zA-Z ]/g, '');
-      console.log(tbag);
       tbag = tbag.toLowerCase();
-      console.log(tbag);
       const bag = tbag.split(' ');
 
       const tags = await db.tags.all();

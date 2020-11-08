@@ -1,6 +1,4 @@
 # Critical
-    check if file exists on cloud before uploading (also check database records and add them if missing) - same goes for its database record
-
     ->user priviledge levels allow tagging, removing tags, adding descriptions, uploading images, etc. This happens in index.ejs and showImage.ejs
     moderation for pic uploads & upload link
     webm support
@@ -9,7 +7,7 @@
     user profile page
     make it check more boards
     persistent login
-    
+    admin tools: set tags, delete picture, change tags without moderation
 
 # New Features
 
@@ -24,6 +22,7 @@
 
 ## Operational
     truncate pictures table on /deleteallfiles
+    a function that deletes all duplicate picture records ,records with no matching file on the cloud, records with tags not in the tag table.
 
 ## money
     ads - exoclick probably
@@ -39,8 +38,7 @@
     move some global functions into declutter (pass cloud and db to the declutter constructor)
 
 # Bugs
-    many errors go unnoticed
-    rate limiter file uploads because they time out on slow connection - i cannot reproduce this
+    rate limiter file uploads because they time out on slow connection
     https://medium.com/developer-rants/how-to-handle-sessions-properly-in-express-js-with-heroku-c35ea8c0e500
 
 # Don't forget
