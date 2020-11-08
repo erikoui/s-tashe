@@ -139,6 +139,7 @@ onload = function() {
     // left report tag button
     const lc3 = document.getElementById('level3-controls1');
     if (lc3) {
+      lc3.innerHTML = '';
       let changeTagBtn = document.createElement('a');
       changeTagBtn.setAttribute('type', 'button');
       changeTagBtn.setAttribute(
@@ -151,6 +152,7 @@ onload = function() {
 
       // right report tag button
       const rc3 = document.getElementById('level3-controls2');
+      rc3.innerHTML = '';
       changeTagBtn = document.createElement('a');
       changeTagBtn.setAttribute('type', 'button');
       changeTagBtn.setAttribute(
