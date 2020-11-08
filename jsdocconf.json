@@ -3,18 +3,21 @@
         "allowUnknownTags": true
     },
     "source": {
-        "include": ["."],
-        "exclude": ["./node_modules"],
-        "includePattern": ".+\\.js(doc)?$",
-        "excludePattern": "(^|\\/|\\\\)_"
+        "include": ".",
+        "exclude": ["./node_modules","./public","./docs"],
+        "includePattern": ".+\\.js(doc)?$"
     },
-    "plugins": [],
+    "opts": {
+        "destination":"./docs",
+        "recurse": true,
+        "private": true
+    },
+    
     "templates": {
         "cleverLinks": false,
         "monospaceLinks": false
     },
-    "opts": {
-        "recurse": true,
-        "private": true
-    }
+
+    
+  "plugins": ["plugins/markdown"]
 }
