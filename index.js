@@ -109,7 +109,7 @@ express()
     .set('view engine', 'ejs')
 
     .get('/', (req, res) => {
-      db.pictures.topN(10, 10).then((top) => {
+      db.pictures.topN(10, 3).then((top) => {
         res.render('pages/index.ejs', {
           user: req.user,
           top10: top,
@@ -158,26 +158,47 @@ express()
       }
       db.pictures.twoRandomPics(selectedTag).then((data) => {
         res.json({
-          image1: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[0].filename}`,
-          image2: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[1].filename}`,
-          tags1: data[0].tags,
-          tags2: data[1].tags,
-          id1: data[0].id,
-          id2: data[1].id,
+          images: [
+            `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[0].filename}`,
+            `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[1].filename}`,
+          ],
+          tags: [
+            data[0].tags,
+            data[1].tags,
+          ],
+          ids: [
+            data[0].id,
+            data[1].id,
+          ],
+          desc: [
+            data[0].desc,
+            data[1].desc,
+          ],
         });
       }).catch((err) => {
         res.json({
-          image1: `images/a.jpg`,
-          image2: `images/b.jpg`,
-          tags1: ['Database error'],
-          tags2: [err.message],
-          id1: 1337,
-          id2: 32202,
+          images: [
+            `images/a.jpg`,
+            `images/b.jpg`,
+          ],
+          tags: [
+            ['Database error'],
+            [err.message],
+          ],
+          ids: [
+            34543534,
+            46346346,
+          ],
+          desc: [
+            'err',
+            'or',
+          ],
         });
         console.error(err);
       });
     })
     .get('/vote', (req, res) => {
+      // TODO: return a json response
       const voteid = req.query.voteid;
       const otherid = req.query.otherid;
       let userid;
