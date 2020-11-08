@@ -32,7 +32,7 @@
           and more, which award more points.<br>
           <h6>
             <% for (let i=0;i<rankingData.pointBreaks.length-1;i++){ %>
-            <%= rankingData.pointBreaks[i] %> points :
+            &lt;<%= rankingData.pointBreaks[i] %> points :
             <%= rankingData.ranks[i] %><br>
             <% } %>
           </h6>
@@ -76,6 +76,8 @@
                 <div id="level5-controls1"></div>
                 <%}if(user.level>6){%>
                 <div id="level6-controls1"></div>
+                <%}if(user.level==10){%>
+                  <div id="admin-controls1"></div>
                 <%}}%>
               </div>
               <div class="col-sm-6" id='rightpictainer'>
@@ -95,7 +97,10 @@
                 <div id="level5-controls2"></div>
                 <%}if(user.level>6){%>
                 <div id="level6-controls2"></div>
+                <%}if(user.level==10){%>
+                <div id="admin-controls2"></div>
                 <%}}%>
+
               </div>
             </div>
           </div>
@@ -106,16 +111,16 @@
           <h3 style="text-align: center;">Leaderboard</h3>
           <ul>
             <% for(let i=0;i<top10.length;i++){ %>
-                <li><a href="<%= prefix+top10[i].filename %>">Number <%=i+1%></a> (
-                  <%= top10[i].votes%>/
-                  <%=top10[i].views%>
-                  -
-                  <%= top10[i].score.toFixed(2) %>)</li>
-                <% } %>
-                </ul>
-              </div>
-            </div>
-          </div>
+            <li><a href="<%= prefix+top10[i].filename %>">Number <%=i+1%></a> (
+              <%= top10[i].votes%>/
+              <%=top10[i].views%>
+              -
+              <%= top10[i].score.toFixed(2) %>)</li>
+            <% } %>
+          </ul>
+        </div>
+      </div>
+    </div>
 </body>
 
 </html>

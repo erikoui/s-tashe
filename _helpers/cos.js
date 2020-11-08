@@ -155,7 +155,7 @@ class Cloud {
     for (let i = 0; i < filenames.length; i++) {
       deleteRequest.Objects.push({'Key': filenames[i]});
     }
-    console.log();
+    console.log(deleteRequest);
 
     return this.cos.deleteObjects({
       Bucket: bucketName,

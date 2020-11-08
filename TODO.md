@@ -7,7 +7,6 @@
     user profile page
     make it check more boards
     persistent login
-    admin tools: delete picture
 
 # New Features
 
@@ -29,7 +28,6 @@
     ads - exoclick probably
 
 # Nice-to-haves
-    refactor index-frontend
     keep track of users selected tag when not logged in (with cookie)
     dark theme
     Tell the user when registering when the username is already in use

@@ -151,6 +151,31 @@ express()
         });
       }
     })
+    .get('/deletePic',
+        ensureLoggedIn(),
+        (req, res) => {
+          if (req.user.admin) {
+            db.pictures.deleteById(req.query.id).then((rec) => {
+              console.log(rec);
+              cloud.deleteItems([rec[0].filename]).then(() => {
+                console.log('file deleted from cloud.');
+                res.json({
+                  err: false,
+                  message: 'probably deleted file, errors dont get passed lol',
+                });
+              }).catch((e)=>{
+                console.error(e);
+              });
+            }).catch((e)=>{
+              console.error(e);
+            });
+          } else {
+            res.json({
+              err: true,
+              message: 'not an admin',
+            });
+          }
+        })
     .get('/showImages', (req, res) => {
       let selectedTag = 2;
       if (req.user) { // if logged in, load the users' selected tag
@@ -198,7 +223,7 @@ express()
       });
     })
     .get('/vote', (req, res) => {
-      // TODO: return a json response
+    // TODO: return a json response
       const voteid = req.query.voteid;
       const otherid = req.query.otherid;
       let userid;
@@ -255,8 +280,8 @@ express()
             declutter.downloadThreadAndSaveToCloud(
                 req.query.thread,
             ).then((output) => {
-            // TODO: show a web page with proper formatting etc
-            // TODO: res.render(pages/chandownloadinfo,{status: output})
+              // TODO: show a web page with proper formatting etc
+              // TODO: res.render(pages/chandownloadinfo,{status: output})
               console.log(output);
             }).catch((e) => {
               console.error(e);
@@ -361,7 +386,7 @@ ${filenames.length} total files`);
           const userPriviledge = declutter.makeRank(req.user);
           const requiredLevel = 3;
           if (userPriviledge.level > requiredLevel) {
-            db.pictures.getTagsById(req.query.picid).then((imgtags)=>{
+            db.pictures.getTagsById(req.query.picid).then((imgtags) => {
               res.render('pages/edittags', {
                 picid: req.query.picid,
                 user: req.user,
@@ -382,22 +407,22 @@ points) to change tags`);
           const userPriviledge = declutter.makeRank(req.user);
           const requiredLevel = 3;
           if (userPriviledge.level > requiredLevel) {
-            let validTag=false;
-            for (let i=0; i< declutter.tags.length; i++) {
+            let validTag = false;
+            for (let i = 0; i < declutter.tags.length; i++) {
               if (req.query.tag == declutter.tags[i].tag) {
-                validTag=true;
+                validTag = true;
                 break;
               }
             }
             if (validTag) {
-              db.pictures.addTag(req.query.picid, req.query.tag).then(()=>{
+              db.pictures.addTag(req.query.picid, req.query.tag).then(() => {
                 res.json({
                   err: false,
-                  message: 'Tag '+req.query.tag+' added.',
-                }).catch((e)=>{
+                  message: 'Tag ' + req.query.tag + ' added.',
+                }).catch((e) => {
                   res.json({
                     err: true,
-                    message: 'Database error: '+e,
+                    message: 'Database error: ' + e,
                   });
                 });
               });
@@ -419,22 +444,22 @@ points) to change tags`);
           const userPriviledge = declutter.makeRank(req.user);
           const requiredLevel = 3;
           if (userPriviledge.level > requiredLevel) {
-            let validTag=false;
-            for (let i=0; i< declutter.tags.length; i++) {
+            let validTag = false;
+            for (let i = 0; i < declutter.tags.length; i++) {
               if (req.query.tag == declutter.tags[i].tag) {
-                validTag=true;
+                validTag = true;
                 break;
               }
             }
             if (validTag) {
-              db.pictures.removeTag(req.query.picid, req.query.tag).then(()=>{
+              db.pictures.removeTag(req.query.picid, req.query.tag).then(() => {
                 res.json({
                   err: false,
-                  message: 'Tag '+req.query.tag+' removed.',
-                }).catch((e)=>{
+                  message: 'Tag ' + req.query.tag + ' removed.',
+                }).catch((e) => {
                   res.json({
                     err: true,
-                    message: 'Database error: '+e,
+                    message: 'Database error: ' + e,
                   });
                 });
               });

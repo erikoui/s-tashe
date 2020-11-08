@@ -91,6 +91,20 @@ class PicturesRepository {
   }
 
   /**
+   * Deletes a picture record by id. note that this does not
+   * delete the file from the cloud server.
+   * @param {int} id - The id of the record to delete.
+   *
+   * @return {object} - object.filename has the fn of the deleted file
+   */
+  async deleteById(id) {
+    return this.db.any(
+        'DELETE FROM pictures WHERE id = ${id} RETURNING filename', {
+          id: id,
+        });
+  }
+
+  /**
    * Returns 2 pictures at random
    * @param {int} selectedtag - The tag id that the current user has selected.
    */
