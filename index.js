@@ -158,10 +158,8 @@ express()
       }
       db.pictures.twoRandomPics(selectedTag).then((data) => {
         res.json({
-        // image1: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[0].filename}`,
-        // image2: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[1].filename}`,
-          image1: `images/a.jpg`,
-          image2: `images/b.jpg`,
+          image1: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[0].filename}`,
+          image2: `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[1].filename}`,
           tags1: data[0].tags,
           tags2: data[1].tags,
           id1: data[0].id,
