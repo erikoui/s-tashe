@@ -47,4 +47,4 @@ ok so the site archives images from 4chan, and tags them using some keywords fro
 * Reach out for help if you need to
 
 ### Recompile documentation
-`npm run createdocs`
+`.\node_modules\.bin\jsdoc -c .\jsdocconf.json  `

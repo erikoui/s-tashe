@@ -1,45 +1,45 @@
 # Critical
-    check if file exists on cloud before uploading (also check database records and add them if missing) - same goes for its database record
-
-    ->user priviledge levels allow tagging, removing tags, adding descriptions, uploading images, etc. This happens in index.ejs and showImage.ejs
+    ->user priviledge levels allow adding descriptions, uploading images, etc. This happens in index.ejs and showImage.ejs
     moderation for pic uploads & upload link
     webm support
     image thumbnails and better css in /tag endpoint (also archive link in front page)
-    report wrong tag button
+    report wrong tag button - Reporting system
     user profile page
     make it check more boards
-    
+    persistent login
+    admin tools: delete picture
 
 # New Features
 
 ## Interface
+    User settings
+    User leaderboards
     allow the user to view previous pics (like a history feature)
     nicer login front end (invalid login message or similar)
     show a loading message while no pics on screen (maybe showing vote and edit stats)
     tag field for uploaded pictures
-    report incorrect tag button
     diagram explaining how zip file tagging works
     
 
 ## Operational
     truncate pictures table on /deleteallfiles
+    index.js requiredlevels move to declutter as constants
 
 ## money
     ads - exoclick probably
 
 # Nice-to-haves
+    refactor index-frontend
     keep track of users selected tag when not logged in (with cookie)
     dark theme
     Tell the user when registering when the username is already in use
-    convert chan-downloader to a module
     progress for the downloader script
     upload page css
     suggest tag feature
-    move some global functions into declutter (pass cloud and db to the declutter constructor)
+    cleanup what ejs does and what frontend javascript does(right now both add elements to the page conditionally)
 
 # Bugs
-    many errors go unnoticed
-    rate limiter file uploads because they time out on slow connection - i cannot reproduce this
+    rate limiter file uploads because they time out on slow connection
     https://medium.com/developer-rants/how-to-handle-sessions-properly-in-express-js-with-heroku-c35ea8c0e500
 
 # Don't forget

@@ -52,10 +52,11 @@ onload = function() {
   /**
    * Show images based on the /showImages response
    */
-  function loadImages() {
+  function renderPage() {
     $.getJSON('/showImages', function(data) {
       let voted = false;
       if (data) {
+        showControls(data);
         const lpt = document.getElementById('tags1');
         const rpt = document.getElementById('tags2');
         lpt.innerHTML = '';
@@ -91,7 +92,7 @@ onload = function() {
             $.getJSON(
                 `/vote?voteid=${data.id1}&otherid=${data.id2}`,
                 (data) => {
-                  loadImages();
+                  renderPage();
                 });
           }
           voted = true;
@@ -103,7 +104,7 @@ onload = function() {
             $.getJSON(
                 `/vote?voteid=${data.id2}&otherid=${data.id1}`,
                 (data) => {
-                  loadImages();
+                  renderPage();
                 });
           }
           voted = true;
@@ -114,14 +115,52 @@ onload = function() {
     });
   }
 
-  loadImages();
-
-  // Make left panel tag buttons call
-  // the /changetag endpoint without changing page
-  $('.changetag').click((e) => {
-    e.preventDefault();
-    $.getJSON(e.target.href, ()=>{
-      location.reload();
+  /**
+   * Shows buttons for reporting, changing, tagging, renaming, deleting etc
+   * @param {object} data - the data from renderPage
+   */
+  function showControls(data) {
+    // Make left panel tag buttons call
+    // the /changeTagId endpoint without changing page
+    $('.changetag').click((e) => {
+      e.preventDefault();
+      $.getJSON(e.target.href, () => {
+        location.reload();
+      });
     });
-  });
+
+    $('.reporttag').click((e) => {
+      e.preventDefault();
+      $.getJSON(e.target.href, () => {
+        location.reload();
+      });
+    });
+    // Level 3
+    // left report tag button
+    const lc3 = document.getElementById('level3-controls1');
+    if (lc3) {
+      let changeTagBtn = document.createElement('a');
+      changeTagBtn.setAttribute('type', 'button');
+      changeTagBtn.setAttribute(
+          'href',
+          `/edittags?picid=${data.id1}&fn=${data.image1}`,
+      );
+      changeTagBtn.setAttribute('class', 'btn btn-sm btn-warning');
+      changeTagBtn.innerText = 'Change tags';
+      lc3.appendChild(changeTagBtn);
+
+      // right report tag button
+      const rc3 = document.getElementById('level3-controls2');
+      changeTagBtn = document.createElement('a');
+      changeTagBtn.setAttribute('type', 'button');
+      changeTagBtn.setAttribute(
+          'href',
+          `/edittags?picid=${data.id2}&fn=${data.image2}`,
+      );
+      changeTagBtn.setAttribute('class', 'btn btn-sm btn-warning');
+      changeTagBtn.innerText = 'Change tags';
+      rc3.appendChild(changeTagBtn);
+    }
+  }
+  renderPage();
 };

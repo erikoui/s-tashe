@@ -26,15 +26,34 @@
             <% } %>
           </div>
           <% } %>
-          <br>
-          Click on the better picture of the two to vote for it. If you are logged in, you gain one point per vote. With
-          points, your level increases which then allows you to add/change tags, upload pictures, add descriptions and
-          more, which award more points.<br>
+          <br> Click on the better picture of the two to vote for it. If you are logged in, you gain one point
+          per vote. With points, your level increases which then allows you to add/change tags, upload
+          pictures, add descriptions
+          and more, which award more points.<br>
           <h6>
-          <% for (let i=0;i<rankingData.pointBreaks.length-1;i++){ %>
-          <%= rankingData.pointBreaks[i] %> points : <%= rankingData.ranks[i] %><br>
-          <% } %>
-        </h6>
+            <% for (let i=0;i<rankingData.pointBreaks.length-1;i++){ %>
+            <%= rankingData.pointBreaks[i] %> points :
+            <%= rankingData.ranks[i] %><br>
+            <% } %>
+          </h6>
+          <% if(user){if(user.admin) {%>
+          <div id="admin-options">
+            <h3> Admin Options </h3>
+            <a href="/upload" class="btn btn-sm btn-success">Upload files</a>
+            <button onclick="askForThread()">Set thread to download</button>
+            <script>
+              function askForThread() {
+                const thread = prompt("Thread url:", "");
+                if (!(thread == null || thread == "")) {
+                  document.getElementById('dlbtn').href = '/download?thread=' + thread;
+                  document.getElementById('dlbtn').classList = "btn btn-sm btn-success";
+                }
+              }
+            </script>
+            <a id="dlbtn" href="/" class="btn btn-sm btn-success hidden">Download thread</a>
+            <a href="/showreports" class="btn btn-sm btn-warning">Show reported problems</a>
+          </div>
+          <%}}%>
         </div>
       </div>
       <div class="col-sm-8">
@@ -44,11 +63,39 @@
               <div class="col-sm-6" id='leftpictainer'>
                 <img src="https://via.placeholder.com/200" id="leftpic" class="img-responsive" style="width:100%">
                 <div id='tags1'></div>
+                <% if(user){%>
+                <%if(user.level>1){%>
+                <div id="level1-controls1"></div>
+                <%}if(user.level>2){%>
+                <div id="level2-controls1"></div>
+                <%}if(user.level>3){%>
+                <div id="level3-controls1"></div>
+                <%}if(user.level>4){%>
+                <div id="level4-controls1"></div>
+                <%}if(user.level>5){%>
+                <div id="level5-controls1"></div>
+                <%}if(user.level>6){%>
+                <div id="level6-controls1"></div>
+                <%}}%>
               </div>
               <div class="col-sm-6" id='rightpictainer'>
                 <img src="https://via.placeholder.com/200" id="rightpic" class="pull-right img-responsive"
                   style="width:100%">
                 <div id='tags2'></div>
+                <% if(user){%>
+                <%if(user.level>1){%>
+                <div id="level1-controls2"></div>
+                <%}if(user.level>2){%>
+                <div id="level2-controls2"></div>
+                <%}if(user.level>3){%>
+                <div id="level3-controls2"></div>
+                <%}if(user.level>4){%>
+                <div id="level4-controls2"></div>
+                <%}if(user.level>5){%>
+                <div id="level5-controls2"></div>
+                <%}if(user.level>6){%>
+                <div id="level6-controls2"></div>
+                <%}}%>
               </div>
             </div>
           </div>
@@ -59,13 +106,16 @@
           <h3 style="text-align: center;">Leaderboard</h3>
           <ul>
             <% for(let i=0;i<top10.length;i++){ %>
-            <li><a href="<%= prefix+top10[i].filename %>">Number <%=i+1%></a> (<%= top10[i].votes%>/<%=top10[i].views%>
-              - <%= top10[i].score.toFixed(2) %>)</li>
-            <% } %>
-          </ul>
-        </div>
-      </div>
-    </div>
+                <li><a href="<%= prefix+top10[i].filename %>">Number <%=i+1%></a> (
+                  <%= top10[i].votes%>/
+                  <%=top10[i].views%>
+                  -
+                  <%= top10[i].score.toFixed(2) %>)</li>
+                <% } %>
+                </ul>
+              </div>
+            </div>
+          </div>
 </body>
 
 </html>

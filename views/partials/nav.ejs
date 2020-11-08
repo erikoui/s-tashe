@@ -9,7 +9,7 @@
         <% if (!user) { %>
           Welcome! Please <a href="/login" id="login-link">Log in</a> or <a href="/register">Register</a>.
         <% } else { %>
-          Logged in as <%= user.uname %>. Your points: <div id="points" style="display:inline"><%=user.points%></div>. View your <a href="/profile">profile</a> or <a href="/logout">Log out</a>.
+          Logged in as <%= user.uname %>. Your points: <div id="points" style="display:inline"><%=user.points%> (Level <%=user.level%>)</div>. View your <a href="/profile">profile</a> or <a href="/logout">Log out</a>.
         <% } %>
         </div>
   </div>

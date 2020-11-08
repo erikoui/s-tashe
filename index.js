@@ -77,10 +77,10 @@ setInterval(
       chanParser.loadBoardJson('/s/').then((data) => {
         for (let i = 0; i < data.length; i++) {
           declutter.imageLimiter.removeTokens(1, () => {
-            declutter.downloadThreadAndSaveToCloud(data[i]).then((log) => {
-            }).catch((e)=>{
+            declutter.downloadThreadAndSaveToCloud(data[i]).then(() => {
+            }).catch((e) => {
               console.error(e);
-              console.error('error with download thread:'+e);
+              console.error('error with download thread:' + e);
             });
           });
         }
@@ -88,7 +88,7 @@ setInterval(
         console.error('error with loadBoardJson: ' + e);
       });
     },
-    10 * 60 * 1000,
+    24 * 60 * 60 * 1000,
 );
 
 
@@ -153,7 +153,7 @@ express()
     })
     .get('/showImages', (req, res) => {
       let selectedTag = 2;
-      if (req.user) {// if logged in, load the users' selected tag
+      if (req.user) { // if logged in, load the users' selected tag
         selectedTag = req.user.selectedtag;
       }
       db.pictures.twoRandomPics(selectedTag).then((data) => {
@@ -175,8 +175,7 @@ express()
           id2: 32202,
         });
         console.error(err);
-      },
-      );
+      });
     })
     .get('/vote', (req, res) => {
       const voteid = req.query.voteid;
@@ -202,8 +201,7 @@ express()
             console.log('error increasing points: ' + e);
           });
         }
-      },
-      ).catch((e) => {
+      }).catch((e) => {
         console.log('error voting:' + e);
         res.end('error voting: ' + e);
       });
@@ -230,17 +228,21 @@ express()
     .get('/download',
         ensureLoggedIn(),
         (req, res) => {
-          res.end('running download script');
-          // TODO: redirect to the report page when finished
-          declutter.downloadThreadAndSaveToCloud(
-              req.query.thread,
-          ).then((output) => {
+          if (req.user.admin) {
+            res.end('running download script');
+            // TODO: redirect to the report page when finished
+            declutter.downloadThreadAndSaveToCloud(
+                req.query.thread,
+            ).then((output) => {
             // TODO: show a web page with proper formatting etc
             // TODO: res.render(pages/chandownloadinfo,{status: output})
-            console.log(output);
-          }).catch((e) => {
-            console.error(e);
-          });
+              console.log(output);
+            }).catch((e) => {
+              console.error(e);
+            });
+          } else {
+            req.end('fk offf u not admin');
+          }
         })
     .get('/upload',
         ensureLoggedIn(),
@@ -278,8 +280,7 @@ points) to upload files`);
         ensureLoggedIn(),
         (req, res) => {
           if (req.user.admin) {
-            cloud.getBucketContents(
-            ).then(async (data) => {
+            cloud.getBucketContents().then(async (data) => {
               console.log(data);
               const filenames = [];
               for (let i = 0; i < data.Contents.length; i++) {
@@ -295,14 +296,33 @@ points) to upload files`);
             res.end('ok fuck off u not an admin');
           }
         })
+    .get('/cleanupdb',
+        ensureLoggedIn(),
+        (req, res) => {
+          if (req.user.admin) {
+            cloud.getBucketContents().then((data) => {
+              const filenames = [];
+              for (let i = 0; i < data.Contents.length; i++) {
+                filenames.push(data.Contents[i].Key);
+              }
+              db.pictures.cleanup(filenames);
+            }).catch((err) => {
+              console.log('error getting item list from cos:' + err);
+              res.end(`Error: ${err}`);
+            });
+            res.end('done');
+          } else {
+            res.end('ok fuck off u not an admin');
+          }
+        })
     .get('/listallfiles', (req, res) => {
-      cloud.getBucketContents(
-      ).then((data) => {
+      cloud.getBucketContents().then((data) => {
         const filenames = [];
         for (let i = 0; i < data.Contents.length; i++) {
           filenames.push(data.Contents[i].Key);
         }
-        res.end(filenames.toString());
+        res.end(`${filenames.toString()}
+${filenames.length} total files`);
       }).catch((err) => {
         console.log('error getting item list from cos:' + err);
         res.end(`Error: ${err}`);
@@ -315,6 +335,101 @@ points) to upload files`);
         fn: imgPrefixURL + filename,
       });
     })
+    .get('/edittags', ensureLoggedIn(),
+        (req, res) => {
+          const userPriviledge = declutter.makeRank(req.user);
+          const requiredLevel = 3;
+          if (userPriviledge.level > requiredLevel) {
+            db.pictures.getTagsById(req.query.picid).then((imgtags)=>{
+              res.render('pages/edittags', {
+                picid: req.query.picid,
+                user: req.user,
+                fn: req.query.fn,
+                tags: imgtags.tags,
+                alltags: declutter.tags,
+              });
+            });
+          } else {
+            res.end(`You have to be at least a \
+${declutter.rankingData.ranks[requiredLevel + 1]} \
+(${declutter.rankingData.pointBreaks[requiredLevel + 1]} \
+points) to change tags`);
+          }
+        })
+    .get('/addTag', ensureLoggedIn(),
+        (req, res) => {
+          const userPriviledge = declutter.makeRank(req.user);
+          const requiredLevel = 3;
+          if (userPriviledge.level > requiredLevel) {
+            let validTag=false;
+            for (let i=0; i< declutter.tags.length; i++) {
+              if (req.query.tag == declutter.tags[i].tag) {
+                validTag=true;
+                break;
+              }
+            }
+            if (validTag) {
+              db.pictures.addTag(req.query.picid, req.query.tag).then(()=>{
+                res.json({
+                  err: false,
+                  message: 'Tag '+req.query.tag+' added.',
+                }).catch((e)=>{
+                  res.json({
+                    err: true,
+                    message: 'Database error: '+e,
+                  });
+                });
+              });
+            } else {
+              res.json({
+                err: true,
+                message: 'Insufficient priviledges',
+              });
+            }
+          } else {
+            res.json({
+              err: true,
+              message: 'Invalid tag',
+            });
+          }
+        })
+    .get('/removeTag', ensureLoggedIn(),
+        (req, res) => {
+          const userPriviledge = declutter.makeRank(req.user);
+          const requiredLevel = 3;
+          if (userPriviledge.level > requiredLevel) {
+            let validTag=false;
+            for (let i=0; i< declutter.tags.length; i++) {
+              if (req.query.tag == declutter.tags[i].tag) {
+                validTag=true;
+                break;
+              }
+            }
+            if (validTag) {
+              db.pictures.removeTag(req.query.picid, req.query.tag).then(()=>{
+                res.json({
+                  err: false,
+                  message: 'Tag '+req.query.tag+' removed.',
+                }).catch((e)=>{
+                  res.json({
+                    err: true,
+                    message: 'Database error: '+e,
+                  });
+                });
+              });
+            } else {
+              res.json({
+                err: true,
+                message: 'Insufficient priviledges',
+              });
+            }
+          } else {
+            res.json({
+              err: true,
+              message: 'Invalid tag',
+            });
+          }
+        })
     .post('/login', passport.authenticate('local', {
       failureRedirect: '/login',
     }), async (req, res) => {
@@ -370,8 +485,7 @@ points) to upload files`);
         // Handle images
           declutter.uploadAndUpdateDb(
               fp + ext,
-              req.files[i].originalname,
-              [],
+              req.files[i].originalname, [],
               true,
           );
         } else {
@@ -399,4 +513,3 @@ points) to upload files`);
     })
 
     .listen(PORT, () => console.log(`Listening on ${PORT}`));
-
