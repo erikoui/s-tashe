@@ -39,6 +39,44 @@ class PicturesRepository {
   }
 
   /**
+   * adds a tag to the picture tag array
+   * @param {int} picid -
+   * @param {string} tag -
+   */
+  async addTag(picid, tag) {
+    return this.db.any(
+        'UPDATE pictures SET tags = ARRAY_APPEND(tags, ${tag}) WHERE id=${id};',
+        {
+          tag: tag,
+          id: picid,
+        });
+  }
+
+
+  /**
+   * removes a tag to the picture tag array
+   * @param {int} picid -
+   * @param {string} tag -
+   */
+  async removeTag(picid, tag) {
+    return this.db.any(
+        'UPDATE pictures SET tags = ARRAY_REMOVE(tags, ${tag}) WHERE id=${id};',
+        {
+          tag: tag,
+          id: picid,
+        });
+  }
+  /**
+   * returns the tags of a picture by id
+   * @param {int} picid pic id
+   */
+  async getTagsById(picid) {
+    return this.db.one('SELECT tags FROM pictures p WHERE p.id=${picid}', {
+      picid: picid,
+    });
+  }
+
+  /**
    * Deletes a picture record by id. note that this does not
    * delete the file from the cloud server.
    * @param {int} id - The id of the record to delete.
@@ -57,7 +95,7 @@ class PicturesRepository {
    * @param {int} selectedtag - The tag id that the current user has selected.
    */
   async twoRandomPics(selectedtag) {
-    const picData=await this.db.many(
+    const picData = await this.db.many(
         `SELECT p.id,p.filename,p.tags
         FROM pictures p
         WHERE (
@@ -66,7 +104,7 @@ class PicturesRepository {
         ORDER BY RANDOM() 
         LIMIT 2;`,
     );
-    const r=[
+    const r = [
       {
         id: picData[0].id,
         filename: picData[0].filename,
@@ -117,7 +155,7 @@ class PicturesRepository {
   async cleanup(cloudfiles) {
     // Duplicates
     try {
-      const d=await this.db.any(
+      const d = await this.db.any(
           `DELETE FROM pictures
 WHERE id IN
 (SELECT id
@@ -132,12 +170,13 @@ RETURNING *;`,
       console.log(`${d.length} rows deleted`);
 
       // records with no matching files on the cloud
-      const qsstr=`DELETE FROM pictures AS m WHERE m.filename NOT IN (${JSON.stringify(cloudfiles).replace('[', '').replace(']', '').replace(/"/g, '\'')}) RETURNING *;`;
+      // eslint-disable-next-line max-len
+      const qsstr = `DELETE FROM pictures AS m WHERE m.filename NOT IN (${JSON.stringify(cloudfiles).replace('[', '').replace(']', '').replace(/"/g, '\'')}) RETURNING *;`;
       console.log(qsstr);
-      const c=await this.db.any(
+      const c = await this.db.any(
           qsstr,
       );
-      console.log(c.length+' files not on the cloud');
+      console.log(c.length + ' files not on the cloud');
     } catch (e) {
       console.error(e);
     }
@@ -150,7 +189,7 @@ RETURNING *;`,
   async listByTag(tag, minviews) {
     return this.db.any(
         // eslint-disable-next-line max-len
-        'SELECT *, CAST(votes+1 AS real) / CAST(views+1 AS real) AS score FROM pictures WHERE ${tag} = ANY (tags) ORDER BY CASE WHEN views >= '+minviews+' THEN 0 ELSE 1 END, score DESC;',
+        'SELECT *, CAST(votes+1 AS real) / CAST(views+1 AS real) AS score FROM pictures WHERE ${tag} = ANY (tags) ORDER BY CASE WHEN views >= ' + minviews + ' THEN 0 ELSE 1 END, score DESC;',
         {tag: tag},
     );
   }
@@ -169,12 +208,14 @@ RETURNING *;`,
     if (!voted) {
       return {pic1votes: -1, pic1views: -1, pic2votes: -1, pic2views: -1};
     }
-    const other=await this.db.one(
+    const other = await this.db.one(
         'UPDATE pictures SET views=views+1 WHERE id=${picid} RETURNING *;',
         {picid: otherid},
     );
-    return {pic1votes: voted.votes, pic1views: voted.views,
-      pic2votes: other.votes, pic2views: other.views};
+    return {
+      pic1votes: voted.votes, pic1views: voted.views,
+      pic2votes: other.votes, pic2views: other.views,
+    };
   }
 
   /**
