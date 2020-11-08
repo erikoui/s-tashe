@@ -63,11 +63,16 @@ class ChanDownloader {
       // Get tags of this thread
       const titlePost = posts[0];
       let tbag = titlePost.sub + ' ' + titlePost.com;
+      console.log(tbag);
+      tbag = tbag.replace(/\//g, ' ');
+      console.log(tbag);
       tbag = tbag.replace(/[^a-zA-Z ]/g, '');
+      console.log(tbag);
       tbag = tbag.toLowerCase();
+      console.log(tbag);
       const bag = tbag.split(' ');
 
-      const tags=await db.tags.all();
+      const tags = await db.tags.all();
       const validTags = [];
       for (let i = 0; i < tags.length; i++) {
         let checkTags = [tags[i].tag];
@@ -76,49 +81,53 @@ class ChanDownloader {
         }
         for (let j = 0; j < bag.length; j++) {
           if ((checkTags.includes(bag[j])) &&
-              !(validTags.includes(bag[j]))) {
+            !(validTags.includes(bag[j]))) {
             validTags.push(tags[i].tag);
-            break;
+            break;// this prevents multiple tags, maybe its wrong
           }
         }
       }
-      console.log('Detected tags: '+JSON.stringify(validTags));
+      console.log('Detected tags: ' + JSON.stringify(validTags));
 
-      const that=this;
-      // TODO: remove the consts and the if(fname)
+      const that = this;
+      let processedPics = 0;
+      let totalPics = posts.length;
       // For each post download the file
       for (let i = 0; i < posts.length; i++) {
+        // If the current post has a file
         if ('filename' in posts[i]) {
           const md5 = this.declutter.b64md52hex(posts[i]['md5']);
-          const ext = posts[i]['ext'];
-          const fname = posts[i]['tim'];
-          const imageUrl = `https://i.4cdn.org/${board}/${fname + ext}`;
-          if (!(await this.declutter.checkMd5ExistsInDb(md5, ext))) {
-          // save the variables as constants to prevent async race conditions
-            const imageName = fname;
-            const imageExtension = ext;
-            const filePath = threadFolder + imageName + imageExtension; ;
-            if (fs.existsSync(threadFolder + imageName + imageExtension)) {
-              console.log(`(${i+1}/${posts.length}) \
-Image ${imageName}${imageExtension} already exists on local, \
-not saving this image.`);
-            } else {
-              this.imageLimiter.removeTokens(1, () => {
-                try {
-                  console.log(
-                      `(${i+1}/${posts.length}) Downloading ${imageUrl}`,
+          const imageExtension = posts[i]['ext'];
+          const imageName = posts[i]['tim'];
+          const imageUrl = `https://i.4cdn.org/${board}/${imageName + imageExtension}`;
+          const filePath = threadFolder + imageName + imageExtension;
+          // Here we check if the file is in the database, even though it is
+          // also checked in declutter.uploadAndUpdateDb because we want to skip
+          // the download of the picture as well.
+          if (!(await this.declutter.checkMd5ExistsInDb(md5, imageExtension))) {
+            // save the variables as constants to prevent async race conditions
+
+            this.imageLimiter.removeTokens(1, () => {
+              try {
+                if (fs.existsSync(filePath)) {
+                  console.log(`(${processedPics}/${totalPics}) Image ${imageName}${imageExtension} already exists on local, not saving this image.`);
+                  // Upload the file and delete it
+                  that.declutter.uploadAndUpdateDb(
+                      filePath,
+                      'no description',
+                      validTags,
+                      true,
                   );
+                } else {
+                  console.log(`(${processedPics}/${totalPics}) Downloading ${imageUrl}`);
                   const out = fs.createWriteStream(filePath);
                   const res = needle.get(imageUrl);
                   res.pipe(out);
                   res.on('end', function(err) {
                     if (err) {
-                      console.log(`(${i+1}/${posts.length}) \
-An error ocurred: ${err.message}`);
+                      console.log(`(${processedPics}/${totalPics}) An error ocurred: ${err.message}`);
                     } else {
-                      console.log(
-                          `(${i+1}/${posts.length}) Image ${imageName} saved.`,
-                      );
+                      console.log(`(${processedPics}/${totalPics}) Image ${imageName} saved.`);
                       // Upload the file and delete it
                       that.declutter.uploadAndUpdateDb(
                           filePath,
@@ -128,14 +137,20 @@ An error ocurred: ${err.message}`);
                       );
                     }
                   });
-                } catch (e) {
-                  console.error(`Error while downloading image: ${e}`);
                 }
-              });
-            }
+              } catch (e) {
+                console.error(`Error while downloading image: ${e}`);
+              }
+            });
           } else {
-            console.log(`(${i+1}/${posts.length}) File already in database`);
+            console.log(`(${processedPics}/${totalPics}) File already in database`);
           }
+          processedPics++;
+        } else {
+          totalPics--;
+        }
+        if (processedPics == totalPics) {
+          console.log(`Done downloading ${threadUrl}`);
         }
       }
     } catch (e) {

@@ -84,8 +84,8 @@ class ChanParser {
   isInteresting(subCom, tagList) {
     // make bag of words from the title post including its subject
     let tbag = subCom;
-
     // clean up any weird characters
+    tbag = tbag.replace(/\//g, ' ');
     tbag = tbag.replace(/[^a-zA-Z ]/g, '');
 
     // normalize
