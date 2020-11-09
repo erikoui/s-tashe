@@ -36,6 +36,7 @@
     upload page css
     suggest tag feature
     cleanup what ejs does and what frontend javascript does(right now both add elements to the page conditionally)
+    replace all ejs with api calls
 
 # Bugs
     rate limiter file uploads because they time out on slow connection
