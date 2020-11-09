@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <% include ../partials/header.ejs %>
+</head>
+
+<body>
+  <% include ../partials/nav.ejs %>
+  <script>
+    jQuery(document).ready(function ($) {
+      $(".clickable-row").click(function () {
+        window.location = $(this).data("href");
+      });
+    });
+  </script>
+  <div class="container-fluid" style="width:90%">
+    <div class="row">
+      <div class="col-sm-2">
+        Left column
+      </div>
+      <div class="col-sm-8">
+        <% if(data){ %>
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Type</th>
+              <th scope="col">Details</th>
+              <th scope="col">Suggestion</th>
+              <th scope="col">User</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <% for(let i=0;i<data.length;i++){%>
+            <tr class='clickable-row' style='cursor: pointer;' data-href='/edittags?picid=<%-data[i].picid%>'>
+              </trclass>>
+              <td><%=data[i].id%></td>
+              <td><%=data[i].rtype%></td>
+              <td><%=data[i].details%></td>
+              <td><%=data[i].suggestedfix%></td>
+              <td><%=data[i].reportedbyuname%></td>
+            </tr>
+            <%}%>
+        </tbody>
+        </table>
+      <%}%>
+      </div>
+      <div class=" col-sm-2">
+        right colimn
+      </div>
+    </div>
+
+</body>
+
+</html>

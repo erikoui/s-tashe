@@ -3,7 +3,6 @@
     moderation for pic uploads & upload link
     webm support
     image thumbnails and better css in /tag endpoint (also archive link in front page)
-    Reporting system: make admin page to view all reports and handle them
     user profile page
     make it check more boards
     persistent login
@@ -44,3 +43,4 @@
 
 # Don't forget
     Check if the admin role can be spoofed in any way such as setting `req.user.admin=true` explicitly through the request or something
+    Check for SQL/html injection

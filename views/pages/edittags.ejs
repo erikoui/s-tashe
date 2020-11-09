@@ -7,7 +7,7 @@
 
 <body>
   <% include ../partials/nav.ejs %>
-  <script src='/client-js/edittags-frontend.js' ></script>
+  <script src='/client-js/edittags-frontend.js'></script>
   <div class="container-fluid" style="width:90%">
     <div class="row">
       <div class="col-sm-2">
@@ -15,15 +15,17 @@
           Click on any of these tags to remove it:
           <div id="remove-tag-list">
             <% for(let i=0;i<tags.length;i++){ %>
-              <!-- TODO: make this in front end javascript because remove returns json  -->
-            <a href="/removeTag?picid=<%= picid %>&tag=<%=tags[i]%>" class="removetag btn btn-sm btn-danger"><%= tags[i] %></a>
+            <!-- TODO: make this in front end javascript because remove returns json  -->
+            <a href="/removeTag?picid=<%= picid %>&tag=<%=tags[i]%>"
+              class="removetag btn btn-sm btn-danger"><%= tags[i] %></a>
             <% } %>
           </div>
           Click on any of these tags to add it:
           <div id="add-tag-list">
             <% for(let i=0;i<alltags.length;i++){ if(tags.indexOf(alltags[i].tag)<=-1){%>
             <!-- TODO: make this in front end javascript because addtag returns json  -->
-              <a href="/addTag?picid=<%= picid %>&tag=<%=alltags[i].tag%>" class="addtag btn btn-sm btn-success"><%= alltags[i].tag %></a>
+            <a href="/addTag?picid=<%= picid %>&tag=<%=alltags[i].tag%>"
+              class="addtag btn btn-sm btn-success"><%= alltags[i].tag %></a>
             <% } }%>
           </div>
         </div>
@@ -32,13 +34,37 @@
         <div class="row">
           <div class="col-sm-12 bg-mid">
             <div class="row" id='pictainer'>
-              <img src="<%- fn %>" id="pic" class="img-responsive" style= "margin: 0 auto; border-radius: 5px;">
+              <img src="<%- fn %>" id="pic" class="img-responsive" style="margin: 0 auto; border-radius: 5px;">
             </div>
           </div>
         </div>
       </div>
       <div class="col-sm-2">
         <div class="col-sm-12 bg-right" id="right-bar">
+          <%if(user.admin){%>
+          <h3>Reports</h3>
+          <div>
+            <ul id="reports"></ul>
+          </div>
+          <script>
+            jQuery(document).ready(function ($) {
+              $('.removeallreports').click((e) => {
+                e.preventDefault();
+                $.getJSON(e.target.href, () => {
+                  location.assign('/showreports');
+                });
+              });
+              $.getJSON('/getReports?picid=<%=picid%>', function (data) {
+                for (let i = 0; i < data.length; i++) {
+                  const reprot = document.createElement('li')
+                  reprot.innerText = data[i].rtype+': '+data[i].details
+                  document.getElementById("reports").appendChild(reprot);
+                }
+              });
+            });
+          </script>
+          <a href='/removeReports?picid=<%=picid%>' class="removeallreports btn btn-sm btn-success">Remove all reports</a>
+          <%}%>
         </div>
       </div>
     </div>

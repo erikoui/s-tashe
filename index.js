@@ -163,10 +163,10 @@ express()
                   err: false,
                   message: 'probably deleted file, errors dont get passed lol',
                 });
-              }).catch((e)=>{
+              }).catch((e) => {
                 console.error(e);
               });
-            }).catch((e)=>{
+            }).catch((e) => {
               console.error(e);
             });
           } else {
@@ -390,7 +390,7 @@ ${filenames.length} total files`);
               res.render('pages/edittags', {
                 picid: req.query.picid,
                 user: req.user,
-                fn: imgPrefixURL+imgData.filename,
+                fn: imgPrefixURL + imgData.filename,
                 description: imgData.description,
                 tags: imgData.tags,
                 alltags: declutter.tags,
@@ -412,7 +412,7 @@ points) to change tags`);
               res.render('pages/report', {
                 picid: req.query.picid,
                 user: req.user,
-                fn: imgPrefixURL+imgData.filename,
+                fn: imgPrefixURL + imgData.filename,
                 description: imgData.description,
                 tags: imgData.tags,
                 votes: imgData.votes,
@@ -425,6 +425,53 @@ points) to change tags`);
 ${declutter.rankingData.ranks[requiredLevel + 1]} \
 (${declutter.rankingData.pointBreaks[requiredLevel + 1]} \
 points) to change tags`);
+          }
+        })
+    .get('/showreports',
+        ensureLoggedIn(),
+        (req, res) => {
+          if (req.user.admin) {
+            db.reports.all().then((data) => {
+              res.render('pages/reportlist', {
+                user: req.user,
+                data: data,
+              });
+            }).catch((e) => {
+              res.end(e);
+            });
+          } else {
+            res.end('fk off no admin');
+          }
+        })
+    .get('/getreports',
+        ensureLoggedIn(),
+        (req, res) => {
+          if (req.user.admin) {
+            db.reports.getByPicId(req.query.picid).then((data) => {
+              res.json(data);
+            }).catch((e) => {
+              res.json({
+                err: true,
+                message: 'Error:' + e,
+              });
+            });
+          }
+        })
+    .get('/removereports',
+        ensureLoggedIn(),
+        (req, res) => {
+          if (req.user.admin) {
+            db.reports.deleteByPicId(req.query.picid).then((data) => {
+              res.json({
+                err: false,
+                message: data.length + 'Reports deleted:',
+              });
+            }).catch((e) => {
+              res.json({
+                err: true,
+                message: 'Error:' + e,
+              });
+            });
           }
         })
     .get('/addTag', ensureLoggedIn(),
@@ -481,11 +528,11 @@ points) to change tags`);
                 res.json({
                   err: false,
                   message: 'Tag ' + req.query.tag + ' removed.',
-                }).catch((e) => {
-                  res.json({
-                    err: true,
-                    message: 'Database error: ' + e,
-                  });
+                });
+              }).catch((e) => {
+                res.json({
+                  err: true,
+                  message: 'Database error: ' + e,
                 });
               });
             } else {
@@ -594,15 +641,15 @@ points) to change tags`);
                 req.user.id,
                 req.user.uname,
                 req.body.suggestedfix,
-            ).then(()=>{
+            ).then(() => {
               res.json({
                 error: false,
                 message: 'Report submitted',
               });
-            }).catch((e)=>{
+            }).catch((e) => {
               res.json({
                 error: true,
-                message: 'Failed'+e,
+                message: 'Failed' + e,
               });
             });
           }

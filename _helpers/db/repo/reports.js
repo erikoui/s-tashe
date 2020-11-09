@@ -51,6 +51,33 @@ class Reports {
         },
     );
   }
+
+  /**
+   * Returns all report records
+   */
+  async all() {
+    return this.db.any('SELECT * FROM reports');
+  }
+
+  /**
+   * deletes reports
+   * @param {int} picid - picture id
+   */
+  async deleteByPicId(picid) {
+    return this.db.any('DELETE FROM reports WHERE picid=${id};', {
+      id: picid,
+    });
+  }
+
+  /**
+   * returns all reports of a picture
+   * @param {int} picid - picture id
+   */
+  async getByPicId(picid) {
+    return this.db.any('SELECT * FROM reports WHERE picid=${id};', {
+      id: picid,
+    });
+  }
 }
 
 
