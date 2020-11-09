@@ -128,12 +128,19 @@ onload = function() {
           }
           // level 2 controls
           if (i==1) {
+            controlButton.setAttribute(
+                'href',
+                `/report?picid=${data.ids[j]}`,
+            );
+            controlButton.setAttribute('class', 'btn btn-sm btn-warning');
+            controlButton.innerText = 'Report problem';
+            c[i][j].appendChild(controlButton);
           }
           // level 3 controls
           if (i==2) {
             controlButton.setAttribute(
                 'href',
-                `/edittags?picid=${data.ids[j]}&fn=${data.images[j]}`,
+                `/edittags?picid=${data.ids[j]}`,
             );
             controlButton.setAttribute('class', 'btn btn-sm btn-warning');
             controlButton.innerText = 'Change tags';

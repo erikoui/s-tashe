@@ -3,10 +3,11 @@
     moderation for pic uploads & upload link
     webm support
     image thumbnails and better css in /tag endpoint (also archive link in front page)
-    report wrong tag button - Reporting system
+    Reporting system: make admin page to view all reports and handle them
     user profile page
     make it check more boards
     persistent login
+    change every requiredLevel in index.js to a middleware thingy
 
 # New Features
 
@@ -28,6 +29,7 @@
     ads - exoclick probably
 
 # Nice-to-haves
+    refactor index.js to have separate api calls (returning json) and html requests (rendering ejs)
     keep track of users selected tag when not logged in (with cookie)
     dark theme
     Tell the user when registering when the username is already in use

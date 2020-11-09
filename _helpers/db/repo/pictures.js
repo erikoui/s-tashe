@@ -71,7 +71,7 @@ class PicturesRepository {
    * @param {int} picid pic id
    */
   async getTagsById(picid) {
-    return this.db.one('SELECT tags FROM pictures p WHERE p.id=${picid}', {
+    return this.db.one('SELECT * FROM pictures p WHERE p.id=${picid}', {
       picid: picid,
     });
   }

@@ -184,8 +184,8 @@ express()
       db.pictures.twoRandomPics(selectedTag).then((data) => {
         res.json({
           images: [
-            `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[0].filename}`,
-            `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/${data[1].filename}`,
+            `${imgPrefixURL}${data[0].filename}`,
+            `${imgPrefixURL}${data[1].filename}`,
           ],
           tags: [
             data[0].tags,
@@ -386,12 +386,37 @@ ${filenames.length} total files`);
           const userPriviledge = declutter.makeRank(req.user);
           const requiredLevel = 3;
           if (userPriviledge.level > requiredLevel) {
-            db.pictures.getTagsById(req.query.picid).then((imgtags) => {
+            db.pictures.getTagsById(req.query.picid).then((imgData) => {
               res.render('pages/edittags', {
                 picid: req.query.picid,
                 user: req.user,
-                fn: req.query.fn,
-                tags: imgtags.tags,
+                fn: imgPrefixURL+imgData.filename,
+                description: imgData.description,
+                tags: imgData.tags,
+                alltags: declutter.tags,
+              });
+            });
+          } else {
+            res.end(`You have to be at least a \
+${declutter.rankingData.ranks[requiredLevel + 1]} \
+(${declutter.rankingData.pointBreaks[requiredLevel + 1]} \
+points) to change tags`);
+          }
+        })
+    .get('/report', ensureLoggedIn(),
+        (req, res) => {
+          const userPriviledge = declutter.makeRank(req.user);
+          const requiredLevel = 2;
+          if (userPriviledge.level > requiredLevel) {
+            db.pictures.getTagsById(req.query.picid).then((imgData) => {
+              res.render('pages/report', {
+                picid: req.query.picid,
+                user: req.user,
+                fn: imgPrefixURL+imgData.filename,
+                description: imgData.description,
+                tags: imgData.tags,
+                votes: imgData.votes,
+                views: imgData.views,
                 alltags: declutter.tags,
               });
             });
@@ -557,5 +582,29 @@ points) to change tags`);
         res.redirect('/register');
       });
     })
-
+    .post('/report', ensureLoggedIn(),
+        (req, res) => {
+          const userPriviledge = declutter.makeRank(req.user);
+          const requiredLevel = 2;
+          if (userPriviledge.level > requiredLevel) {
+            db.reports.add(
+                req.body.rtype,
+                req.body.details,
+                req.body.picid,
+                req.user.id,
+                req.user.uname,
+                req.body.suggestedfix,
+            ).then(()=>{
+              res.json({
+                error: false,
+                message: 'Report submitted',
+              });
+            }).catch((e)=>{
+              res.json({
+                error: true,
+                message: 'Failed'+e,
+              });
+            });
+          }
+        })
     .listen(PORT, () => console.log(`Listening on ${PORT}`));
