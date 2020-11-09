@@ -56,13 +56,62 @@ class Declutter {
   }
 
   /**
-   * Uploads a file to the this.cloud storage and adds a record in
-   * the pictures table.
-   * @param {string} localFilePath - local filenmame
-   * @param {string} desc - description
-   * @param {array<string>} tags - tag array
-   * @param {boolean} del - if true, will delete the file after uploading
-   */
+ * checks if the user has sufficient priviledges (middleware)
+ * @param {int} p - minimum level (10 is admin)
+ * @param {boolean} json - retrun response in json mode?
+ * @return {function} - function that either allows the next
+ *  middleware to run or blocks it
+ */
+  checkLevel(p, json) {
+    return (req, res, next) => {
+      if (req.user) {
+        if (p==10) {// check admin
+          if (req.user.admin) {
+            next();
+          } else {
+            if (json) {
+              res.json({
+                err: true,
+                message: 'You have to be an admin to do this.',
+              });
+            } else {
+              res.end('You have to be an admin to do this.');
+            }
+          }
+        } else {// not an admin
+          if (req.user.level >= p) {
+            next();
+          } else {
+            if (json) {
+              res.json({
+                err: true,
+                message: `You have to be at least level ${p} to do this`,
+              });
+            } else {
+              res.end(`You have to be at least level ${p} to do this`);
+            }
+          }
+        }
+      } else { // not logged in
+        if (json) {
+          res.json({
+            err: true,
+            message: `You have to be logged in to do this.`,
+          });
+        } else {
+          res.end('You have to be logged in to do this.');
+        }
+      }
+    };
+  }
+  /**
+     * Uploads a file to the this.cloud storage and adds a record in
+     * the pictures table.
+     * @param {string} localFilePath - local filenmame
+     * @param {string} desc - description
+     * @param {array<string>} tags - tag array
+     * @param {boolean} del - if true, will delete the file after uploading
+     */
   uploadAndUpdateDb(localFilePath, desc, tags, del) {
     const filePath = path.join(localFilePath);// normalize the path just in case
     md5File(filePath).then(async (md5) => {
@@ -71,7 +120,7 @@ class Declutter {
       console.log(`${cloudname} : Uploading file...`);
 
       // Upload
-      const exists=await this.checkMd5ExistsInDb(md5, ext);
+      const exists = await this.checkMd5ExistsInDb(md5, ext);
       if (!exists) {
         try {
           await this.cloud.simpleUpload(md5 + ext, filePath);
@@ -102,12 +151,12 @@ class Declutter {
   }
 
   /**
-  * Inserts image info and tags it in the database.
-  * @param {string} filename - filename as in the cloud
-  *  (the md5 name). Also known as the key
-  * @param {array<string>} tags - tag array
-  * @param {string} desc - Description
-  */
+    * Inserts image info and tags it in the database.
+    * @param {string} filename - filename as in the cloud
+    *  (the md5 name). Also known as the key
+    * @param {array<string>} tags - tag array
+    * @param {string} desc - Description
+    */
   async addPicToDb(filename, tags, desc) {
     this.db.pictures.add(desc, filename, tags).then((data) => {
       console.log(`${data.filename} added to database.`);
@@ -117,10 +166,10 @@ class Declutter {
   }
 
   /**
-   * Generates a string of random characters
-   * @param {int} length - string length
-   * @return {string} - the random string
-   */
+     * Generates a string of random characters
+     * @param {int} length - string length
+     * @return {string} - the random string
+     */
   randomString(length) {
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -132,17 +181,17 @@ class Declutter {
   }
 
   /**
-   * Creates an array of {tags,filename} objects
-   * @param {string} dir - Directory to scan
-   * @return {array} The array of {tags,filename} objects
-   */
+     * Creates an array of {tags,filename} objects
+     * @param {string} dir - Directory to scan
+     * @return {array} The array of {tags,filename} objects
+     */
   scanAndTag(dir) {
     /**
-      * Creates an array files in the dir
-      * @param {string} dir - Directory to scan
-      * @param {array} files_ - Used internally, dont pass any argument
-      * @return {array} The array of files in the dir
-     */
+        * Creates an array files in the dir
+        * @param {string} dir - Directory to scan
+        * @param {array} files_ - Used internally, dont pass any argument
+        * @return {array} The array of files in the dir
+       */
     const getFiles = function(dir, files_) {
       files_ = files_ || [];
       const files = fs.readdirSync(dir);
@@ -183,24 +232,24 @@ class Declutter {
   }
 
   /**
-   * converts b64 md5 to hexadecimal
-   * @param {string} b64md5 - base64 encoded md5 sum
-   * @return {string} - hexadecimal 24 digit md5
-   */
+     * converts b64 md5 to hexadecimal
+     * @param {string} b64md5 - base64 encoded md5 sum
+     * @return {string} - hexadecimal 24 digit md5
+     */
   b64md52hex(b64md5) {
     const buffer = Buffer.from(b64md5, 'base64');
     return buffer.toString('hex');
   }
 
   /**
-   *
-   * @param {string} md5 - hex encoded md5
-   * @param {string} ext - file extension ('.jpg')
-   * @return {boolean} - wether it exists
-   */
+     *
+     * @param {string} md5 - hex encoded md5
+     * @param {string} ext - file extension ('.jpg')
+     * @return {boolean} - wether it exists
+     */
   async checkMd5ExistsInDb(md5, ext) {
     try {
-      await this.db.pictures.findByFilename(md5+ext);
+      await this.db.pictures.findByFilename(md5 + ext);
     } catch (e) {
       return false;
     }
@@ -208,13 +257,13 @@ class Declutter {
   }
 
   /**
-    * handles errors
-    * @param{Error} err - the error to handle
-    * @param{Request} req - the request to process
-    * @param{Response} res - the response to send back
-    * @param{Function} next - i have no idea
-    * @return{void}
-    */
+      * handles errors
+      * @param{Error} err - the error to handle
+      * @param{Request} req - the request to process
+      * @param{Response} res - the response to send back
+      * @param{Function} next - i have no idea
+      * @return{void}
+      */
   errorHandler(err, req, res, next) {
     if (typeof (err) === 'string') {
       // custom application error
@@ -226,16 +275,16 @@ class Declutter {
   }
 
   /**
-   * Reloads the tags from the tags table
-   */
+     * Reloads the tags from the tags table
+     */
   async refreshTags() {
     this.tags = await this.db.tags.all();
   }
 
   /**
-   *
-   * @param {string} thread - thread url
-   */
+     *
+     * @param {string} thread - thread url
+     */
   async downloadThreadAndSaveToCloud(thread) {
     this.chanDownloader.downloadThread(thread);
   }

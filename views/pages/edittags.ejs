@@ -15,14 +15,14 @@
           Click on any of these tags to remove it:
           <div id="remove-tag-list">
             <% for(let i=0;i<tags.length;i++){ %>
-            <a href="/removeTag?picid=<%= picid %>&tag=<%=tags[i]%>"
+            <a href="/API/removeTag?picid=<%= picid %>&tag=<%=tags[i]%>"
               class="removetag btn btn-sm btn-danger"><%= tags[i] %></a>
             <% } %>
           </div>
           Click on any of these tags to add it:
           <div id="add-tag-list">
             <% for(let i=0;i<alltags.length;i++){ if(tags.indexOf(alltags[i].tag)<=-1){%>
-            <a href="/addTag?picid=<%= picid %>&tag=<%=alltags[i].tag%>"
+            <a href="/API/addTag?picid=<%= picid %>&tag=<%=alltags[i].tag%>"
               class="addtag btn btn-sm btn-success"><%= alltags[i].tag %></a>
             <% } }%>
           </div>
@@ -45,7 +45,7 @@
             <ul id="reports"></ul>
             <div id="loading">Loading reports...</div>
           </div>
-          <a href='/removeReports?picid=<%=picid%>' class="removeallreports btn btn-sm btn-success">Remove all reports</a>
+          <a href='/API/removereports?picid=<%=picid%>' class="removeallreports btn btn-sm btn-success">Remove all reports</a>
           <%}%>
         </div>
       </div>

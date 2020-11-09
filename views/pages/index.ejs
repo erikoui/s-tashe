@@ -17,10 +17,10 @@
           <div id="tag-list">
             <% for(let i=0;i<tags.length;i++){ %>
             <% if(tags[i].id==user.selectedtag){ %>
-            <a href="/changeTagId?newid=<%= tags[i].id %>"
+            <a href="/API/changeTagId?newid=<%= tags[i].id %>"
               class="changetag btn-primary btn-sm btn-default"><%= tags[i].tag %></a>
             <% }else{ %>
-            <a href="/changeTagId?newid=<%= tags[i].id %>"
+            <a href="/API/changeTagId?newid=<%= tags[i].id %>"
               class="changetag btn btn-sm btn-default"><%= tags[i].tag %></a>
             <% } %>
             <% } %>
@@ -45,7 +45,7 @@
               function askForThread() {
                 const thread = prompt("Thread url:", "");
                 if (!(thread == null || thread == "")) {
-                  document.getElementById('dlbtn').href = '/download?thread=' + thread;
+                  document.getElementById('dlbtn').href = '/API/download?thread=' + thread;
                   document.getElementById('dlbtn').classList = "btn btn-sm btn-success";
                 }
               }

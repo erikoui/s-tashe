@@ -50,7 +50,7 @@ onload = function() {
   /**
    * Loads the tags under the images.
    *
-   * @param {object} data - server response from calling /showImages
+   * @param {object} data - server response from calling /API/getTwoRandomPics
    */
   function showTags(data) {
     // Tag divs
@@ -79,7 +79,7 @@ onload = function() {
   /**
    * Loads 2 images to the page and sets their click event to vote for them.
    *
-   * @param {object} data - server response from calling /showImages
+   * @param {object} data - server response from calling /API/getTwoRandomPics
    */
   function showImages(data) {
     let voted = false;
@@ -94,7 +94,7 @@ onload = function() {
     };
 
     /**
-     * calls the /vote endpoint
+     * calls the /API/vote endpoint
      * @param {int} voteid - image id to vote for
      * @param {int} otherid - the other image to increase its views
      */
@@ -102,7 +102,7 @@ onload = function() {
       if (!voted) {// prevent voting for both
         hideImages();
         updatePointsDisplay();
-        $.getJSON(`/vote?voteid=${voteid}&otherid=${otherid}`, renderPage());
+        $.getJSON(`/API/vote?voteid=${voteid}&otherid=${otherid}`, renderPage());
       }
       voted = true;
     }
@@ -178,7 +178,7 @@ onload = function() {
         adminButton.onclick=(e)=>{
           e.preventDefault();
           if (confirm('Are you sure?')) {
-            $.getJSON('/deletePic?id='+data.ids[i], (data)=>{
+            $.getJSON('/API/deletePic?id='+data.ids[i], (data)=>{
               location.reload();
             });
           }
@@ -189,10 +189,10 @@ onload = function() {
   }
 
   /**
-   * Show images based on the /showImages response
+   * Show images based on the /API/getTwoRandomPics response
    */
   function renderPage() {
-    $.getJSON('/showImages', function(data) {
+    $.getJSON('/API/getTwoRandomPics', function(data) {
       if (data) {
         showControls(data);
         showImages(data);
@@ -204,7 +204,7 @@ onload = function() {
   }
 
   // Make left panel tag buttons call
-  // the /changeTagId endpoint without changing page
+  // the /API/changeTagId endpoint without changing page
   $('.changetag').click((e) => {
     e.preventDefault();
     $.getJSON(e.target.href, () => {

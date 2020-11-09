@@ -21,7 +21,7 @@
     
 
 ## Operational
-    truncate pictures table on /deleteallfiles
+    truncate pictures table on /API/deleteallfiles
     index.js requiredlevels move to declutter as constants
 
 ## money

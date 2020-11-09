@@ -26,7 +26,7 @@ onload = function() {
 
   const picid=document.getElementById('picid').innerText;
   document.getElementById('picid').innerText='';
-  $.getJSON('/getReports?picid='+picid, function(data) {
+  $.getJSON('/API/getReports?picid='+picid, function(data) {
     for (let i = 0; i < data.length; i++) {
       const reprot = document.createElement('li');
       reprot.innerText = data[i].rtype+': '+data[i].details;

@@ -7,7 +7,6 @@ const passport = require('passport');
 const Strategy = require('passport-local').Strategy;
 const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 const extract = require('extract-zip');
-
 const multer = require('multer');
 const upload = multer({dest: 'uploads/'});
 
@@ -93,7 +92,7 @@ setInterval(
 
 app = express();
 
-// ------------ init ------------
+// ------------ init middlewares ------------
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(require('morgan')('combined'));
 app.use(require('body-parser').urlencoded({extended: true}));
@@ -148,38 +147,21 @@ app.get('/login', (req, res) => {
 app.get('/register', (req, res) => {
   res.render('pages/register.ejs', {user: req.user});
 });
-app.get('/upload',
-    ensureLoggedIn(),
+app.get('/upload', ensureLoggedIn(), declutter.checkLevel(6, false),
     (req, res) => {
-      const userPriviledge = declutter.makeRank(req.user);
-      const requiredLevel = 5;
-      if (userPriviledge.level > requiredLevel) {
-        res.render('pages/upload', {user: req.user});
-      } else {
-        res.end(`You have to be at least a \
-${declutter.rankingData.ranks[requiredLevel + 1]} \
-(${declutter.rankingData.pointBreaks[requiredLevel + 1]} \
-points) to upload files`);
-      }
+      res.render('pages/upload', {user: req.user});
     });
 app.get('/logout', (req, res) => {
   req.logout();
   res.redirect('/');
 });
-app.get('/admin',
-    ensureLoggedIn(),
+app.get('/admin', ensureLoggedIn(), declutter.checkLevel(10, false),
     (req, res) => {
-      if (req.user.admin) {
-        res.render('pages/admin', {user: req.user});
-      } else {
-        res.end('ok fuck off u not an admin');
-      }
+      res.render('pages/admin', {user: req.user});
     });
-app.get('/profile',
-    ensureLoggedIn(),
-    (req, res) => {
-      res.render('pages/profile', {user: req.user});
-    });
+app.get('/profile', ensureLoggedIn(), (req, res) => {
+  res.render('pages/profile', {user: req.user});
+});
 app.get('/showImage/:fn', (req, res) => {
   const filename = req.params['fn'];
   res.render('pages/showImage', {
@@ -187,168 +169,93 @@ app.get('/showImage/:fn', (req, res) => {
     fn: imgPrefixURL + filename,
   });
 });
-app.get('/edittags', ensureLoggedIn(),
+app.get('/edittags', ensureLoggedIn(), declutter.checkLevel(3, false),
     (req, res) => {
-      const userPriviledge = declutter.makeRank(req.user);
-      const requiredLevel = 3;
-      if (userPriviledge.level > requiredLevel) {
-        db.pictures.getTagsById(req.query.picid).then((imgData) => {
-          res.render('pages/edittags', {
-            picid: req.query.picid,
-            user: req.user,
-            fn: imgPrefixURL + imgData.filename,
-            description: imgData.description,
-            tags: imgData.tags,
-            alltags: declutter.tags,
-          });
+      db.pictures.getTagsById(req.query.picid).then((imgData) => {
+        res.render('pages/edittags', {
+          picid: req.query.picid,
+          user: req.user,
+          fn: imgPrefixURL + imgData.filename,
+          description: imgData.description,
+          tags: imgData.tags,
+          alltags: declutter.tags,
         });
-      } else {
-        res.end(`You have to be at least a \
-${declutter.rankingData.ranks[requiredLevel + 1]} \
-(${declutter.rankingData.pointBreaks[requiredLevel + 1]} \
-points) to change tags`);
-      }
+      });
     });
-app.get('/report', ensureLoggedIn(),
+app.get('/report', ensureLoggedIn(), declutter.checkLevel(2, false),
     (req, res) => {
-      const userPriviledge = declutter.makeRank(req.user);
-      const requiredLevel = 2;
-      if (userPriviledge.level > requiredLevel) {
-        db.pictures.getTagsById(req.query.picid).then((imgData) => {
-          res.render('pages/report', {
-            picid: req.query.picid,
-            user: req.user,
-            fn: imgPrefixURL + imgData.filename,
-            description: imgData.description,
-            tags: imgData.tags,
-            votes: imgData.votes,
-            views: imgData.views,
-            alltags: declutter.tags,
-          });
+      db.pictures.getTagsById(req.query.picid).then((imgData) => {
+        res.render('pages/report', {
+          picid: req.query.picid,
+          user: req.user,
+          fn: imgPrefixURL + imgData.filename,
+          description: imgData.description,
+          tags: imgData.tags,
+          votes: imgData.votes,
+          views: imgData.views,
+          alltags: declutter.tags,
         });
-      } else {
-        res.end(`You have to be at least a \
-${declutter.rankingData.ranks[requiredLevel + 1]} \
-(${declutter.rankingData.pointBreaks[requiredLevel + 1]} \
-points) to change tags`);
-      }
+      });
     });
-app.get('/showreports',
-    ensureLoggedIn(),
+app.get('/showreports', ensureLoggedIn(), declutter.checkLevel(10, false),
     (req, res) => {
-      if (req.user.admin) {
-        db.reports.all().then((data) => {
-          res.render('pages/reportlist', {
-            user: req.user,
-            data: data,
-          });
-        }).catch((e) => {
-          res.end(e);
+      db.reports.all().then((data) => {
+        res.render('pages/reportlist', {
+          user: req.user,
+          data: data,
         });
-      } else {
-        res.end('fk off no admin');
-      }
+      }).catch((e) => {
+        res.end(e);
+      });
     });
 
 // ----------- API calls ----------
-app.get('/getreports',
-    ensureLoggedIn(),
+app.get('/API/getReports', ensureLoggedIn(), declutter.checkLevel(10, true),
     (req, res) => {
-      if (req.user.admin) {
-        db.reports.getByPicId(req.query.picid).then((data) => {
-          res.json(data);
-        }).catch((e) => {
-          res.json({
-            err: true,
-            message: 'Error:' + e,
-          });
-        });
-      }
-    });
-app.get('/removereports',
-    ensureLoggedIn(),
-    (req, res) => {
-      if (req.user.admin) {
-        db.reports.deleteByPicId(req.query.picid).then((data) => {
-          res.json({
-            err: false,
-            message: data.length + 'Reports deleted:',
-          });
-        }).catch((e) => {
-          res.json({
-            err: true,
-            message: 'Error:' + e,
-          });
-        });
-      }
-    });
-app.get('/addTag', ensureLoggedIn(),
-    (req, res) => {
-      const userPriviledge = declutter.makeRank(req.user);
-      const requiredLevel = 3;
-      if (userPriviledge.level > requiredLevel) {
-        let validTag = false;
-        for (let i = 0; i < declutter.tags.length; i++) {
-          if (req.query.tag == declutter.tags[i].tag) {
-            validTag = true;
-            break;
-          }
-        }
-        if (validTag) {
-          db.pictures.addTag(req.query.picid, req.query.tag).then(() => {
-            res.json({
-              err: false,
-              message: 'Tag ' + req.query.tag + ' added.',
-            }).catch((e) => {
-              res.json({
-                err: true,
-                message: 'Database error: ' + e,
-              });
-            });
-          });
-        } else {
-          res.json({
-            err: true,
-            message: 'Insufficient priviledges',
-          });
-        }
-      } else {
+      db.reports.getByPicId(req.query.picid).then((data) => {
+        res.json(data);
+      }).catch((e) => {
         res.json({
           err: true,
-          message: 'Invalid tag',
+          message: 'Error:' + e,
         });
-      }
+      });
     });
-app.get('/removeTag', ensureLoggedIn(),
+app.get('/API/removereports', ensureLoggedIn(), declutter.checkLevel(10, true),
     (req, res) => {
-      const userPriviledge = declutter.makeRank(req.user);
-      const requiredLevel = 3;
-      if (userPriviledge.level > requiredLevel) {
-        let validTag = false;
-        for (let i = 0; i < declutter.tags.length; i++) {
-          if (req.query.tag == declutter.tags[i].tag) {
-            validTag = true;
-            break;
-          }
+      db.reports.deleteByPicId(req.query.picid).then((data) => {
+        res.json({
+          err: false,
+          message: data.length + 'Reports deleted:',
+        });
+      }).catch((e) => {
+        res.json({
+          err: true,
+          message: 'Error:' + e,
+        });
+      });
+    });
+app.get('/API/addTag', ensureLoggedIn(), declutter.checkLevel(3, true),
+    (req, res) => {
+      let validTag = false;
+      for (let i = 0; i < declutter.tags.length; i++) {
+        if (req.query.tag == declutter.tags[i].tag) {
+          validTag = true;
+          break;
         }
-        if (validTag) {
-          db.pictures.removeTag(req.query.picid, req.query.tag).then(() => {
-            res.json({
-              err: false,
-              message: 'Tag ' + req.query.tag + ' removed.',
-            });
+      }
+      if (validTag) {
+        db.pictures.addTag(req.query.picid, req.query.tag).then(() => {
+          res.json({
+            err: false,
+            message: 'Tag ' + req.query.tag + ' added.',
           }).catch((e) => {
             res.json({
               err: true,
               message: 'Database error: ' + e,
             });
           });
-        } else {
-          res.json({
-            err: true,
-            message: 'Insufficient priviledges',
-          });
-        }
+        });
       } else {
         res.json({
           err: true,
@@ -356,100 +263,120 @@ app.get('/removeTag', ensureLoggedIn(),
         });
       }
     });
-app.get('/deleteallfiles',
-    ensureLoggedIn(),
+app.get('/API/removeTag', ensureLoggedIn(), declutter.checkLevel(3, true),
     (req, res) => {
-      if (req.user.admin) {
-        cloud.getBucketContents().then(async (data) => {
-          console.log(data);
-          const filenames = [];
-          for (let i = 0; i < data.Contents.length; i++) {
-            filenames.push(data.Contents[i].Key);
-          }
-          await cloud.deleteItems(filenames);
-          res.end(filenames.toString());
-        }).catch((err) => {
-          console.log('error getting item list from cos:' + err);
-          res.end(`Error: ${err}`);
+      let validTag = false;
+      for (let i = 0; i < declutter.tags.length; i++) {
+        if (req.query.tag == declutter.tags[i].tag) {
+          validTag = true;
+          break;
+        }
+      }
+      if (validTag) {
+        db.pictures.removeTag(req.query.picid, req.query.tag).then(() => {
+          res.json({
+            err: false,
+            message: 'Tag ' + req.query.tag + ' removed.',
+          });
+        }).catch((e) => {
+          res.json({
+            err: true,
+            message: 'Database error: ' + e,
+          });
         });
       } else {
-        res.end('ok fuck off u not an admin');
-      }
-    });
-app.get('/cleanupdb',
-    ensureLoggedIn(),
-    (req, res) => {
-      if (req.user.admin) {
-        cloud.getBucketContents().then((data) => {
-          const filenames = [];
-          for (let i = 0; i < data.Contents.length; i++) {
-            filenames.push(data.Contents[i].Key);
-          }
-          db.pictures.cleanup(filenames);
-        }).catch((err) => {
-          console.log('error getting item list from cos:' + err);
-          res.end(`Error: ${err}`);
+        res.json({
+          err: true,
+          message: 'Invalid tag',
         });
-        res.end('done');
-      } else {
-        res.end('ok fuck off u not an admin');
       }
     });
-app.get('/listallfiles', (req, res) => {
-  cloud.getBucketContents().then((data) => {
-    const filenames = [];
-    for (let i = 0; i < data.Contents.length; i++) {
-      filenames.push(data.Contents[i].Key);
-    }
-    res.end(`${filenames.toString()}
-${filenames.length} total files`);
-  }).catch((err) => {
-    console.log('error getting item list from cos:' + err);
-    res.end(`Error: ${err}`);
+app.get('/API/deleteallfiles', ensureLoggedIn(), declutter.checkLevel(10, true),
+    (req, res) => {
+      cloud.getBucketContents().then(async (data) => {
+        console.log(data);
+        const filenames = [];
+        for (let i = 0; i < data.Contents.length; i++) {
+          filenames.push(data.Contents[i].Key);
+        }
+        await cloud.deleteItems(filenames);
+        res.end(filenames.toString());
+      }).catch((err) => {
+        console.log('error getting item list from cos:' + err);
+        res.end(`Error: ${err}`);
+      });
+    });
+app.get('/API/cleanupdb', ensureLoggedIn(), declutter.checkLevel(10, true),
+    (req, res) => {
+      cloud.getBucketContents().then((data) => {
+        const filenames = [];
+        for (let i = 0; i < data.Contents.length; i++) {
+          filenames.push(data.Contents[i].Key);
+        }
+        db.pictures.cleanup(filenames);
+      }).catch((err) => {
+        console.log('error getting item list from cos:' + err);
+        res.json({
+          err: true,
+          message: err,
+        });
+      });
+      res.json({
+        err: false,
+        message: 'Done',
+      });
+    });
+app.get('/API/listallfiles', ensureLoggedIn(), declutter.checkLevel(10, true),
+    (req, res) => {
+      cloud.getBucketContents().then((data) => {
+        const filenames = [];
+        for (let i = 0; i < data.Contents.length; i++) {
+          filenames.push(data.Contents[i].Key);
+        }
+        res.json({
+          err: false,
+          data: filenames,
+          message: `${filenames.length} total files`,
+        });
+      }).catch((err) => {
+        console.log(`error getting item list from cos: ${err}`);
+        res.json({
+          err: true,
+          data: [],
+          message: `error getting item list from cos: ${err}`,
+        });
+      });
+    });
+app.get('/API/download', ensureLoggedIn(), declutter.checkLevel(10, true),
+    (req, res) => {
+    // TODO: return a JSON object or a stream
+
+      declutter.downloadThreadAndSaveToCloud(
+          req.query.thread,
+      ).then((output) => {
+        console.log(output);
+      }).catch((e) => {
+        console.error(e);
+      });
+      res.end('running download script');
+    });
+app.get('/API/changeTagId', ensureLoggedIn(), (req, res) => {
+  const tagId = req.query.newid;
+  db.users.changeTagId(req.user.id, tagId).then(() => {
+    res.json({
+      message: 'Tag changed',
+      err: false,
+    });
+    console.log(`Tag changed to ${tagId}`);
+  }).catch((e) => {
+    res.json({
+      message: `Tag change failed: ${e}`,
+      err: true,
+    });
+    console.error(`Error changing tag: ${e}`);
   });
 });
-app.get('/download',
-    ensureLoggedIn(),
-    (req, res) => {
-      // TODO: return a JSON object or a stream
-      if (req.user.admin) {
-        res.end('running download script');
-        // TODO: redirect to the report page when finished
-        declutter.downloadThreadAndSaveToCloud(
-            req.query.thread,
-        ).then((output) => {
-          console.log(output);
-        }).catch((e) => {
-          console.error(e);
-        });
-      } else {
-        req.end('fk offf u not admin');
-      }
-    });
-app.get('/changeTagId', (req, res) => {
-  const tagId = req.query.newid;
-  if (req.user) {
-    db.users.changeTagId(req.user.id, tagId).then(() => {
-      res.json({
-        message: 'Tag changed',
-        error: false,
-      });
-      console.log(`Tag changed to ${tagId}`);
-    }).catch((e) => {
-      res.json({
-        message: `Tag change failed: ${e}`,
-        error: true,
-      });
-      console.error(`Error changing tag: ${e}`);
-    });
-  } else {
-    res.json({
-      message: 'Not logged in',
-      error: true,
-    });
-  }
-});
-app.get('/showImages', (req, res) => {
+app.get('/API/getTwoRandomPics', (req, res) => {
   let selectedTag = 2;
   if (req.user) { // if logged in, load the users' selected tag
     selectedTag = req.user.selectedtag;
@@ -495,8 +422,7 @@ app.get('/showImages', (req, res) => {
     console.error(err);
   });
 });
-app.get('/vote', (req, res) => {
-  // TODO: return a json response
+app.get('/API/vote', (req, res) => {
   const voteid = req.query.voteid;
   const otherid = req.query.otherid;
   let userid;
@@ -509,7 +435,11 @@ app.get('/vote', (req, res) => {
       voteid, otherid,
   ).then((data) => {
     // Return the votes to the client
-    res.json(data);
+    res.json({
+      err: false,
+      data: data,
+      message: 'Voted OK',
+    });
     // Add points to the user if they are logged in
     if (userid) {
       db.users.addPoints(
@@ -522,33 +452,29 @@ app.get('/vote', (req, res) => {
     }
   }).catch((e) => {
     console.log('error voting:' + e);
-    res.end('error voting: ' + e);
+    res.json({
+      err: true,
+      data: {},
+      message: 'Database error: ' + e,
+    });
   });
 });
-app.get('/deletePic',
-    ensureLoggedIn(),
+app.get('/API/deletePic', ensureLoggedIn(), declutter.checkLevel(10, true),
     (req, res) => {
-      if (req.user.admin) {
-        db.pictures.deleteById(req.query.id).then((rec) => {
-          console.log(rec);
-          cloud.deleteItems([rec[0].filename]).then(() => {
-            console.log('file deleted from cloud.');
-            res.json({
-              err: false,
-              message: 'probably deleted file, errors dont get passed lol',
-            });
-          }).catch((e) => {
-            console.error(e);
+      db.pictures.deleteById(req.query.id).then((rec) => {
+        console.log('file deleted from db');
+        cloud.deleteItems([rec[0].filename]).then(() => {
+          console.log('file deleted from cloud.');
+          res.json({
+            err: false,
+            message: 'probably deleted file, errors dont get passed lol',
           });
         }).catch((e) => {
           console.error(e);
         });
-      } else {
-        res.json({
-          err: true,
-          message: 'not an admin',
-        });
-      }
+      }).catch((e) => {
+        console.error(e);
+      });
     });
 
 app.post('/login', passport.authenticate('local', {
@@ -632,29 +558,27 @@ app.post('/register', (req, res) => {
     res.redirect('/register');
   });
 });
-app.post('/report', ensureLoggedIn(),
+app.post('/report', ensureLoggedIn(), declutter.checkLevel(2, true),
     (req, res) => {
-      const userPriviledge = declutter.makeRank(req.user);
-      const requiredLevel = 2;
-      if (userPriviledge.level > requiredLevel) {
-        db.reports.add(
-            req.body.rtype,
-            req.body.details,
-            req.body.picid,
-            req.user.id,
-            req.user.uname,
-            req.body.suggestedfix,
-        ).then(() => {
-          res.json({
-            error: false,
-            message: 'Report submitted',
-          });
-        }).catch((e) => {
-          res.json({
-            error: true,
-            message: 'Failed' + e,
-          });
+      db.reports.add(
+          req.body.rtype,
+          req.body.details,
+          req.body.picid,
+          req.user.id,
+          req.user.uname,
+          req.body.suggestedfix,
+      ).then(() => {
+        res.json({
+          error: false,
+          message: 'Report submitted',
         });
-      }
+      }).catch((e) => {
+        res.json({
+          error: true,
+          message: 'Failed: ' + e,
+        });
+      });
     });
+
+// --------------- Start Server ----------------
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));
