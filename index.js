@@ -25,6 +25,9 @@ const declutter = new Declutter(db, cloud);
 const ChanParser = require('./_helpers/chan-parser');
 const chanParser = new ChanParser();
 
+const PgService = require('./_helpers/postgresql-service.ts');
+const pgService = new PgService;
+const session = require('express-session');
 // Server port to listen on
 const PORT = process.env.PORT || 5000;
 // Image links prefix
@@ -96,10 +99,17 @@ app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(require('morgan')('combined'));
 app.use(require('body-parser').urlencoded({extended: true}));
-app.use(require('cookie-session')({
+app.use(session({
+  store: pgService.sessionHandler(session),
   secret: 'VS7nXTfOGbbvvM26',
-  resave: false,
   saveUninitialized: false,
+  resave: false,
+  unset: 'destroy',
+  cookie: {
+    sameSite: 'Lax',
+    maxAge: 60000,
+    secure: false,
+  },
 }));
 app.use(passport.initialize());
 app.use(passport.session());
