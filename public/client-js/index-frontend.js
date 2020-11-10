@@ -1,33 +1,16 @@
 onload = function() {
   /**
-   * loads an image to the img tag given by id
-   * @param {string} src - src
-   * @param {string} alt - alt
-   * @param {string} id -img html tag id (where to "put" the image)
-   *
-   * @return {any} the image element
-   */
-  function showImage(src, alt, id) {
-    const img = document.getElementById(id);
-    img.src = src;
-    img.alt = alt;
-    img.onload = function() {
-      $(img).fadeIn(200);
-    };
-    img.style.display = 'none';
-    return img;
-  }
-
-  /**
    * Hides the images so people cant click them
    */
   function hideImages() {
-    const limg = document.getElementById('leftpic');
-    const rimg = document.getElementById('rightpic');
-    limg.style.display = 'none';
-    rimg.style.display = 'none';
-    limg.onload = function() { };
-    rimg.onload = function() { };
+    for (let i=0; i<2; i++) {
+      const img = document.getElementById('img'+i);
+      const vid = document.getElementById('vid'+i);
+      img.style.display = 'none';
+      vid.style.display = 'none';
+      img.onload = function() { };
+      vid.onload = function() { };
+    }
   }
 
   /**
@@ -82,17 +65,31 @@ onload = function() {
    * @param {object} data - server response from calling /API/getTwoRandomPics
    */
   function showImages(data) {
+    for (let i=0; i<2; i++) {
+      let clickable;
+      const parsedSrc=data.images[i].split('.');
+      // if webm do this
+      if (parsedSrc[parsedSrc.length-1]==='webm') {
+        document.getElementById('img'+i).style.display='none';// hide picture
+        document.getElementById('img'+i).src='';// hide picture
+        document.getElementById('src'+i).src=data.images[i];// source element
+        document.getElementById('vid'+i).load();// video element
+        clickable=document.getElementById('vid'+i);
+        $(clickable).show();
+      } else {
+        document.getElementById('img'+i).src=data.images[i];
+        clickable=document.getElementById('img'+i);
+        $(clickable).hide();
+        clickable.onload=(()=>{
+          $(clickable).fadeIn(500);
+        });
+      }
+      clickable.onclick = ()=>{
+        vote(data.ids[i%2], data.ids[i%2]);
+      };
+    }
+
     let voted = false;
-
-    const lp = showImage(data.images[0], data.desc[0], 'leftpic');
-    const rp = showImage(data.images[1], data.desc[1], 'rightpic');
-    lp.onclick = ()=>{
-      vote(data.ids[0], data.ids[1]);
-    };
-    rp.onclick = ()=>{
-      vote(data.ids[1], data.ids[0]);
-    };
-
     /**
      * calls the /API/vote endpoint
      * @param {int} voteid - image id to vote for
@@ -102,7 +99,12 @@ onload = function() {
       if (!voted) {// prevent voting for both
         hideImages();
         updatePointsDisplay();
-        $.getJSON(`/API/vote?voteid=${voteid}&otherid=${otherid}`, renderPage());
+        $.getJSON(
+            `/API/vote?voteid=${voteid}&otherid=${otherid}`,
+            ()=>{
+              renderPage();
+            },
+        );
       }
       voted = true;
     }

@@ -1,7 +1,6 @@
 # Critical
     ->user priviledge levels allow adding descriptions, uploading images, etc. This happens in index.ejs and showImage.ejs
     moderation for pic uploads & upload link
-    webm support
     image thumbnails and better css in /tag endpoint (also archive link in front page)
     user profile page
     make it check more boards

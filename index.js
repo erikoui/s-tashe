@@ -107,7 +107,7 @@ app.use(session({
   unset: 'destroy',
   cookie: {
     sameSite: 'Lax',
-    maxAge: 60000,
+    maxAge: 30*24*60*60*1000,
     secure: false,
   },
 }));
