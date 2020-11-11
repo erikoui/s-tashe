@@ -6,6 +6,8 @@ onload = function() {
     for (let i=0; i<2; i++) {
       const img = document.getElementById('img'+i);
       const vid = document.getElementById('vid'+i);
+      const txt = document.getElementById('txt'+i);
+      $(txt).show();
       img.style.display = 'none';
       vid.style.display = 'none';
       img.onload = function() { };
@@ -67,9 +69,11 @@ onload = function() {
   function showImages(data) {
     for (let i=0; i<2; i++) {
       let clickable;
+      const loadingText=document.getElementById('txt'+i);
       const parsedSrc=data.images[i].split('.');
-      // if webm do this
+
       if (parsedSrc[parsedSrc.length-1]==='webm') {
+        // if webm do this
         document.getElementById('img'+i).style.display='none';// hide picture
         document.getElementById('img'+i).src='';// hide picture
         document.getElementById('src'+i).src=data.images[i];// source element
@@ -80,8 +84,11 @@ onload = function() {
         document.getElementById('img'+i).src=data.images[i];
         clickable=document.getElementById('img'+i);
         $(clickable).hide();
+        $(loadingText).show();
+        
         clickable.onload=(()=>{
           $(clickable).fadeIn(500);
+          $(loadingText).hide();
         });
       }
       clickable.onclick = ()=>{

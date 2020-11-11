@@ -61,9 +61,10 @@
           <div class="col-sm-12 bg-mid">
             <div class="row">
               <div class="col-sm-6" id='leftpictainer'>
-                <img src="https://via.placeholder.com/200" id="img0" class="img-responsive" style="width:100%">
+                <div class="loading-placeholder" id='txt0'>Loading...</div>
+                <img id="img0" class="img-responsive" style="width:100%">
                 <video id="vid0" width="100%" muted autoplay loop>
-                  <source src="https://via.placeholder.com/200" id="src0" type='video/webm' style="display:none">
+                  <source id="src0" type='video/webm' style="display:none">
                 </video>
                 <div id='tags1'></div>
                 <% if(user){%>
@@ -84,10 +85,11 @@
                 <%}}%>
               </div>
               <div class="col-sm-6" id='rightpictainer'>
-                <img src="https://via.placeholder.com/200" id="img1" class="pull-right img-responsive"
+                <div class="loading-placeholder" id='txt1'>Loading...</div>
+                <img id="img1" class="pull-right img-responsive"
                   style="width:100%">
                 <video id="vid1" width="100%" muted autoplay loop>
-                  <source src="https://via.placeholder.com/200" id="src1" type='video/webm' style="display:none">
+                  <source id="src1" type='video/webm' style="display:none">
                 </video>
                 <div id='tags2'></div>
                 <% if(user){%>

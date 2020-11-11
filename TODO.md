@@ -3,8 +3,6 @@
     moderation for pic uploads & upload link
     image thumbnails and better css in /tag endpoint (also archive link in front page)
     user profile page
-    make it check more boards
-
 
 # New Features
 
@@ -13,7 +11,6 @@
     User leaderboards
     allow the user to view previous pics (like a history feature)
     nicer login front end (invalid login message or similar)
-    show a loading message while no pics on screen (maybe showing vote and edit stats)
     tag field for uploaded pictures
     diagram explaining how zip file tagging works
     

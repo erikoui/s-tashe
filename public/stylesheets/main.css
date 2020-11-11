@@ -50,3 +50,12 @@
 .bg-mid{
   background-color: #f5f3f3;
 }
+
+.loading-placeholder{
+  background-color: #eee;
+  color:#fff;
+  text-align: center;
+  min-height:300px;
+  line-height: 300px;
+  font-size:3vw;
+}
