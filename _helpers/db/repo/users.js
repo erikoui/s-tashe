@@ -61,6 +61,37 @@ class UsersRepository {
   }
 
   /**
+   * asdasd
+   * @param {int} userId asdasd
+   * @param {string} newUsername new username
+   */
+  async changeUsername(userId, newUsername) {
+    return this.db.none(
+        'UPDATE users SET uname=${newname} WHERE id=${uid};', {
+          newname: newUsername,
+          uid: userId,
+        },
+    );
+  }
+
+  /**
+   * asdasd
+   * @param {int} userId asdasd
+   * @param {string} oldPass old pass
+   * @param {string} newPass new pass
+   */
+  async changePassword(userId, oldPass, newPass) {
+    return this.db.one(
+        // eslint-disable-next-line max-len
+        'UPDATE users SET password=${newpass} WHERE id=${uid} AND password=${oldpass} RETURNING *;', {
+          newpass: newPass,
+          oldpass: oldPass,
+          uid: userId,
+        },
+    );
+  }
+
+  /**
    * Tries to find a user by id
    * @param {int} id - user id
    */

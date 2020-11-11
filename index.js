@@ -589,6 +589,24 @@ app.post('/report', ensureLoggedIn(), declutter.checkLevel(2, true),
         });
       });
     });
+app.post('/API/changeUsername', ensureLoggedIn(), (req, res) => {
+  db.users.changeUsername(req.user.id, req.body.uname).then(() => {
+    res.redirect('/');
+  }).catch((e) => {
+    console.log(e);
+    res.redirect('/profile');
+  });
+});
+app.post('/API/changePassword', ensureLoggedIn(), (req, res) => {
+  const oldPassHash = sha1(req.body.cpass);
+  const newPassHash = sha1(req.body.npass);
+  db.users.changePassword(req.user.id, oldPassHash, newPassHash).then(() => {
+    res.redirect('/logout');
+  }).catch((e) => {
+    console.log(e);
+    res.render('pages/wrongpass', {user: req.user});
+  });
+});
 
 // --------------- Start Server ----------------
 app.listen(PORT, () => console.log(`Listening on ${PORT}`));

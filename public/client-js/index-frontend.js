@@ -79,13 +79,13 @@ onload = function() {
         document.getElementById('src'+i).src=data.images[i];// source element
         document.getElementById('vid'+i).load();// video element
         clickable=document.getElementById('vid'+i);
+        $(loadingText).hide();
         $(clickable).show();
       } else {
         document.getElementById('img'+i).src=data.images[i];
         clickable=document.getElementById('img'+i);
         $(clickable).hide();
         $(loadingText).show();
-        
         clickable.onload=(()=>{
           $(clickable).fadeIn(500);
           $(loadingText).hide();

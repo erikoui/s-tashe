@@ -1,22 +1,19 @@
 # Critical
-    ->user priviledge levels allow adding descriptions, uploading images, etc. This happens in index.ejs and showImage.ejs
+    ->user priviledge levels allow adding descriptions, etc. This happens in index.ejs and showImage.ejs
     moderation for pic uploads & upload link
     image thumbnails and better css in /tag endpoint (also archive link in front page)
-    user profile page
+    archive link in navbar
 
 # New Features
 
 ## Interface
-    User settings
     User leaderboards
     allow the user to view previous pics (like a history feature)
     nicer login front end (invalid login message or similar)
     tag field for uploaded pictures
     diagram explaining how zip file tagging works
     
-
 ## Operational
-    index.js requiredlevels move to declutter as constants
 
 ## money
     ads - exoclick probably
@@ -33,8 +30,8 @@
 
 # Bugs
     rate limiter file uploads because they time out on slow connection
-    https://medium.com/developer-rants/how-to-handle-sessions-properly-in-express-js-with-heroku-c35ea8c0e500
+    user can just call the /vote api using external tools. block this somehow
+    disable register and change password button on empty fields
 
 # Don't forget
-    Check if the admin role can be spoofed in any way such as setting `req.user.admin=true` explicitly through the request or something
     Check for SQL/html injection
