@@ -71,7 +71,7 @@ class PicturesRepository {
    * @param {int} picid pic id
    */
   async getTagsById(picid) {
-    return this.db.one('SELECT tags FROM pictures p WHERE p.id=${picid}', {
+    return this.db.one('SELECT * FROM pictures p WHERE p.id=${picid}', {
       picid: picid,
     });
   }
@@ -88,6 +88,20 @@ class PicturesRepository {
     // );
     console.log('pictures.js remove not yet implemented');
     return 0;
+  }
+
+  /**
+   * Deletes a picture record by id. note that this does not
+   * delete the file from the cloud server.
+   * @param {int} id - The id of the record to delete.
+   *
+   * @return {object} - object.filename has the fn of the deleted file
+   */
+  async deleteById(id) {
+    return this.db.any(
+        'DELETE FROM pictures WHERE id = ${id} RETURNING filename', {
+          id: id,
+        });
   }
 
   /**

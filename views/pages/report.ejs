@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <% include ../partials/header.ejs %>
+</head>
+
+<body>
+  <% include ../partials/nav.ejs %>
+  <script>
+    $(document).ready(function () {
+      $("#reprot").on("submit", function (event) {
+        event.preventDefault();
+        var formValues = $(this).serialize();
+        $.post("/report", formValues, function (data) {
+          // Display the returned data in browser
+          console.log("data received"+JSON.stringify(data))
+          $("#result").html(data.message);
+        }, 'json');
+      });
+    });
+
+  </script>
+  <div class="container-fluid" style="width:90%">
+    <div class="row">
+      <div class="col-sm-2">
+        <div class="col-sm-12 bg-left" id="left-bar">
+          <h3>Image tags</h3>
+          <div id="tag-list">
+            <% for(let i=0;i<tags.length;i++){ %>
+            <a class="removetag btn btn-sm btn-default"><%= tags[i] %></a>
+            <% } %>
+          </div>
+          <h3>Image description</h3>
+          <div id="img-desc">
+            <%= description %>
+          </div>
+          <h3>Model name</h3>
+          Coming soon
+          <h3>Sauce</h3>
+          Coming soon
+          <h3>Score</h3>
+          <%=votes/views%>(<%=votes%>/<%=views%>)
+        </div>
+      </div>
+      <div class="col-sm-8">
+        <div class="row">
+          <div class="col-sm-12 bg-mid">
+            <div class="row" id='pictainer'>
+              <img src="<%- fn %>" id="pic" class="img-responsive" style="margin: 0 auto; border-radius: 5px;">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-2">
+        <div class="col-sm-12 bg-right" id="right-bar">
+          <form id="reprot" method="POST" class="form-vertical">
+            <!-- Form Name -->
+            <legend>Report</legend>
+
+            <!-- Text input-->
+            <div class="form-group">
+              <label class="control-label" for="details">What is wrong? (optional)</label>
+              <input id="details" name="details" type="text" placeholder="tag should be insta"
+                class="form-control input-md">
+            </div>
+
+            <!-- Select Basic -->
+            <div class="form-group">
+              <label class="control-label" for="rtype">Report type</label>
+              <select id="rtype" name="rtype" class="form-control">
+                <option value="tag">Wrong tag</option>
+                <option value="description">Wrong description</option>
+                <option value="badpic">Inappropriate pic</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <!-- Text input-->
+            <div class="form-group">
+              <label class="control-label" for="suggestedfix">How to fix it? (optional)</label>
+              <input id="suggestedfix" name="suggestedfix" type="text" placeholder="change the tag pls"
+                class="form-control input-md">
+            </div>
+
+            <!-- Also send the pic id -->
+            <input type="hidden" name="picid" value="<%- picid %>" />
+
+            <!-- Button -->
+            <div class="form-group">
+              <button id="submit" name="submit" class="btn btn-primary">Submit</button>
+            </div>
+            </fieldset>
+          </form>
+          <div id="result"></div>
+        </div>
+      </div>
+    </div>
+</body>
+
+</html>

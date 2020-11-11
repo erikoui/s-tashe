@@ -10,20 +10,55 @@
   <div class="container-fluid" style="width:90%">
     <div class="row">
       <div class="col-sm-2">
-        User settings here (change password etc)
+          <div class="col-sm-12 bg-left">
+            <p>
+              <strong>Username: </strong><%= user.uname %><br />
+              <strong>Points: </strong><%= user.points %><br />
+              <strong>Rank: </strong><%= user.rank %><br />
+              <strong>Joined on: </strong><%= user.joinedon %><br />
+            </p>
+          </div>
       </div>
       <div class="col-sm-8">
-        <p>
-          Username: <%= user.uname %><br/>
-          Points: <%= user.points %><br/>
-          Rank: <%= user.rank %><br/>       
-          Joined on: <%= user.joinedon %><br/>
-          </p>
+        <div class="row">
+          <div class="col-sm-12 bg-mid">
+            <h2>Settings</h2>
+            <div class="bg-left" style="border-radius: 10px;padding:10px">
+              <h3>Change username</h3>
+              <form class="form-inline" action="/API/changeUsername" method="POST">
+                <label class="col-form-label col-form-label-sm" for="uname">New Username</label>
+                <input type="text" class="form-control mb-2 mr-sm-2" id="uname" name="uname" placeholder="<%=user.uname%>">
+                <button id="username-button" type="submit" class="btn btn-primary btn-sm">Submit</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-12 bg-mid">   
+            <div class="bg-left" style="border-radius: 10px;padding:10px">
+              <h3>Change password</h3>
+              <form class="form-inline" action="/API/changePassword" method="POST">
+                <label class="col-form-label col-form-label-sm" for="cpass">Current password</label>
+                <input type="password" class="form-control mb-2 mr-sm-2" id="cpass" name="cpass"><br>
+                <label class="col-form-label col-form-label-sm" for="npass">New password</label>
+                <input type="password" class="form-control mb-2 mr-sm-2" id="npass" name="npass"><br>
+                <label class="col-form-label col-form-label-sm" for="npassc">Confirm password</label>
+                <input type="password" class="form-control mb-2 mr-sm-2" id="npassc" name="npassc"><br>
+                <button type="submit" id="pass-button" class="btn btn-primary btn-sm">Submit</button>
+              </form>
+              <script src="/client-js/profile-frontend.js"></script>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="col-sm-2">
-        User leaderboad here
+          <div class="col-sm-12 bg-right">
+            User leaderboad here
+          </div>
       </div>
     </div>
+  </div>
 
 </body>
+
 </html>

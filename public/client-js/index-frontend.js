@@ -1,43 +1,25 @@
 onload = function() {
   /**
-   * loads an image to the img tag given by id
-   * @param {string} src - src
-   * @param {string} alt - alt
-   * @param {string} id -img html tag id (where to "put" the image)
-   *
-   * @return {any} the image element
-   */
-  function showImage(src, alt, id) {
-    const img = document.getElementById(id);
-    img.src = src;
-    img.alt = alt;
-    img.onload = function() {
-      $(img).fadeIn(500);
-    };
-    img.style.display = 'none';
-    return img;
-  }
-
-  /**
    * Hides the images so people cant click them
    */
   function hideImages() {
-    const limg = document.getElementById('leftpic');
-    const rimg = document.getElementById('rightpic');
-    limg.style.display = 'none';
-    rimg.style.display = 'none';
-    limg.onload = function() { };
-    rimg.onload = function() { };
+    for (let i=0; i<2; i++) {
+      const img = document.getElementById('img'+i);
+      const vid = document.getElementById('vid'+i);
+      const txt = document.getElementById('txt'+i);
+      $(txt).show();
+      img.style.display = 'none';
+      vid.style.display = 'none';
+      img.onload = function() { };
+      vid.onload = function() { };
+    }
   }
 
   /**
-   * Adds 1 point to the point display only. points are added to the database
-   * via the /vote endpoint.
-   *
-   * @param {String} clickedId - The id of the element to which to show the
-   * notification
+   * Adds 1 point to the point display only. Does not add points to the
+   * database.
    */
-  function updatePoints() {
+  function updatePointsDisplay() {
     const pointsDiv = document.getElementById('points');
     if (pointsDiv) {
       const currentPoints = parseInt(pointsDiv.innerText);
@@ -49,70 +31,90 @@ onload = function() {
       );
     }
   }
+
   /**
-   * Show images based on the /showImages response
+   * Loads the tags under the images.
+   *
+   * @param {object} data - server response from calling /API/getTwoRandomPics
    */
-  function renderPage() {
-    $.getJSON('/showImages', function(data) {
-      let voted = false;
-      if (data) {
-        showControls(data);
-        const lpt = document.getElementById('tags1');
-        const rpt = document.getElementById('tags2');
-        lpt.innerHTML = '';
-        rpt.innerHTML = '';
+  function showTags(data) {
+    // Tag divs
+    const pt = [
+      document.getElementById('tags1'),
+      document.getElementById('tags2'),
+    ];
 
-        const lp = showImage(data.image1, data.desc1, 'leftpic');
-        const rp = showImage(data.image2, data.desc2, 'rightpic');
-
-        if (data.tags1) {
-          for (let i = 0; i < data.tags1.length; i++) {
-            const currentTag = document.createElement('a');
-            currentTag.setAttribute('type', 'button');
-            currentTag.setAttribute('href', `/tag?tag=${data.tags1[i]}`);
-            currentTag.setAttribute('class', 'btn btn-sm btn-default');
-            currentTag.innerText = data.tags1[i];
-            lpt.appendChild(currentTag);
-          }
+    // Set tags
+    for (let j=0; j<2; j++) {
+      // clear tags
+      pt[j].innerHTML='';
+      if (data.tags[j]) {
+        for (let i = 0; i < data.tags[j].length; i++) {
+          const currentTag = document.createElement('a');
+          currentTag.setAttribute('type', 'button');
+          currentTag.setAttribute('href', `/tag?tag=${data.tags[j][i]}`);
+          currentTag.setAttribute('class', 'btn btn-sm btn-default');
+          currentTag.innerText = data.tags[j][i];
+          pt[j].appendChild(currentTag);
         }
-        if (data.tags2) {
-          for (let i = 0; i < data.tags2.length; i++) {
-            const currentTag = document.createElement('a');
-            currentTag.setAttribute('type', 'button');
-            currentTag.setAttribute('href', `/tag?tag=${data.tags2[i]}`);
-            currentTag.setAttribute('class', 'btn btn-sm btn-default');
-            currentTag.innerText = data.tags2[i];
-            rpt.appendChild(currentTag);
-          }
-        }
-        lp.onclick = function() {
-          if (!voted) {// prevent voting for both
-            hideImages();
-            updatePoints();
-            $.getJSON(
-                `/vote?voteid=${data.id1}&otherid=${data.id2}`,
-                (data) => {
-                  renderPage();
-                });
-          }
-          voted = true;
-        };
-        rp.onclick = function() {
-          if (!voted) {// prevent voting for both
-            hideImages();
-            updatePoints();
-            $.getJSON(
-                `/vote?voteid=${data.id2}&otherid=${data.id1}`,
-                (data) => {
-                  renderPage();
-                });
-          }
-          voted = true;
-        };
-      } else {
-        console.log('error fetching images from server');
       }
-    });
+    }
+  }
+
+  /**
+   * Loads 2 images to the page and sets their click event to vote for them.
+   *
+   * @param {object} data - server response from calling /API/getTwoRandomPics
+   */
+  function showImages(data) {
+    for (let i=0; i<2; i++) {
+      let clickable;
+      const loadingText=document.getElementById('txt'+i);
+      const parsedSrc=data.images[i].split('.');
+
+      if (parsedSrc[parsedSrc.length-1]==='webm') {
+        // if webm do this
+        document.getElementById('img'+i).style.display='none';// hide picture
+        document.getElementById('img'+i).src='';// hide picture
+        document.getElementById('src'+i).src=data.images[i];// source element
+        document.getElementById('vid'+i).load();// video element
+        clickable=document.getElementById('vid'+i);
+        $(loadingText).hide();
+        $(clickable).show();
+      } else {
+        document.getElementById('img'+i).src=data.images[i];
+        clickable=document.getElementById('img'+i);
+        $(clickable).hide();
+        $(loadingText).show();
+        clickable.onload=(()=>{
+          $(clickable).fadeIn(500);
+          $(loadingText).hide();
+        });
+      }
+      clickable.onclick = ()=>{
+        vote(data.ids[i%2], data.ids[i%2]);
+      };
+    }
+
+    let voted = false;
+    /**
+     * calls the /API/vote endpoint
+     * @param {int} voteid - image id to vote for
+     * @param {int} otherid - the other image to increase its views
+     */
+    function vote(voteid, otherid) {
+      if (!voted) {// prevent voting for both
+        hideImages();
+        updatePointsDisplay();
+        $.getJSON(
+            `/API/vote?voteid=${voteid}&otherid=${otherid}`,
+            ()=>{
+              renderPage();
+            },
+        );
+      }
+      voted = true;
+    }
   }
 
   /**
@@ -120,47 +122,105 @@ onload = function() {
    * @param {object} data - the data from renderPage
    */
   function showControls(data) {
-    // Make left panel tag buttons call
-    // the /changeTagId endpoint without changing page
-    $('.changetag').click((e) => {
-      e.preventDefault();
-      $.getJSON(e.target.href, () => {
-        location.reload();
-      });
-    });
+    // Level 3: change tags buttons
+    const c=[];
+    for (let i=0; i<6; i++) {
+      for (let j=0; j<2; j++) {
+        c[i]=[];
+        c[i][j]=document.getElementById(`level${i + 1}-controls${j + 1}`);
+        if (c[i][j]) {
+          c[i][j].innerHTML = '';
+          const controlButton = document.createElement('a');
+          controlButton.setAttribute('type', 'button');
+          // level 1 controls
+          if (i==0) {
+          }
+          // level 2 controls
+          if (i==1) {
+            controlButton.setAttribute(
+                'href',
+                `/report?picid=${data.ids[j]}`,
+            );
+            controlButton.setAttribute('class', 'btn btn-sm btn-warning');
+            controlButton.innerText = 'Report problem';
+            c[i][j].appendChild(controlButton);
+          }
+          // level 3 controls
+          if (i==2) {
+            controlButton.setAttribute(
+                'href',
+                `/edittags?picid=${data.ids[j]}`,
+            );
+            controlButton.setAttribute('class', 'btn btn-sm btn-warning');
+            controlButton.innerText = 'Change tags';
+            c[i][j].appendChild(controlButton);
+          }
+          // level 4 controls
+          if (i==3) {
+          }
+          // level 5 controls
+          if (i==4) {
+          }
+          // level 6 controls
+          if (i==5) {
+          }
+        }
+      }
+    }
 
-    $('.reporttag').click((e) => {
-      e.preventDefault();
-      $.getJSON(e.target.href, () => {
-        location.reload();
-      });
-    });
-    // Level 3
-    // left report tag button
-    const lc3 = document.getElementById('level3-controls1');
-    if (lc3) {
-      let changeTagBtn = document.createElement('a');
-      changeTagBtn.setAttribute('type', 'button');
-      changeTagBtn.setAttribute(
-          'href',
-          `/edittags?picid=${data.id1}&fn=${data.image1}`,
-      );
-      changeTagBtn.setAttribute('class', 'btn btn-sm btn-warning');
-      changeTagBtn.innerText = 'Change tags';
-      lc3.appendChild(changeTagBtn);
-
-      // right report tag button
-      const rc3 = document.getElementById('level3-controls2');
-      changeTagBtn = document.createElement('a');
-      changeTagBtn.setAttribute('type', 'button');
-      changeTagBtn.setAttribute(
-          'href',
-          `/edittags?picid=${data.id2}&fn=${data.image2}`,
-      );
-      changeTagBtn.setAttribute('class', 'btn btn-sm btn-warning');
-      changeTagBtn.innerText = 'Change tags';
-      rc3.appendChild(changeTagBtn);
+    // Admin controls
+    const adminDiv=[
+      document.getElementById('admin-controls1'),
+      document.getElementById('admin-controls2'),
+    ];
+    for (let i=0; i<2; i++) {
+      if (adminDiv[i]) {
+        adminDiv[i].innerHTML='';
+        const adminButton=document.createElement('a');
+        adminButton.setAttribute('type', 'button');
+        adminButton.setAttribute(
+            'href',
+            ``,
+        );
+        adminButton.setAttribute('class', 'btn btn-sm btn-danger');
+        adminButton.innerText = 'Delete image';
+        adminButton.onclick=(e)=>{
+          e.preventDefault();
+          if (confirm('Are you sure?')) {
+            $.getJSON('/API/deletePic?id='+data.ids[i], (data)=>{
+              location.reload();
+            });
+          }
+        };
+        adminDiv[i].appendChild(adminButton);
+      }
     }
   }
+
+  /**
+   * Show images based on the /API/getTwoRandomPics response
+   */
+  function renderPage() {
+    $.getJSON('/API/getTwoRandomPics', function(data) {
+      if (data) {
+        showControls(data);
+        showImages(data);
+        showTags(data);
+      } else {
+        console.log('Error fetching images from server');
+      }
+    });
+  }
+
+  // Make left panel tag buttons call
+  // the /API/changeTagId endpoint without changing page
+  $('.changetag').click((e) => {
+    e.preventDefault();
+    $.getJSON(e.target.href, () => {
+      location.reload();
+    });
+  });
+
+  // Load the middle column pics, tags and controls
   renderPage();
 };

@@ -143,6 +143,77 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
+
+CREATE TABLE public.reports (
+    id integer NOT NULL,
+    rtype text,
+    details text,
+    picid bigint,
+    reportedbyid bigint,
+    reportedbyuname text,
+    suggestedfix text
+);
+
+
+--
+-- TOC entry 208 (class 1259 OID 21041102)
+-- Name: reports_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.reports_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- TOC entry 3857 (class 0 OID 0)
+-- Dependencies: 208
+-- Name: reports_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.reports_id_seq OWNED BY public.reports.id;
+
+
+--
+-- TOC entry 3721 (class 2604 OID 21041107)
+-- Name: reports id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.reports ALTER COLUMN id SET DEFAULT nextval('public.reports_id_seq'::regclass);
+
+
+--
+-- TOC entry 3851 (class 0 OID 21041104)
+-- Dependencies: 209
+-- Data for Name: reports; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.reports (id, rtype, details, picid, reportedbyid, reportedbyuname, suggestedfix) FROM stdin;
+\.
+
+
+--
+-- TOC entry 3858 (class 0 OID 0)
+-- Dependencies: 208
+-- Name: reports_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.reports_id_seq', 1, false);
+
+
+--
+-- TOC entry 3723 (class 2606 OID 21041112)
+-- Name: reports reports_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.reports
+    ADD CONSTRAINT reports_pkey PRIMARY KEY (id);
+
+
 --
 -- TOC entry 3875 (class 0 OID 0)
 -- Dependencies: 202
