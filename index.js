@@ -10,9 +10,6 @@ const extract = require('extract-zip');
 const multer = require('multer');
 const upload = multer({dest: 'uploads/'});
 
-// eslint-disable-next-line no-unused-vars
-const {nextTick} = require('process');
-
 // Load custom modules
 const {db} = require('./_helpers/db');
 
@@ -107,7 +104,7 @@ app.use(session({
   unset: 'destroy',
   cookie: {
     sameSite: 'Lax',
-    maxAge: 30*24*60*60*1000,
+    maxAge: 30 * 24 * 60 * 60 * 1000,
     secure: false,
   },
 }));
@@ -124,7 +121,7 @@ app.get('/', (req, res) => {
       user: req.user,
       top10: top,
       tags: declutter.tags,
-      prefix: '/showImage/',
+      prefix: '/edittags/',
       rankingData: declutter.rankingData,
     });
   }).catch((e) => {
@@ -133,7 +130,7 @@ app.get('/', (req, res) => {
       user: req.user,
       top10: [],
       tags: declutter.tags,
-      prefix: '/showImage/',
+      prefix: '/edittags/',
       rankingData: declutter.rankingData,
     });
   });
@@ -143,7 +140,7 @@ app.get('/tag', (req, res) => {
   db.pictures.listByTag(tag, 10)
       .then((picList) => {
         res.render('pages/tag.ejs', {
-          prefix: '/showImage/',
+          prefix: '/edittags/',
           picList: picList,
           user: req.user,
         });
@@ -172,29 +169,17 @@ app.get('/admin', ensureLoggedIn(), declutter.checkLevel(10, false),
 app.get('/profile', ensureLoggedIn(), (req, res) => {
   res.render('pages/profile', {user: req.user});
 });
-app.get('/showImage/:fn', (req, res) => {
-  const filename = req.params['fn'];
-  res.render('pages/showImage', {
-    user: req.user,
-    fn: imgPrefixURL + filename,
-  });
-});
-app.get('/edittags', ensureLoggedIn(), declutter.checkLevel(3, false),
+app.get('/edittags',
     (req, res) => {
-      db.pictures.getTagsById(req.query.picid).then((imgData) => {
-        res.render('pages/edittags', {
-          picid: req.query.picid,
-          user: req.user,
-          fn: imgPrefixURL + imgData.filename,
-          description: imgData.description,
-          tags: imgData.tags,
-          alltags: declutter.tags,
-        });
+      res.render('pages/edittags', {
+        picid: req.query.picid,
+        user: req.user,
       });
     });
+
 app.get('/report', ensureLoggedIn(), declutter.checkLevel(2, false),
     (req, res) => {
-      db.pictures.getTagsById(req.query.picid).then((imgData) => {
+      db.pictures.getPicDataById(req.query.picid).then((imgData) => {
         res.render('pages/report', {
           picid: req.query.picid,
           user: req.user,
@@ -220,6 +205,23 @@ app.get('/showreports', ensureLoggedIn(), declutter.checkLevel(10, false),
     });
 
 // ----------- API calls ----------
+app.get('/API/getPicData', (req, res)=>{
+  db.pictures.getPicDataById(req.query.picid).then((imgData) => {
+    res.json({
+      err: false,
+      picid: req.query.picid,
+      fn: imgPrefixURL + imgData.filename,
+      description: imgData.description,
+      tags: imgData.tags,
+      alltags: declutter.tags,
+    });
+  }).catch((e)=>{
+    res.json({
+      err: true,
+      message: e.message,
+    });
+  });
+});
 app.get('/API/getReports', ensureLoggedIn(), declutter.checkLevel(10, true),
     (req, res) => {
       db.reports.getByPicId(req.query.picid).then((data) => {
@@ -245,7 +247,7 @@ app.get('/API/removereports', ensureLoggedIn(), declutter.checkLevel(10, true),
         });
       });
     });
-app.get('/API/addTag', ensureLoggedIn(), declutter.checkLevel(3, true),
+app.get('/API/addTag', declutter.checkLevel(3, true), ensureLoggedIn(),
     (req, res) => {
       let validTag = false;
       for (let i = 0; i < declutter.tags.length; i++) {
@@ -259,11 +261,11 @@ app.get('/API/addTag', ensureLoggedIn(), declutter.checkLevel(3, true),
           res.json({
             err: false,
             message: 'Tag ' + req.query.tag + ' added.',
-          }).catch((e) => {
-            res.json({
-              err: true,
-              message: 'Database error: ' + e,
-            });
+          });
+        }).catch((e) => {
+          res.json({
+            err: true,
+            message: 'Database error: ' + e,
           });
         });
       } else {
@@ -273,7 +275,7 @@ app.get('/API/addTag', ensureLoggedIn(), declutter.checkLevel(3, true),
         });
       }
     });
-app.get('/API/removeTag', ensureLoggedIn(), declutter.checkLevel(3, true),
+app.get('/API/removeTag', declutter.checkLevel(3, true), ensureLoggedIn(),
     (req, res) => {
       let validTag = false;
       for (let i = 0; i < declutter.tags.length; i++) {
@@ -471,7 +473,7 @@ app.get('/API/vote', (req, res) => {
 });
 app.get('/API/deletePic', ensureLoggedIn(), declutter.checkLevel(10, true),
     (req, res) => {
-      db.pictures.deleteById(req.query.id).then((rec) => {
+      db.pictures.deleteById(req.query.picid).then((rec) => {
         console.log('file deleted from db');
         cloud.deleteItems([rec[0].filename]).then(() => {
           console.log('file deleted from cloud.');

@@ -187,7 +187,7 @@ onload = function() {
         adminButton.onclick=(e)=>{
           e.preventDefault();
           if (confirm('Are you sure?')) {
-            $.getJSON('/API/deletePic?id='+data.ids[i], (data)=>{
+            $.getJSON('/API/deletePic?picid='+data.ids[i], (data)=>{
               location.reload();
             });
           }

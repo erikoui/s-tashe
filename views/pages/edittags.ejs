@@ -13,39 +13,32 @@
       <div class="col-sm-2">
         <div class="col-sm-12 bg-left" id="left-bar">
           Click on any of these tags to remove it:
-          <div id="remove-tag-list">
-            <% for(let i=0;i<tags.length;i++){ %>
-            <a href="/API/removeTag?picid=<%= picid %>&tag=<%=tags[i]%>"
-              class="removetag btn btn-sm btn-danger"><%= tags[i] %></a>
-            <% } %>
-          </div>
+          <div id="loading-tags" inline>Loading tags...</div>
+          <div id="remove-tag-list"></div>
           Click on any of these tags to add it:
-          <div id="add-tag-list">
-            <% for(let i=0;i<alltags.length;i++){ if(tags.indexOf(alltags[i].tag)<=-1){%>
-            <a href="/API/addTag?picid=<%= picid %>&tag=<%=alltags[i].tag%>"
-              class="addtag btn btn-sm btn-success"><%= alltags[i].tag %></a>
-            <% } }%>
-          </div>
+          <div id="add-tag-list"></div>
         </div>
       </div>
       <div class="col-sm-8">
         <div class="row">
           <div class="col-sm-12 bg-mid">
             <div class="row" id='pictainer'>
-              <img src="<%- fn %>" id="pic" class="img-responsive" style="margin: 0 auto; border-radius: 5px;">
+              <img id="pic" class="img-responsive" style="margin: 0 auto; border-radius: 5px;">
             </div>
           </div>
         </div>
       </div>
       <div class="col-sm-2">
         <div class="col-sm-12 bg-right" id="right-bar">
-          <%if(user.admin){%>
+          <%if(user) if(user.admin){%>
           <h3>Reports</h3>
           <div>
             <ul id="reports"></ul>
             <div id="loading">Loading reports...</div>
           </div>
-          <a href='/API/removereports?picid=<%=picid%>' class="removeallreports btn btn-sm btn-success">Remove all reports</a>
+          <a href='/API/removereports?picid=<%=picid%>' class="removeallreports btn btn-sm btn-success">Remove all
+            reports</a>
+          <a id='deletebutton' href='/API/deletePic?picid=<%=picid%>' class="confirm-button btn btn-sm btn-danger">Delete pic</a>
           <%}%>
         </div>
       </div>
