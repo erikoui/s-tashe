@@ -9,6 +9,7 @@ const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 const extract = require('extract-zip');
 const multer = require('multer');
 const upload = multer({dest: 'uploads/'});
+const favicon=require('serve-favicon');
 
 // Load custom modules
 const {db} = require('./_helpers/db');
@@ -94,6 +95,7 @@ app = express();
 
 // ------------ init middlewares ------------
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(favicon(path.join(__dirname, 'public', 'favicon.png')));
 app.use(require('morgan')('combined'));
 app.use(require('body-parser').urlencoded({extended: true}));
 app.use(session({

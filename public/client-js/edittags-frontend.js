@@ -100,6 +100,7 @@ onload = function() {
               `/API/changeDescription?picid=${picid}&newdesc=${newDesc}`,
               (data)=>{
                 if (data.err) {
+                  alert(data.message);
                   console.log('error changing desciption: '+data.message);
                 } else {
                   console.log(data.message);

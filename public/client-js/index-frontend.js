@@ -107,10 +107,10 @@ onload = function() {
 
       if (parsedSrc[parsedSrc.length - 1] === 'webm') {
         // if webm do this
-        document.getElementById('img' + i).style.display = 'none';// hide picture
-        document.getElementById('img' + i).src = '';// hide picture
-        document.getElementById('src' + i).src = data.images[i];// source element
-        document.getElementById('vid' + i).load();// video element
+        document.getElementById('img' + i).style.display = 'none';
+        document.getElementById('img' + i).src = '';
+        document.getElementById('src' + i).src = data.images[i];
+        document.getElementById('vid' + i).load();
         clickable = document.getElementById('vid' + i);
         $(loadingText).hide();
         $(clickable).show();
@@ -254,6 +254,10 @@ onload = function() {
         showControls(data);
         showImages(data);
         showTags(data);
+        if (!document.getElementById('gleaders')) {
+          console.log('updating leaderboard');
+          updateLeaderboard(data);
+        }
       } else {
         console.log('Error fetching images from server');
       }
@@ -271,5 +275,4 @@ onload = function() {
 
   // Load the middle column pics, tags and controls
   renderPage();
-  updateLeaderboard(data);
 };
