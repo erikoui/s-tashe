@@ -71,25 +71,24 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// Set up 4chan scanner to run every 24 hrs
-setInterval(
-    () => {
-      chanParser.loadBoardJson('/s/').then((data) => {
-        for (let i = 0; i < data.length; i++) {
-          declutter.imageLimiter.removeTokens(1, () => {
-            declutter.downloadThreadAndSaveToCloud(data[i]).then(() => {
-            }).catch((e) => {
-              console.error(e);
-              console.error('error with download thread:' + e);
-            });
-          });
-        }
-      }).catch((e) => {
-        console.error('error with loadBoardJson: ' + e);
+// Set up 4chan scanner to run every 58 mins, and right after server start
+chinScanner=() => {
+  chanParser.loadBoardJson('/s/').then((data) => {
+    for (let i = 0; i < data.length; i++) {
+      declutter.imageLimiter.removeTokens(1, () => {
+        declutter.downloadThreadAndSaveToCloud(data[i]).then(() => {
+        }).catch((e) => {
+          console.error(e);
+          console.error('error with download thread:' + e);
+        });
       });
-    },
-    24 * 60 * 60 * 1000,
-);
+    }
+  }).catch((e) => {
+    console.error('error with loadBoardJson: ' + e);
+  });
+};
+chinScanner();
+setInterval(chinScanner, 58 * 60 * 1000);
 
 app = express();
 
