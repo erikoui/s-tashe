@@ -3,6 +3,7 @@
     image thumbnails and better css in /tag endpoint (also archive link in front page)
     archive link in navbar
     award points on change tags
+    remove all reports on delete pic
 
 # New Features
 
