@@ -77,6 +77,20 @@ class PicturesRepository {
   }
 
   /**
+   * Changes the description of a picture by id
+   * @param {int} picid -picture id
+   * @param {string} newDesc -new desctription
+   */
+  async changeDesc(picid, newDesc) {
+    return this.db.one(
+        'UPDATE pictures SET description=${newD} WHERE id=${id} RETURNING *;',
+        {
+          id: picid,
+          newD: newDesc,
+        });
+  }
+
+  /**
    * Deletes a picture record by id. note that this does not
    * delete the file from the cloud server.
    * @param {int} id - The id of the record to delete.

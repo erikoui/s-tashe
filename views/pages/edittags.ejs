@@ -24,6 +24,14 @@
           <div class="col-sm-12 bg-mid">
             <div class="row" id='pictainer'>
               <img id="pic" class="img-responsive" style="margin: 0 auto; border-radius: 5px;">
+              <div class="tags-list">
+                <div id="desc" class="inline-div">
+                  Loading description...
+                </div>
+                <div class="inline-div">
+                  <a id='edit-desc' href=''><span class="glyphicon glyphicon glyphicon-pencil"></span></a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -38,12 +46,14 @@
           </div>
           <a href='/API/removereports?picid=<%=picid%>' class="removeallreports btn btn-sm btn-success">Remove all
             reports</a>
-          <a id='deletebutton' href='/API/deletePic?picid=<%=picid%>' class="confirm-button btn btn-sm btn-danger">Delete pic</a>
+          <a id='deletebutton' href='/API/deletePic?picid=<%=picid%>'
+            class="confirm-button btn btn-sm btn-danger">Delete pic</a>
           <%}%>
         </div>
       </div>
     </div>
-    <div id='picid' style="display:none;"><%=picid%></div>
+    <div id='picid' style="display:none;"><%=picid%>
+        </div>
 </body>
 
 </html>

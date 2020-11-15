@@ -25,6 +25,7 @@ const chanParser = new ChanParser();
 const PgService = require('./_helpers/postgresql-service.ts');
 const pgService = new PgService;
 const session = require('express-session');
+const e = require('express');
 // Server port to listen on
 const PORT = process.env.PORT || 5000;
 // Image links prefix
@@ -230,6 +231,21 @@ app.get('/API/getReports', ensureLoggedIn(), declutter.checkLevel(10, true),
         res.json({
           err: true,
           message: 'Error:' + e,
+        });
+      });
+    });
+// eslint-disable-next-line max-len
+app.get('/API/changeDescription', declutter.checkLevel(5, true), ensureLoggedIn(),
+    (req, res)=>{
+      db.pictures.changeDesc(req.query.picid, req.query.newdesc).then((data)=>{
+        res.json({
+          err: false,
+          message: 'OK:'+data.description,
+        });
+      }).catch((e)=>{
+        res.json({
+          err: true,
+          message: e.message,
         });
       });
     });

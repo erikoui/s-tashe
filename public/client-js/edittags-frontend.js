@@ -1,7 +1,3 @@
-// TODO: remove location.reload() and replace it with something
-// that redraws the tags (no need to get tags from db)
-
-// TODO: show the result of the getJSONs in a div somewhere
 onload = function() {
   $('.removeallreports').click((e) => {
     e.preventDefault();
@@ -18,6 +14,7 @@ onload = function() {
       });
     }
   });
+
 
   const picid = $('#picid').text();
   $('#picid').html('');
@@ -85,6 +82,31 @@ onload = function() {
       } else {
         console.log('error getting pic data: '+data.message);
       }
+      $('#desc').text(data.description);
+      $('#edit-desc').click((e)=>{
+        e.preventDefault();
+        $('#desc').html(
+            `<form class="form-inline" id='change-desc-form'>
+           <input id='new-desc' type="text" name="desc" 
+           value='${data.description}'>
+           <input type="submit" value="Change">
+           </form>`,
+        );
+        $('#change-desc-form').submit((e)=>{
+          e.preventDefault();
+          const newDesc=$('#new-desc').val();
+          $.getJSON(
+              `/API/changeDescription?picid=${picid}&newdesc=${newDesc}`,
+              (data)=>{
+                if (data.err) {
+                  console.log('error changing desciption: '+data.message);
+                } else {
+                  console.log(data.message);
+                  refreshData(picid);
+                }
+              });
+        });
+      });
     });
   };
   refreshData(picid);
