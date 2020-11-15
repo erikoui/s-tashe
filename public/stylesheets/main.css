@@ -59,3 +59,13 @@
   line-height: 300px;
   font-size:3vw;
 }
+
+.tags-list{
+  text-align: center;
+  margin:5px;
+}
+
+.inline-div{
+  display:inline;
+  line-height:15px;
+}

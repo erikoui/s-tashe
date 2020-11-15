@@ -1,8 +1,8 @@
 # Critical
-    ->user priviledge levels allow adding descriptions, etc. This happens in index.ejs and showImage.ejs
     moderation for pic uploads & upload link
     image thumbnails and better css in /tag endpoint (also archive link in front page)
     archive link in navbar
+    award points on change tags
 
 # New Features
 
@@ -29,8 +29,7 @@
     replace all ejs with api calls
 
 # Bugs
-    rate limiter file uploads because they time out on slow connection
-    user can just call the /vote api using external tools. block this somehow
+    user can just call the /vote api using external tools. block this somehow - limit votes per day/week
     disable register and change password button on empty fields
 
 # Don't forget

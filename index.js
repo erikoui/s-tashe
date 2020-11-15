@@ -10,9 +10,6 @@ const extract = require('extract-zip');
 const multer = require('multer');
 const upload = multer({dest: 'uploads/'});
 
-// eslint-disable-next-line no-unused-vars
-const {nextTick} = require('process');
-
 // Load custom modules
 const {db} = require('./_helpers/db');
 
@@ -28,6 +25,7 @@ const chanParser = new ChanParser();
 const PgService = require('./_helpers/postgresql-service.ts');
 const pgService = new PgService;
 const session = require('express-session');
+
 // Server port to listen on
 const PORT = process.env.PORT || 5000;
 // Image links prefix
@@ -73,25 +71,24 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// Set up 4chan scanner to run every 24 hrs
-setInterval(
-    () => {
-      chanParser.loadBoardJson('/s/').then((data) => {
-        for (let i = 0; i < data.length; i++) {
-          declutter.imageLimiter.removeTokens(1, () => {
-            declutter.downloadThreadAndSaveToCloud(data[i]).then(() => {
-            }).catch((e) => {
-              console.error(e);
-              console.error('error with download thread:' + e);
-            });
-          });
-        }
-      }).catch((e) => {
-        console.error('error with loadBoardJson: ' + e);
+// Set up 4chan scanner to run every 58 mins, and right after server start
+chinScanner=() => {
+  chanParser.loadBoardJson('/s/').then((data) => {
+    for (let i = 0; i < data.length; i++) {
+      declutter.imageLimiter.removeTokens(1, () => {
+        declutter.downloadThreadAndSaveToCloud(data[i]).then(() => {
+        }).catch((e) => {
+          console.error(e);
+          console.error('error with download thread:' + e);
+        });
       });
-    },
-    24 * 60 * 60 * 1000,
-);
+    }
+  }).catch((e) => {
+    console.error('error with loadBoardJson: ' + e);
+  });
+};
+chinScanner();
+setInterval(chinScanner, 58 * 60 * 1000);
 
 app = express();
 
@@ -107,7 +104,7 @@ app.use(session({
   unset: 'destroy',
   cookie: {
     sameSite: 'Lax',
-    maxAge: 30*24*60*60*1000,
+    maxAge: 30 * 24 * 60 * 60 * 1000,
     secure: false,
   },
 }));
@@ -124,7 +121,7 @@ app.get('/', (req, res) => {
       user: req.user,
       top10: top,
       tags: declutter.tags,
-      prefix: '/showImage/',
+      prefix: '/edittags/',
       rankingData: declutter.rankingData,
     });
   }).catch((e) => {
@@ -133,7 +130,7 @@ app.get('/', (req, res) => {
       user: req.user,
       top10: [],
       tags: declutter.tags,
-      prefix: '/showImage/',
+      prefix: '/edittags/',
       rankingData: declutter.rankingData,
     });
   });
@@ -143,7 +140,7 @@ app.get('/tag', (req, res) => {
   db.pictures.listByTag(tag, 10)
       .then((picList) => {
         res.render('pages/tag.ejs', {
-          prefix: '/showImage/',
+          prefix: '/edittags/',
           picList: picList,
           user: req.user,
         });
@@ -172,29 +169,17 @@ app.get('/admin', ensureLoggedIn(), declutter.checkLevel(10, false),
 app.get('/profile', ensureLoggedIn(), (req, res) => {
   res.render('pages/profile', {user: req.user});
 });
-app.get('/showImage/:fn', (req, res) => {
-  const filename = req.params['fn'];
-  res.render('pages/showImage', {
-    user: req.user,
-    fn: imgPrefixURL + filename,
-  });
-});
-app.get('/edittags', ensureLoggedIn(), declutter.checkLevel(3, false),
+app.get('/edittags',
     (req, res) => {
-      db.pictures.getTagsById(req.query.picid).then((imgData) => {
-        res.render('pages/edittags', {
-          picid: req.query.picid,
-          user: req.user,
-          fn: imgPrefixURL + imgData.filename,
-          description: imgData.description,
-          tags: imgData.tags,
-          alltags: declutter.tags,
-        });
+      res.render('pages/edittags', {
+        picid: req.query.picid,
+        user: req.user,
       });
     });
+
 app.get('/report', ensureLoggedIn(), declutter.checkLevel(2, false),
     (req, res) => {
-      db.pictures.getTagsById(req.query.picid).then((imgData) => {
+      db.pictures.getPicDataById(req.query.picid).then((imgData) => {
         res.render('pages/report', {
           picid: req.query.picid,
           user: req.user,
@@ -220,6 +205,23 @@ app.get('/showreports', ensureLoggedIn(), declutter.checkLevel(10, false),
     });
 
 // ----------- API calls ----------
+app.get('/API/getPicData', (req, res)=>{
+  db.pictures.getPicDataById(req.query.picid).then((imgData) => {
+    res.json({
+      err: false,
+      picid: req.query.picid,
+      fn: imgPrefixURL + imgData.filename,
+      description: imgData.description,
+      tags: imgData.tags,
+      alltags: declutter.tags,
+    });
+  }).catch((e)=>{
+    res.json({
+      err: true,
+      message: e.message,
+    });
+  });
+});
 app.get('/API/getReports', ensureLoggedIn(), declutter.checkLevel(10, true),
     (req, res) => {
       db.reports.getByPicId(req.query.picid).then((data) => {
@@ -228,6 +230,21 @@ app.get('/API/getReports', ensureLoggedIn(), declutter.checkLevel(10, true),
         res.json({
           err: true,
           message: 'Error:' + e,
+        });
+      });
+    });
+// eslint-disable-next-line max-len
+app.get('/API/changeDescription', declutter.checkLevel(5, true), ensureLoggedIn(),
+    (req, res)=>{
+      db.pictures.changeDesc(req.query.picid, req.query.newdesc).then((data)=>{
+        res.json({
+          err: false,
+          message: 'OK:'+data.description,
+        });
+      }).catch((e)=>{
+        res.json({
+          err: true,
+          message: e.message,
         });
       });
     });
@@ -245,7 +262,7 @@ app.get('/API/removereports', ensureLoggedIn(), declutter.checkLevel(10, true),
         });
       });
     });
-app.get('/API/addTag', ensureLoggedIn(), declutter.checkLevel(3, true),
+app.get('/API/addTag', declutter.checkLevel(3, true), ensureLoggedIn(),
     (req, res) => {
       let validTag = false;
       for (let i = 0; i < declutter.tags.length; i++) {
@@ -259,11 +276,11 @@ app.get('/API/addTag', ensureLoggedIn(), declutter.checkLevel(3, true),
           res.json({
             err: false,
             message: 'Tag ' + req.query.tag + ' added.',
-          }).catch((e) => {
-            res.json({
-              err: true,
-              message: 'Database error: ' + e,
-            });
+          });
+        }).catch((e) => {
+          res.json({
+            err: true,
+            message: 'Database error: ' + e,
           });
         });
       } else {
@@ -273,7 +290,7 @@ app.get('/API/addTag', ensureLoggedIn(), declutter.checkLevel(3, true),
         });
       }
     });
-app.get('/API/removeTag', ensureLoggedIn(), declutter.checkLevel(3, true),
+app.get('/API/removeTag', declutter.checkLevel(3, true), ensureLoggedIn(),
     (req, res) => {
       let validTag = false;
       for (let i = 0; i < declutter.tags.length; i++) {
@@ -471,7 +488,7 @@ app.get('/API/vote', (req, res) => {
 });
 app.get('/API/deletePic', ensureLoggedIn(), declutter.checkLevel(10, true),
     (req, res) => {
-      db.pictures.deleteById(req.query.id).then((rec) => {
+      db.pictures.deleteById(req.query.picid).then((rec) => {
         console.log('file deleted from db');
         cloud.deleteItems([rec[0].filename]).then(() => {
           console.log('file deleted from cloud.');

@@ -70,10 +70,24 @@ class PicturesRepository {
    * returns the tags of a picture by id
    * @param {int} picid pic id
    */
-  async getTagsById(picid) {
+  async getPicDataById(picid) {
     return this.db.one('SELECT * FROM pictures p WHERE p.id=${picid}', {
       picid: picid,
     });
+  }
+
+  /**
+   * Changes the description of a picture by id
+   * @param {int} picid -picture id
+   * @param {string} newDesc -new desctription
+   */
+  async changeDesc(picid, newDesc) {
+    return this.db.one(
+        'UPDATE pictures SET description=${newD} WHERE id=${id} RETURNING *;',
+        {
+          id: picid,
+          newD: newDesc,
+        });
   }
 
   /**

@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const {db} = require('./db');
 const needle = require('needle');
+const {RateLimiter} = require('limiter');
 
 let threadFolder = __dirname;
 /**
@@ -17,6 +18,7 @@ class ChanDownloader {
    */
   constructor(declutter) {
     this.imageLimiter = declutter.imageLimiter;
+    this.uploadLimiter = new RateLimiter(5, 'minute');
     this.declutter = declutter;
   }
 
@@ -108,12 +110,14 @@ class ChanDownloader {
                 if (fs.existsSync(filePath)) {
                   console.log(`(${processedPics}/${totalPics}) Image ${imageName}${imageExtension} already exists on local, not saving this image.`);
                   // Upload the file and delete it
-                  that.declutter.uploadAndUpdateDb(
-                      filePath,
-                      'no description',
-                      validTags,
-                      true,
-                  );
+                  that.uploadLimiter.removeTokens(1, ()=>{
+                    that.declutter.uploadAndUpdateDb(
+                        filePath,
+                        'no description',
+                        validTags,
+                        true,
+                    );
+                  });
                 } else {
                   console.log(`(${processedPics}/${totalPics}) Downloading ${imageUrl}`);
                   const out = fs.createWriteStream(filePath);
@@ -125,12 +129,14 @@ class ChanDownloader {
                     } else {
                       console.log(`(${processedPics}/${totalPics}) Image ${imageName} saved.`);
                       // Upload the file and delete it
-                      that.declutter.uploadAndUpdateDb(
-                          filePath,
-                          'no description',
-                          validTags,
-                          true,
-                      );
+                      that.uploadLimiter.removeTokens(1, ()=>{
+                        that.declutter.uploadAndUpdateDb(
+                            filePath,
+                            'no description',
+                            validTags,
+                            true,
+                        );
+                      });
                     }
                   });
                 }

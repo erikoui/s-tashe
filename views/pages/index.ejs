@@ -18,7 +18,7 @@
             <% for(let i=0;i<tags.length;i++){ %>
             <% if(tags[i].id==user.selectedtag){ %>
             <a href="/API/changeTagId?newid=<%= tags[i].id %>"
-              class="changetag btn-primary btn-sm btn-default"><%= tags[i].tag %></a>
+              class="changetag btn btn-primary btn-sm"><%= tags[i].tag %></a>
             <% }else{ %>
             <a href="/API/changeTagId?newid=<%= tags[i].id %>"
               class="changetag btn btn-sm btn-default"><%= tags[i].tag %></a>
@@ -66,22 +66,24 @@
                 <video id="vid0" width="100%" muted autoplay loop>
                   <source id="src0" type='video/webm' style="display:none">
                 </video>
-                <div id='tags1'></div>
+                <div id='tags1' class="tags-list"></div>
+                <hr>
+                <div id='no-priviledge-controls1' class="inline-div"></div><br>
                 <% if(user){%>
                 <%if(user.level>1){%>
-                <div id="level1-controls1"></div>
+                <div id="level1-controls1" class='inline-div'></div>
                 <%}if(user.level>2){%>
-                <div id="level2-controls1"></div>
+                <div id="level2-controls1" class='inline-div'></div>
                 <%}if(user.level>3){%>
-                <div id="level3-controls1"></div>
+                <div id="level3-controls1" class='inline-div'></div>
                 <%}if(user.level>4){%>
-                <div id="level4-controls1"></div>
+                <div id="level4-controls1" class='inline-div'></div>
                 <%}if(user.level>5){%>
-                <div id="level5-controls1"></div>
+                <div id="level5-controls1" class='inline-div'></div>
                 <%}if(user.level>6){%>
-                <div id="level6-controls1"></div>
+                <div id="level6-controls1" class='inline-div'></div>
                 <%}if(user.level==10){%>
-                <div id="admin-controls1"></div>
+                <br><div id="admin-controls1" class='inline-div'></div>
                 <%}}%>
               </div>
               <div class="col-sm-6" id='rightpictainer'>
@@ -91,22 +93,24 @@
                 <video id="vid1" width="100%" muted autoplay loop>
                   <source id="src1" type='video/webm' style="display:none">
                 </video>
-                <div id='tags2'></div>
+                <div id='tags2' class="tags-list"></div>
+                <hr>
+                <div id='no-priviledge-controls2' class="inline-div"></div><br>
                 <% if(user){%>
                 <%if(user.level>1){%>
-                <div id="level1-controls2"></div>
+                <div id="level1-controls2" class='inline-div'></div>
                 <%}if(user.level>2){%>
-                <div id="level2-controls2"></div>
+                <div id="level2-controls2" class='inline-div'></div>
                 <%}if(user.level>3){%>
-                <div id="level3-controls2"></div>
+                <div id="level3-controls2" class='inline-div'></div>
                 <%}if(user.level>4){%>
-                <div id="level4-controls2"></div>
+                <div id="level4-controls2" class='inline-div'></div>
                 <%}if(user.level>5){%>
-                <div id="level5-controls2"></div>
+                <div id="level5-controls2" class='inline-div'></div>
                 <%}if(user.level>6){%>
-                <div id="level6-controls2"></div>
+                <div id="level6-controls2" class='inline-div'></div>
                 <%}if(user.level==10){%>
-                <div id="admin-controls2"></div>
+                <br><div id="admin-controls2" class='inline-div'></div>
                 <%}}%>
 
               </div>

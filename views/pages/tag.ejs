@@ -9,7 +9,7 @@
   <% include ../partials/nav.ejs %>
   <ol>
     <% for(let i=0;i<picList.length;i++){ %>
-    <li><a href="<%= prefix+picList[i].filename %>"><%=picList[i].description%></a> (<%= picList[i].votes%>/<%=picList[i].views%> - <%= picList[i].score.toFixed(2) %>)</li>
+    <li><a href="<%= prefix+'?picid='+picList[i].id %>"><%=picList[i].description%></a> (<%= picList[i].votes%>/<%=picList[i].views%> - <%= picList[i].score.toFixed(2) %>)</li>
     <% } %>
   </ol>
 </body>
