@@ -3,7 +3,9 @@
     image thumbnails and better css in /tag endpoint (also archive link in front page)
     archive link in navbar
     award points on change tags
-    remove all reports on delete pic
+    fix leaderboard links to picid instead of filename, and show leaderboard for selected tag, as well as global leaderboard
+    alert on insufficient priviledges to change description
+    merge report and edittags, rename to picInfo or something
 
 # New Features
 

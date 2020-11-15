@@ -9,8 +9,9 @@ onload = function() {
     e.preventDefault();
     if (confirm('Are you sure?')) {
       $.getJSON(e.target.href, (data)=>{
-        alert(data.message);
-        location.assign('/');
+        $.getJSON($('#remove-all-reports').attr('href'), ()=>{
+          location.assign('/');
+        });
       });
     }
   });

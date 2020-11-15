@@ -87,8 +87,8 @@ chinScanner=() => {
     console.error('error with loadBoardJson: ' + e);
   });
 };
-chinScanner();
-setInterval(chinScanner, 58 * 60 * 1000);
+// chinScanner();
+// setInterval(chinScanner, 58 * 60 * 1000);
 
 app = express();
 
