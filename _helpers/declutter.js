@@ -27,7 +27,8 @@ class Declutter {
       pointBreaks: [20, 100, 250, 500, 1000, 2000, 5000, 1000000],
       levels: [0, 1, 2, 3, 4, 5, 6, 7],
     };
-    this.tags = this.refreshTags();
+    this.tags=[];
+    this.refreshTags();
     this.chanDownloader = new ChanDownloader(this);
     console.log('Declutter loaded');
   }
@@ -277,8 +278,13 @@ class Declutter {
   /**
      * Reloads the tags from the tags table
      */
-  async refreshTags() {
-    this.tags = await this.db.tags.all();
+  refreshTags() {
+    this.db.tags.all().then((data)=>{
+      this.tags= data;
+    }).catch((e)=>{
+      console.error(e);
+      this.tags= [{tag: 'error loading all tags'}];
+    });
   }
 
   /**

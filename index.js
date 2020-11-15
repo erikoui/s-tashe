@@ -115,6 +115,42 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 // ------------ Load views ------------
+app.get('/API/getLeaderboards', (req, res)=>{
+  const minVotes=req.query.minvotes;
+  const numLeaders=req.query.n;
+  const tag=req.query.tag;
+  if (tag) {
+    db.pictures.topNandTag(numLeaders, minVotes, tag).then((top) => {
+      res.json({
+        err: false,
+        message: '',
+        top: top,
+      });
+    }).catch((e) => {
+      console.error(e);
+      res.json({
+        err: false,
+        message: e.message,
+        top: top,
+      });
+    });
+  } else {
+    db.pictures.topN(numLeaders, minVotes).then((top) => {
+      res.json({
+        err: false,
+        message: '',
+        top: top,
+      });
+    }).catch((e) => {
+      console.error(e);
+      res.json({
+        err: false,
+        message: e.message,
+        top: top,
+      });
+    });
+  }
+});
 app.get('/', (req, res) => {
   db.pictures.topN(10, 3).then((top) => {
     res.render('pages/index.ejs', {

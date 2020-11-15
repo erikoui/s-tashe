@@ -261,6 +261,24 @@ RETURNING *;`,
         },
     );
   }
+
+  /**
+   * returns the top n pics by tag
+   * @param {int} n Number of pics
+   * @param {int} minviews - minmimum views to be shown as sorted
+   * @param {string} tag - tag
+   */
+  async topNandTag(n, minviews, tag) {
+    return this.db.many(
+        // eslint-disable-next-line max-len
+        'SELECT *, CAST(votes+1 AS real) / CAST(views+1 AS real) AS score FROM public.pictures WHERE ${tag} = ANY(tags) ORDER BY CASE WHEN views >= ${m} THEN 0 ELSE 1 END, score DESC LIMIT ${l};',
+        {
+          m: minviews,
+          l: n,
+          tag: tag,
+        },
+    );
+  }
   /**
    * Returns all picture records
    */

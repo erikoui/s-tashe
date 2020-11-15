@@ -120,16 +120,10 @@
       </div>
       <div class="col-sm-2">
         <div class="col-sm-12 bg-right" id="right-bar">
-          <h3 style="text-align: center;">Leaderboard</h3>
-          <ul>
-            <% for(let i=0;i<top10.length;i++){ %>
-            <li><a href="<%= prefix+top10[i].filename %>">Number <%=i+1%></a> (
-              <%= top10[i].votes%>/
-              <%=top10[i].views%>
-              -
-              <%= top10[i].score.toFixed(2) %>)</li>
-            <% } %>
-          </ul>
+          <h3 style="text-align: center;">Tag Leaderboard</h3>
+          <div id='tag-leaderboard'></div>
+          <h3 style="text-align: center;">Global Leaderboard</h3>
+          <div id='global-leaderboard'></div>
         </div>
       </div>
     </div>

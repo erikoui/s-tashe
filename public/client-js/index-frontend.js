@@ -33,6 +33,39 @@ onload = function() {
   }
 
   /**
+   * refreshes the index page leaderbopard.
+   * @param {object} data - server response from calling /API/getTwoRandomPics
+   */
+  function updateLeaderboard(data) {
+    $.getJSON(
+        '/API/getLeaderboards?minvotes=5&n=10&tag='+data.tags[0][0],
+        (top10) => {
+          $('#tag-leaderboard').html(`<ul id='tleaders'></ul>`);
+          if (!top10.err) {
+            for (let i = 0; i < top10.top.length; i++) {
+              $('#tleaders').append(
+                  // eslint-disable-next-line max-len
+                  `<li><a href="/edittags?picid=${top10.top[i].id}">${top10.top[i].description}</a> (${top10.top[i].votes}/${top10.top[i].views} - ${top10.top[i].score.toFixed(2)})</li>`,
+              );
+            }
+          }
+        });
+    $.getJSON(
+        '/API/getLeaderboards?minvotes=5&n=10',
+        (top10) => {
+          $('#global-leaderboard').html(`<ul id='gleaders'></ul>`);
+          if (!top10.err) {
+            for (let i = 0; i < top10.top.length; i++) {
+              $('#gleaders').append(
+                  // eslint-disable-next-line max-len
+                  `<li><a href="/edittags?picid=${top10.top[i].id}">${top10.top[i].description} </a> (${top10.top[i].votes}/${top10.top[i].views} - ${top10.top[i].score.toFixed(2)})</li>`,
+              );
+            }
+          }
+        });
+  }
+
+  /**
    * Loads the tags under the images.
    *
    * @param {object} data - server response from calling /API/getTwoRandomPics
@@ -238,4 +271,5 @@ onload = function() {
 
   // Load the middle column pics, tags and controls
   renderPage();
+  updateLeaderboard(data);
 };
