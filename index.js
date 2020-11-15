@@ -25,7 +25,7 @@ const chanParser = new ChanParser();
 const PgService = require('./_helpers/postgresql-service.ts');
 const pgService = new PgService;
 const session = require('express-session');
-const e = require('express');
+
 // Server port to listen on
 const PORT = process.env.PORT || 5000;
 // Image links prefix
