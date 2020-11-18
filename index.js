@@ -31,7 +31,7 @@ const session = require('express-session');
 // Server port to listen on
 const PORT = process.env.PORT || 5000;
 // Image links prefix
-const imgPrefixURL = `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/`;
+const imgPrefixURL = declutter.imgPrefixURL;
 
 // Configure the local strategy for use by Passport.
 passport.use(
@@ -91,6 +91,9 @@ chinScanner=() => {
 };
 // chinScanner();
 // setInterval(chinScanner, 58 * 60 * 1000);
+
+// update the archive pictures every 6 hrs
+setInterval(declutter.updateArchivePicList, 6*60*60*1000);
 
 app = express();
 
@@ -228,7 +231,11 @@ app.get('/edittags',
         user: req.user,
       });
     });
-
+app.get('/archive', (req, res)=>{
+  res.render('pages/archive', {
+    user: req.user,
+  });
+});
 app.get('/report', ensureLoggedIn(), declutter.checkLevel(2, false),
     (req, res) => {
       db.pictures.getPicDataById(req.query.picid).then((imgData) => {
@@ -569,7 +576,19 @@ app.get('/API/deletePic', ensureLoggedIn(), declutter.checkLevel(10, true),
         console.error(e);
       });
     });
-
+app.get('/API/getBestEachTag', (req, res)=>{
+  res.json({
+    images: declutter.archivePicList,
+  });
+});
+app.get('/API/updateArchive', ensureLoggedIn(), declutter.checkLevel(10, true),
+    (req, res)=>{
+      declutter.updateArchivePicList().then(()=>{
+        res.end('OK');
+      }).catch((e)=>{
+        res.end(e.message);
+      });
+    });
 app.post('/login', passport.authenticate('local', {
   failureRedirect: '/login',
 }), async (req, res) => {
