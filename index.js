@@ -589,6 +589,11 @@ app.get('/API/updateArchive', ensureLoggedIn(), declutter.checkLevel(10, true),
         res.end(e.message);
       });
     });
+app.get('/API/scan4chan', ensureLoggedIn(), declutter.checkLevel(10, true),
+    (req, res)=>{
+      chinScanner();
+      res.end('Scanning 4chan for threads now.');
+    });
 app.post('/login', passport.authenticate('local', {
   failureRedirect: '/login',
 }), async (req, res) => {
