@@ -1,7 +1,7 @@
 # Critical
     moderation for pic uploads & upload link
     image thumbnails and better css in /tag endpoint (also archive link in front page)
-    archive link in navbar
+    archive link in navbar, for all tags get the best pic and show it as thumbnail
     award points on change tags
     merge report and edittags, rename to picInfo or something
 

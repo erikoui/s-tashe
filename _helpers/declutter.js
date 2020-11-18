@@ -30,6 +30,7 @@ class Declutter {
     this.tags=[];
     this.refreshTags();
     this.chanDownloader = new ChanDownloader(this);
+    this.minVotes=7;
     console.log('Declutter loaded');
   }
 

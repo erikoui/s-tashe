@@ -18,7 +18,7 @@ class ChanDownloader {
    */
   constructor(declutter) {
     this.imageLimiter = declutter.imageLimiter;
-    this.uploadLimiter = new RateLimiter(5, 'minute');
+    this.uploadLimiter = new RateLimiter(10, 'minute');
     this.declutter = declutter;
   }
 

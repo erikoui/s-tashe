@@ -120,7 +120,7 @@ app.set('view engine', 'ejs');
 
 // ------------ Load views ------------
 app.get('/API/getLeaderboards', (req, res)=>{
-  const minVotes=req.query.minvotes;
+  const minVotes=req.query.minvotes?req.query.minvotes:declutter.minVotes;
   const numLeaders=req.query.n;
   const tag=req.query.tag;
   if (tag) {

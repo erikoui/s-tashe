@@ -38,7 +38,7 @@ onload = function() {
    */
   function updateLeaderboard(data) {
     $.getJSON(
-        '/API/getLeaderboards?minvotes=5&n=10&tag='+data.tags[0][0],
+        '/API/getLeaderboards?n=10&tag='+data.tags[0][0],
         (top10) => {
           $('#tag-leaderboard').html(`<ul id='tleaders'></ul>`);
           if (!top10.err) {
@@ -51,7 +51,7 @@ onload = function() {
           }
         });
     $.getJSON(
-        '/API/getLeaderboards?minvotes=5&n=10',
+        '/API/getLeaderboards?n=10',
         (top10) => {
           $('#global-leaderboard').html(`<ul id='gleaders'></ul>`);
           if (!top10.err) {
