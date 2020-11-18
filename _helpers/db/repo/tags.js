@@ -25,7 +25,7 @@ class TagsRepository {
    * Returns all tag records;
    */
   async all() {
-    return this.db.any('SELECT * FROM tags');
+    return this.db.many('SELECT * FROM tags');
   }
 }
 

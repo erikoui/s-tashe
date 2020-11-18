@@ -12,11 +12,10 @@
     <div class="row">
       <div class="col-sm-2">
         <div class="col-sm-12 bg-left" id="left-bar">
-          <% if(user){ %>
           <h3 style="text-align: center;">Select tag to vote for</h3>
           <div id="tag-list">
             <% for(let i=0;i<tags.length;i++){ %>
-            <% if(tags[i].id==user.selectedtag){ %>
+            <% if(tags[i].id==(user?user.selectedtag:cookieTag)){ %>
             <a href="/API/changeTagId?newid=<%= tags[i].id %>"
               class="changetag btn btn-primary btn-sm"><%= tags[i].tag %></a>
             <% }else{ %>
@@ -25,7 +24,6 @@
             <% } %>
             <% } %>
           </div>
-          <% } %>
           <br> Click on the better picture of the two to vote for it. If you are logged in, you gain one point
           per vote. With points, your level increases which then allows you to add/change tags, upload
           pictures, add descriptions
@@ -63,7 +61,7 @@
               <div class="col-sm-6" id='leftpictainer'>
                 <div class="loading-placeholder" id='txt0'>Loading...</div>
                 <img id="img0" class="img-responsive" style="width:100%">
-                <video id="vid0" width="100%" muted autoplay loop>
+                <video id="vid0" width="100%" muted autoplay loop style="display:none">
                   <source id="src0" type='video/webm' style="display:none">
                 </video>
                 <div id='tags1' class="tags-list"></div>
@@ -90,7 +88,7 @@
                 <div class="loading-placeholder" id='txt1'>Loading...</div>
                 <img id="img1" class="pull-right img-responsive"
                   style="width:100%">
-                <video id="vid1" width="100%" muted autoplay loop>
+                <video id="vid1" width="100%" muted autoplay loop style="display:none">
                   <source id="src1" type='video/webm' style="display:none">
                 </video>
                 <div id='tags2' class="tags-list"></div>
@@ -120,16 +118,10 @@
       </div>
       <div class="col-sm-2">
         <div class="col-sm-12 bg-right" id="right-bar">
-          <h3 style="text-align: center;">Leaderboard</h3>
-          <ul>
-            <% for(let i=0;i<top10.length;i++){ %>
-            <li><a href="<%= prefix+top10[i].filename %>">Number <%=i+1%></a> (
-              <%= top10[i].votes%>/
-              <%=top10[i].views%>
-              -
-              <%= top10[i].score.toFixed(2) %>)</li>
-            <% } %>
-          </ul>
+          <h3 style="text-align: center;">Tag Leaderboard</h3>
+          <div id='tag-leaderboard'></div>
+          <h3 style="text-align: center;">Global Leaderboard</h3>
+          <div id='global-leaderboard'></div>
         </div>
       </div>
     </div>

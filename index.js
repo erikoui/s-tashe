@@ -9,6 +9,8 @@ const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 const extract = require('extract-zip');
 const multer = require('multer');
 const upload = multer({dest: 'uploads/'});
+const favicon=require('serve-favicon');
+const cookieParser = require('cookie-parser');
 
 // Load custom modules
 const {db} = require('./_helpers/db');
@@ -29,7 +31,7 @@ const session = require('express-session');
 // Server port to listen on
 const PORT = process.env.PORT || 5000;
 // Image links prefix
-const imgPrefixURL = `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/`;
+const imgPrefixURL = declutter.imgPrefixURL;
 
 // Configure the local strategy for use by Passport.
 passport.use(
@@ -87,13 +89,17 @@ chinScanner=() => {
     console.error('error with loadBoardJson: ' + e);
   });
 };
-chinScanner();
-setInterval(chinScanner, 58 * 60 * 1000);
+// chinScanner();
+// setInterval(chinScanner, 58 * 60 * 1000);
+
+// update the archive pictures every 6 hrs
+setInterval(declutter.updateArchivePicList, 6*60*60*1000);
 
 app = express();
 
 // ------------ init middlewares ------------
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(favicon(path.join(__dirname, 'public', 'favicon.png')));
 app.use(require('morgan')('combined'));
 app.use(require('body-parser').urlencoded({extended: true}));
 app.use(session({
@@ -108,6 +114,7 @@ app.use(session({
     secure: false,
   },
 }));
+app.use(cookieParser());
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(declutter.errorHandler);
@@ -115,25 +122,73 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 // ------------ Load views ------------
+app.get('/API/getLeaderboards', (req, res)=>{
+  const minVotes=req.query.minvotes?req.query.minvotes:declutter.minVotes;
+  const numLeaders=req.query.n;
+  const tag=req.query.tag;
+  if (tag) {
+    db.pictures.topNandTag(numLeaders, minVotes, tag).then((top) => {
+      res.json({
+        err: false,
+        message: '',
+        top: top,
+      });
+    }).catch((e) => {
+      console.error(e);
+      res.json({
+        err: false,
+        message: e.message,
+        top: top,
+      });
+    });
+  } else {
+    db.pictures.topN(numLeaders, minVotes).then((top) => {
+      res.json({
+        err: false,
+        message: '',
+        top: top,
+      });
+    }).catch((e) => {
+      console.error(e);
+      res.json({
+        err: false,
+        message: e.message,
+        top: top,
+      });
+    });
+  }
+});
 app.get('/', (req, res) => {
-  db.pictures.topN(10, 3).then((top) => {
-    res.render('pages/index.ejs', {
-      user: req.user,
-      top10: top,
-      tags: declutter.tags,
-      prefix: '/edittags/',
-      rankingData: declutter.rankingData,
+  let cookieTag=2;
+  console.log('Cookies: ', req.cookies);
+  if (!req.cookies.selectedTag) {
+    res.cookie('selectedTag', 2, {
+      maxAge: 60 * 60 * 24 * 30, // 1 month
     });
-  }).catch((e) => {
-    console.error(e);
-    res.render('pages/index.ejs', {
-      user: req.user,
-      top10: [],
-      tags: declutter.tags,
-      prefix: '/edittags/',
-      rankingData: declutter.rankingData,
-    });
+    console.log('No cookies found, made one');
+  } else {
+    console.log('Got selected tag from cookie:'+req.cookies.selectedTag);
+    cookieTag=req.cookies.selectedTag;
+  }
+  // db.pictures.topN(10, 3).then((top) => {
+  res.render('pages/index.ejs', {
+    user: req.user,
+    cookieTag: cookieTag,
+    tags: declutter.tags,
+    prefix: '/edittags/',
+    rankingData: declutter.rankingData,
   });
+  // }).catch((e) => {
+  //   console.error(e);
+  //   res.render('pages/index.ejs', {
+  //     user: req.user,
+  //     cookieTag: declutter.cookieTag,
+  //     top10: [],
+  //     tags: declutter.tags,
+  //     prefix: '/edittags/',
+  //     rankingData: declutter.rankingData,
+  //   });
+  // });
 });
 app.get('/tag', (req, res) => {
   const tag = req.query.tag;
@@ -176,7 +231,11 @@ app.get('/edittags',
         user: req.user,
       });
     });
-
+app.get('/archive', (req, res)=>{
+  res.render('pages/archive', {
+    user: req.user,
+  });
+});
 app.get('/report', ensureLoggedIn(), declutter.checkLevel(2, false),
     (req, res) => {
       db.pictures.getPicDataById(req.query.picid).then((imgData) => {
@@ -387,26 +446,40 @@ app.get('/API/download', ensureLoggedIn(), declutter.checkLevel(10, true),
       });
       res.end('running download script');
     });
-app.get('/API/changeTagId', ensureLoggedIn(), (req, res) => {
+app.get('/API/changeTagId', (req, res) => {
   const tagId = req.query.newid;
-  db.users.changeTagId(req.user.id, tagId).then(() => {
+  res.cookie('selectedTag', tagId, {
+    maxAge: 60 * 60 * 24 * 30, // 1 month
+  });
+  if (req.user) {
+    db.users.changeTagId(req.user.id, tagId).then(() => {
+      res.json({
+        message: 'Tag changed',
+        err: false,
+      });
+      console.log(`Tag changed to ${tagId}`);
+    }).catch((e) => {
+      res.json({
+        message: `Tag change failed: ${e}`,
+        err: true,
+      });
+      console.error(`Error changing tag: ${e}`);
+    });
+  } else {
     res.json({
-      message: 'Tag changed',
+      message: 'Tag changed in cookie',
       err: false,
     });
-    console.log(`Tag changed to ${tagId}`);
-  }).catch((e) => {
-    res.json({
-      message: `Tag change failed: ${e}`,
-      err: true,
-    });
-    console.error(`Error changing tag: ${e}`);
-  });
+    console.log(`Tag changed to ${tagId} (via cookie)`);
+  }
 });
 app.get('/API/getTwoRandomPics', (req, res) => {
   let selectedTag = 2;
   if (req.user) { // if logged in, load the users' selected tag
     selectedTag = req.user.selectedtag;
+  } else {
+    console.log(req.cookies.selectedTag);
+    selectedTag = (req.cookies.selectedTag?req.cookies.selectedTag:2);
   }
   db.pictures.twoRandomPics(selectedTag).then((data) => {
     res.json({
@@ -503,7 +576,19 @@ app.get('/API/deletePic', ensureLoggedIn(), declutter.checkLevel(10, true),
         console.error(e);
       });
     });
-
+app.get('/API/getBestEachTag', (req, res)=>{
+  res.json({
+    images: declutter.archivePicList,
+  });
+});
+app.get('/API/updateArchive', ensureLoggedIn(), declutter.checkLevel(10, true),
+    (req, res)=>{
+      declutter.updateArchivePicList().then(()=>{
+        res.end('OK');
+      }).catch((e)=>{
+        res.end(e.message);
+      });
+    });
 app.post('/login', passport.authenticate('local', {
   failureRedirect: '/login',
 }), async (req, res) => {

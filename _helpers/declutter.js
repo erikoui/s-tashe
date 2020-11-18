@@ -27,11 +27,40 @@ class Declutter {
       pointBreaks: [20, 100, 250, 500, 1000, 2000, 5000, 1000000],
       levels: [0, 1, 2, 3, 4, 5, 6, 7],
     };
-    this.tags = this.refreshTags();
     this.chanDownloader = new ChanDownloader(this);
+    this.minVotes=7;
+    this.imgPrefixURL=`https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/`;
+    this.tags=[];
+    this.archivePicList=[];
+    this.refreshTags().then(()=>{
+      this.updateArchivePicList();
+    }).catch((e)=>{
+      console.log(e);
+    });
     console.log('Declutter loaded');
   }
 
+  /**
+   * Updates the best pics list for each tag because it takes time.
+   * Only the admin should call this directly, otherwise run it every 2 hours
+   * or so.
+   */
+  async updateArchivePicList() {
+    console.log('Updating archive pic list');
+    this.archivePicList=[];
+    console.log(this.tags);
+    for (let i=0; i<this.tags.length; i++) {
+      const r=await this.db.pictures.topNandTag(
+          1, this.minVotes, this.tags[i].tag,
+      );
+      console.log(r);
+      this.archivePicList.push({
+        src: this.imgPrefixURL+r[0].filename,
+        tag: this.tags[i].tag,
+      });
+    }
+    console.log(this.archivePicList);
+  }
   /**
    * Converts the users points to a text description
    * @param {any} user - the user object returned by login
@@ -278,7 +307,12 @@ class Declutter {
      * Reloads the tags from the tags table
      */
   async refreshTags() {
-    this.tags = await this.db.tags.all();
+    await this.db.tags.all().then((data)=>{
+      this.tags= data;
+    }).catch((e)=>{
+      console.error(e);
+      this.tags= [{tag: 'error loading all tags'}];
+    });
   }
 
   /**

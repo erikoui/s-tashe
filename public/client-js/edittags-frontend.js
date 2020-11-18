@@ -9,8 +9,9 @@ onload = function() {
     e.preventDefault();
     if (confirm('Are you sure?')) {
       $.getJSON(e.target.href, (data)=>{
-        alert(data.message);
-        location.assign('/');
+        $.getJSON($('#remove-all-reports').attr('href'), ()=>{
+          location.assign('/');
+        });
       });
     }
   });
@@ -99,6 +100,7 @@ onload = function() {
               `/API/changeDescription?picid=${picid}&newdesc=${newDesc}`,
               (data)=>{
                 if (data.err) {
+                  alert(data.message);
                   console.log('error changing desciption: '+data.message);
                 } else {
                   console.log(data.message);

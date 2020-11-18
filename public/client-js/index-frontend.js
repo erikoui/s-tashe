@@ -33,6 +33,39 @@ onload = function() {
   }
 
   /**
+   * refreshes the index page leaderbopard.
+   * @param {object} data - server response from calling /API/getTwoRandomPics
+   */
+  function updateLeaderboard(data) {
+    $.getJSON(
+        '/API/getLeaderboards?n=10&tag='+data.tags[0][0],
+        (top10) => {
+          $('#tag-leaderboard').html(`<ul id='tleaders'></ul>`);
+          if (!top10.err) {
+            for (let i = 0; i < top10.top.length; i++) {
+              $('#tleaders').append(
+                  // eslint-disable-next-line max-len
+                  `<li><a href="/edittags?picid=${top10.top[i].id}">${top10.top[i].description}</a> (${top10.top[i].votes}/${top10.top[i].views} - ${top10.top[i].score.toFixed(2)})</li>`,
+              );
+            }
+          }
+        });
+    $.getJSON(
+        '/API/getLeaderboards?n=10',
+        (top10) => {
+          $('#global-leaderboard').html(`<ul id='gleaders'></ul>`);
+          if (!top10.err) {
+            for (let i = 0; i < top10.top.length; i++) {
+              $('#gleaders').append(
+                  // eslint-disable-next-line max-len
+                  `<li><a href="/edittags?picid=${top10.top[i].id}">${top10.top[i].description} </a> (${top10.top[i].votes}/${top10.top[i].views} - ${top10.top[i].score.toFixed(2)})</li>`,
+              );
+            }
+          }
+        });
+  }
+
+  /**
    * Loads the tags under the images.
    *
    * @param {object} data - server response from calling /API/getTwoRandomPics
@@ -74,10 +107,10 @@ onload = function() {
 
       if (parsedSrc[parsedSrc.length - 1] === 'webm') {
         // if webm do this
-        document.getElementById('img' + i).style.display = 'none';// hide picture
-        document.getElementById('img' + i).src = '';// hide picture
-        document.getElementById('src' + i).src = data.images[i];// source element
-        document.getElementById('vid' + i).load();// video element
+        document.getElementById('img' + i).style.display = 'none';
+        document.getElementById('img' + i).src = '';
+        document.getElementById('src' + i).src = data.images[i];
+        document.getElementById('vid' + i).load();
         clickable = document.getElementById('vid' + i);
         $(loadingText).hide();
         $(clickable).show();
@@ -221,6 +254,10 @@ onload = function() {
         showControls(data);
         showImages(data);
         showTags(data);
+        if (!document.getElementById('gleaders')) {
+          console.log('updating leaderboard');
+          updateLeaderboard(data);
+        }
       } else {
         console.log('Error fetching images from server');
       }

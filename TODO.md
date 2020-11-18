@@ -1,8 +1,8 @@
 # Critical
     moderation for pic uploads & upload link
     image thumbnails and better css in /tag endpoint (also archive link in front page)
-    archive link in navbar
     award points on change tags
+    merge report and edittags, rename to picInfo or something
 
 # New Features
 
@@ -19,7 +19,6 @@
     ads - exoclick probably
 
 # Nice-to-haves
-    keep track of users selected tag when not logged in (with cookie)
     dark theme
     Tell the user when registering when the username is already in use
     progress for the downloader script
