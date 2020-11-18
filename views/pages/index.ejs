@@ -12,11 +12,10 @@
     <div class="row">
       <div class="col-sm-2">
         <div class="col-sm-12 bg-left" id="left-bar">
-          <% if(user){ %>
           <h3 style="text-align: center;">Select tag to vote for</h3>
           <div id="tag-list">
             <% for(let i=0;i<tags.length;i++){ %>
-            <% if(tags[i].id==user.selectedtag){ %>
+            <% if(tags[i].id==(user?user.selectedtag:cookieTag)){ %>
             <a href="/API/changeTagId?newid=<%= tags[i].id %>"
               class="changetag btn btn-primary btn-sm"><%= tags[i].tag %></a>
             <% }else{ %>
@@ -25,7 +24,6 @@
             <% } %>
             <% } %>
           </div>
-          <% } %>
           <br> Click on the better picture of the two to vote for it. If you are logged in, you gain one point
           per vote. With points, your level increases which then allows you to add/change tags, upload
           pictures, add descriptions

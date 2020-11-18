@@ -20,7 +20,6 @@
     ads - exoclick probably
 
 # Nice-to-haves
-    keep track of users selected tag when not logged in (with cookie)
     dark theme
     Tell the user when registering when the username is already in use
     progress for the downloader script
