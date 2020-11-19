@@ -3,6 +3,9 @@
     image thumbnails and better css in /tag endpoint (also archive link in front page) - sort by score, auto min votes
     merge report and edittags, rename to picInfo or something
     chinScanner output to special admin page (not realtime) via saving a file on cloud or db
+    twitter and discord buttons
+    give feedback to user when voting so that they feel they are actually doing something (tell them the ranking change of the pic or the new score)
+    add tags form admin page
 
 # New Features
 
@@ -17,12 +20,12 @@
 ## Operational
     points on edid pic info - awarded once per picture, after moderation.
     enable/disable tags for scanning
+    vote on the tags to classify the images?
 
 ## money
     ads - exoclick probably
     twitter account header image (thubnails page)
-    discord server
-    matketing
+    matketing on 4chin and twittr
 
 
 # Nice-to-haves
@@ -33,8 +36,10 @@
     suggest tag feature
     cleanup what ejs does and what frontend javascript does(right now both add elements to the page conditionally)
     replace all ejs with api calls
+    save favorites (user favorite pics button)
 
 # Bugs
+    sometimes tag leaderboard fails to load
     user can just call the /vote api using external tools. block this somehow - limit votes per day/week
     disable register and change password button on empty fields
 
