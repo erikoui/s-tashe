@@ -12,12 +12,18 @@
     nicer login front end (invalid login message or similar)
     tag field for uploaded pictures
     diagram explaining how zip file tagging works
+    footer
     
 ## Operational
     points on edid pic info - awarded once per picture, after moderation.
+    enable/disable tags for scanning
 
 ## money
     ads - exoclick probably
+    twitter account header image (thubnails page)
+    discord server
+    matketing
+
 
 # Nice-to-haves
     dark theme
