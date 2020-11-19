@@ -125,7 +125,7 @@ onload = function() {
         });
       }
       clickable.onclick = () => {
-        vote(data.ids[i % 2], data.ids[(i+1) % 2]);
+        vote(data.ids[i % 2], data.ids[(i+1)%2]);
       };
     }
 
