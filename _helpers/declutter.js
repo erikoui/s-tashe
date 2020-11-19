@@ -33,11 +33,10 @@ class Declutter {
     this.tags=[];
     this.archivePicList=[];
     this.refreshTags().then(()=>{
-      this.updateArchivePicList();
+      console.log('Declutter loaded');
     }).catch((e)=>{
       console.log(e);
     });
-    console.log('Declutter loaded');
   }
 
   /**

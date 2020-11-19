@@ -96,7 +96,6 @@ chinScanner=() => {
 setInterval(declutter.updateArchivePicList, 6*60*60*1000);
 
 app = express();
-
 // ------------ init middlewares ------------
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(path.join(__dirname, 'public', 'favicon.png')));
@@ -104,7 +103,7 @@ app.use(require('morgan')('combined'));
 app.use(require('body-parser').urlencoded({extended: true}));
 app.use(session({
   store: pgService.sessionHandler(session),
-  secret: 'VS7nXTfOGbbvvM26',
+  secret: process.env.SESSION_SECRET,
   saveUninitialized: false,
   resave: false,
   unset: 'destroy',
@@ -122,42 +121,6 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 // ------------ Load views ------------
-app.get('/API/getLeaderboards', (req, res)=>{
-  const minVotes=req.query.minvotes?req.query.minvotes:declutter.minVotes;
-  const numLeaders=req.query.n;
-  const tag=req.query.tag;
-  if (tag) {
-    db.pictures.topNandTag(numLeaders, minVotes, tag).then((top) => {
-      res.json({
-        err: false,
-        message: '',
-        top: top,
-      });
-    }).catch((e) => {
-      console.error(e);
-      res.json({
-        err: false,
-        message: e.message,
-        top: top,
-      });
-    });
-  } else {
-    db.pictures.topN(numLeaders, minVotes).then((top) => {
-      res.json({
-        err: false,
-        message: '',
-        top: top,
-      });
-    }).catch((e) => {
-      console.error(e);
-      res.json({
-        err: false,
-        message: e.message,
-        top: top,
-      });
-    });
-  }
-});
 app.get('/', (req, res) => {
   let cookieTag=2;
   console.log('Cookies: ', req.cookies);
@@ -589,6 +552,47 @@ app.get('/API/updateArchive', ensureLoggedIn(), declutter.checkLevel(10, true),
         res.end(e.message);
       });
     });
+app.get('/API/scan4chan', ensureLoggedIn(), declutter.checkLevel(10, true),
+    (req, res)=>{
+      chinScanner();
+      res.end('Scanning 4chan for threads now.');
+    });
+app.get('/API/getLeaderboards', (req, res)=>{
+  const minVotes=req.query.minvotes?req.query.minvotes:declutter.minVotes;
+  const numLeaders=req.query.n;
+  const tag=req.query.tag;
+  if (tag) {
+    db.pictures.topNandTag(numLeaders, minVotes, tag).then((top) => {
+      res.json({
+        err: false,
+        message: '',
+        top: top,
+      });
+    }).catch((e) => {
+      console.error(e);
+      res.json({
+        err: false,
+        message: e.message,
+        top: top,
+      });
+    });
+  } else {
+    db.pictures.topN(numLeaders, minVotes).then((top) => {
+      res.json({
+        err: false,
+        message: '',
+        top: top,
+      });
+    }).catch((e) => {
+      console.error(e);
+      res.json({
+        err: false,
+        message: e.message,
+        top: top,
+      });
+    });
+  }
+});
 app.post('/login', passport.authenticate('local', {
   failureRedirect: '/login',
 }), async (req, res) => {
