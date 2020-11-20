@@ -83,13 +83,13 @@
                 <%}if(user.level>6){%>
                 <div id="level6-controls1" class='inline-div'></div>
                 <%}if(user.level==10){%>
-                <br><div id="admin-controls1" class='inline-div'></div>
+                <br>
+                <div id="admin-controls1" class='inline-div'></div>
                 <%}}%>
               </div>
               <div class="col-sm-6" id='rightpictainer'>
                 <div class="loading-placeholder" id='txt1'>Loading...</div>
-                <img id="img1" class="pull-right img-responsive"
-                  style="width:100%">
+                <img id="img1" class="pull-right img-responsive" style="width:100%">
                 <video id="vid1" width="100%" muted autoplay loop style="display:none">
                   <source id="src1" type='video/webm' style="display:none">
                 </video>
@@ -110,7 +110,8 @@
                 <%}if(user.level>6){%>
                 <div id="level6-controls2" class='inline-div'></div>
                 <%}if(user.level==10){%>
-                <br><div id="admin-controls2" class='inline-div'></div>
+                <br>
+                <div id="admin-controls2" class='inline-div'></div>
                 <%}}%>
 
               </div>
@@ -124,9 +125,14 @@
           <div id='tag-leaderboard'></div>
           <h3 style="text-align: center;">Global Leaderboard</h3>
           <div id='global-leaderboard'></div>
+          <% include ../partials/rightad.ejs %>
         </div>
       </div>
     </div>
+  </div>
+  <% include ../partials/stickyad.ejs %>
 </body>
+
 <% include ../partials/footer.ejs %>
+
 </html>

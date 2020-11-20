@@ -10,14 +10,14 @@
   <div class="container-fluid" style="width:90%">
     <div class="row">
       <div class="col-sm-2">
-          <div class="col-sm-12 bg-left">
-            <p>
-              <strong>Username: </strong><%= user.uname %><br />
-              <strong>Points: </strong><%= user.points %><br />
-              <strong>Rank: </strong><%= user.rank %><br />
-              <strong>Joined on: </strong><%= user.joinedon %><br />
-            </p>
-          </div>
+        <div class="col-sm-12 bg-left">
+          <p>
+            <strong>Username: </strong><%= user.uname %><br />
+            <strong>Points: </strong><%= user.points %><br />
+            <strong>Rank: </strong><%= user.rank %><br />
+            <strong>Joined on: </strong><%= user.joinedon %><br />
+          </p>
+        </div>
       </div>
       <div class="col-sm-8">
         <div class="row">
@@ -27,14 +27,15 @@
               <h3>Change username</h3>
               <form class="form-inline" action="/API/changeUsername" method="POST">
                 <label class="col-form-label col-form-label-sm" for="uname">New Username</label>
-                <input type="text" class="form-control mb-2 mr-sm-2" id="uname" name="uname" placeholder="<%=user.uname%>">
+                <input type="text" class="form-control mb-2 mr-sm-2" id="uname" name="uname"
+                  placeholder="<%=user.uname%>">
                 <button id="username-button" type="submit" class="btn btn-primary btn-sm">Submit</button>
               </form>
             </div>
           </div>
         </div>
         <div class="row">
-          <div class="col-sm-12 bg-mid">   
+          <div class="col-sm-12 bg-mid">
             <div class="bg-left" style="border-radius: 10px;padding:10px">
               <h3>Change password</h3>
               <form class="form-inline" action="/API/changePassword" method="POST">
@@ -52,13 +53,14 @@
         </div>
       </div>
       <div class="col-sm-2">
-          <div class="col-sm-12 bg-right">
-            User leaderboad here
-          </div>
+        <div class="col-sm-12 bg-right">
+          <% include ../partials/rightad.ejs %>
+        </div>
       </div>
     </div>
   </div>
 
 </body>
 <% include ../partials/footer.ejs %>
+
 </html>

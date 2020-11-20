@@ -6,6 +6,8 @@
     twitter and discord buttons
     *give feedback to user when voting so that they feel they are actually doing something (tell them the ranking change of the pic or the new score)
     add tags form admin page
+    refresh page after 10 votes for new ads
+    limit cos requests (like caching) because free plan will hit cap easy (check heroku transfer caps etc - 500MB storage limit tho)
 
 # New Features
 
@@ -26,7 +28,7 @@
     allow user to see pics without tags
 
 ## money
-    ads - native reccomnendataion every 10 votes, and banners on the sides
+    ads - native reccomnendataion every 10 votes
     twitter account header image (thubnails page)
     matketing on 4chin and twittr
 
