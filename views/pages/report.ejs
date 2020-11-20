@@ -14,7 +14,7 @@
         var formValues = $(this).serialize();
         $.post("/report", formValues, function (data) {
           // Display the returned data in browser
-          console.log("data received"+JSON.stringify(data))
+          console.log("data received" + JSON.stringify(data))
           $("#result").html(data.message);
         }, 'json');
       });
@@ -41,6 +41,7 @@
           Coming soon
           <h3>Score</h3>
           <%=votes/views%>(<%=votes%>/<%=views%>)
+          <% include ../partials/leftad.ejs %>
         </div>
       </div>
       <div class="col-sm-8">
@@ -93,9 +94,13 @@
             </fieldset>
           </form>
           <div id="result"></div>
+          <% include ../partials/rightad.ejs %>
         </div>
       </div>
     </div>
+  </div>
+  <% include ../partials/stickyad.ejs %>
 </body>
 <% include ../partials/footer.ejs %>
+
 </html>

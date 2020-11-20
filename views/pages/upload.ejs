@@ -175,7 +175,9 @@
   <div class="container-fluid" style="width:90%">
     <div class="row">
       <div class="col-sm-2">
-        User settings here (change password etc)
+        <div class="col-sm-12 bg-left" id="left-bar">
+          <% include ../partials/leftad.ejs %>
+        </div>
       </div>
       <div class="col-sm-8">
         <div class="row vertical-center-row">
@@ -186,7 +188,7 @@
                   data-multiple-caption="{count} files selected" multiple />
                 <label for="file"><strong>Choose a file</strong><span class="box__dragndrop"> or drag it
                     here</span>.</label>
-                <input type="text" name="name" id="name"/>
+                <input type="text" name="name" id="name" />
                 <label for="name"><strong>benis</strong></label>
                 <button class="box__button" type="submit">Upload</button>
               </div>
@@ -195,18 +197,22 @@
               <div class="box__error">Error! <span></span>.</div>
             </form>
           </div>
-          </div>
+        </div>
         <div id="pupload-options" style="margin: auto;">
-          When uploading zip files, the pictures will be tagged based on the folder name they were in. Pictures in the root of the zip file will be uploaded without tags. Files deeper than 2 dirs will have both dir names as separate tags.
-        <br>
+          When uploading zip files, the pictures will be tagged based on the folder name they were in. Pictures in the
+          root of the zip file will be uploaded without tags. Files deeper than 2 dirs will have both dir names as
+          separate tags.
+          <br>
           Some options here
         </div>
       </div>
       <div class="col-sm-2">
-        User leaderboad here
+        <% include ../partials/rightad.ejs %>
       </div>
     </div>
   </div>
+  <% include ../partials/stickyad.ejs %>
 </body>
 <% include ../partials/footer.ejs %>
+
 </html>
