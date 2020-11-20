@@ -130,3 +130,22 @@
 .gallery-container:hover .gallery-text-block {
   opacity: 1;
 }
+
+body{ 
+  min-height:100vh; 
+   position:relative; 
+  }
+
+
+body::after {
+  content: '';
+  display: block;
+  height: 50px; /* Set same as footer's height */
+}
+
+footer {
+  position: absolute;
+  bottom: 0;
+  width: 90%;
+  height: 50px;
+}
