@@ -26,7 +26,7 @@
     allow user to see pics without tags
 
 ## money
-    ads - exoclick probably
+    ads - native reccomnendataion every 10 votes, and banners on the sides
     twitter account header image (thubnails page)
     matketing on 4chin and twittr
 
