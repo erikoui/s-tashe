@@ -155,7 +155,7 @@ app.get('/', (req, res) => {
 });
 app.get('/tag', (req, res) => {
   const tag = req.query.tag;
-  db.pictures.listByTag(tag, 10)
+  db.pictures.listByTag(tag, declutter.minVotes)
       .then((picList) => {
         res.render('pages/tag.ejs', {
           prefix: '/edittags/',
@@ -168,6 +168,9 @@ app.get('/tag', (req, res) => {
 });
 app.get('/login', (req, res) => {
   res.render('pages/login.ejs', {user: req.user});
+});
+app.get('/about', (req, res) => {
+  res.render('pages/about.ejs', {user: req.user});
 });
 app.get('/register', (req, res) => {
   res.render('pages/register.ejs', {user: req.user});
