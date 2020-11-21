@@ -59,9 +59,11 @@ class ChanParser {
     // Clean them up to use as a single array of words
     let checkTags = [];
     for (let i = 0; i < tags.length; i++) {
-      checkTags.push(tags[i].tag);
-      if (tags[i].alts != null) {
-        checkTags = checkTags.concat(tags[i].alts.concat(tags[i].tag));
+      if (tags[i].auto_download) {
+        checkTags.push(tags[i].tag);
+        if (tags[i].alts != null) {
+          checkTags = checkTags.concat(tags[i].alts.concat(tags[i].tag));
+        }
       }
     }
     console.log('Tags loaded: ' + checkTags);

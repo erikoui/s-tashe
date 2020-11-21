@@ -15,6 +15,7 @@
     10 blog posts of at least 300 words for ads lmao wtf
     generate descriptions for pics (markov chain/random adjective-noun from bag)
     blog system frontend
+    doante button
 
 # New Features
 
@@ -30,7 +31,6 @@
     
 ## Operational
     points on edid pic info - awarded once per picture, after moderation.
-    enable/disable tags for scanning
     vote on the tags to classify the images?
     allow user to see pics without tags
 
