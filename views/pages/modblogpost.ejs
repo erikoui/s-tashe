@@ -51,7 +51,7 @@
                 <input type="text" name="abstract" class="form-control" value="<%- (!!abstract)?abstract:'' %>">
               </div>
               <div class="form-group">
-                <textarea id="editor" name="body"><%= (!!body)?body:'' %></textarea>
+                <textarea id="editor" name="body"><%- (!!body)?body:'' %></textarea>
               </div><br>
               <div class="form-group">
                 <button class="btn btn-primary" id="submit"><%- (!!title)?'Save Changes':'Create New Post' %></button>
