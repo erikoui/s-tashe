@@ -18,7 +18,7 @@ class ChanDownloader {
    */
   constructor(declutter) {
     this.imageLimiter = declutter.imageLimiter;
-    this.uploadLimiter = new RateLimiter(10, 'minute');
+    this.uploadLimiter = new RateLimiter(3, 'minute');
     this.declutter = declutter;
   }
 
@@ -98,7 +98,9 @@ class ChanDownloader {
           const imageExtension = posts[i]['ext'];
           const imageName = posts[i]['tim'];
           const imageUrl = `https://i.4cdn.org/${board}/${imageName + imageExtension}`;
+          // TODO: use path.join or similar here.
           const filePath = threadFolder + imageName + imageExtension;
+
           // Here we check if the file is in the database, even though it is
           // also checked in declutter.uploadAndUpdateDb because we want to skip
           // the download of the picture as well.
@@ -107,8 +109,11 @@ class ChanDownloader {
 
             this.imageLimiter.removeTokens(1, () => {
               try {
+                // This never trues when i remove console log???
+                console.log(filePath);
                 if (fs.existsSync(filePath)) {
-                  console.log(`(${processedPics}/${totalPics}) Image ${imageName}${imageExtension} already exists on local, not saving this image.`);
+                  // eslint-disable-next-line max-len
+                  console.log(`(${processedPics}/${totalPics} ${validTags[0]}) Image ${imageName}${imageExtension} already exists on local, not saving this image.`);
                   // Upload the file and delete it
                   that.uploadLimiter.removeTokens(1, ()=>{
                     that.declutter.uploadAndUpdateDb(
@@ -119,15 +124,18 @@ class ChanDownloader {
                     );
                   });
                 } else {
-                  console.log(`(${processedPics}/${totalPics}) Downloading ${imageUrl}`);
+                  // eslint-disable-next-line max-len
+                  console.log(`(${processedPics}/${totalPics} ${validTags[0]}) Downloading ${imageUrl}`);
                   const out = fs.createWriteStream(filePath);
                   const res = needle.get(imageUrl);
                   res.pipe(out);
                   res.on('end', function(err) {
                     if (err) {
-                      console.log(`(${processedPics}/${totalPics}) An error ocurred: ${err.message}`);
+                      // eslint-disable-next-line max-len
+                      console.log(`(${processedPics}/${totalPics} ${validTags[0]}) An error ocurred: ${err.message}`);
                     } else {
-                      console.log(`(${processedPics}/${totalPics}) Image ${imageName} saved.`);
+                      // eslint-disable-next-line max-len
+                      console.log(`(${processedPics}/${totalPics} ${validTags[0]}) Image ${imageName} saved.`);
                       // Upload the file and delete it
                       that.uploadLimiter.removeTokens(1, ()=>{
                         that.declutter.uploadAndUpdateDb(
@@ -145,7 +153,9 @@ class ChanDownloader {
               }
             });
           } else {
-            console.log(`(${processedPics}/${totalPics}) File already in database`);
+            // eslint-disable-next-line max-len
+            console.log(`(${processedPics}/${totalPics} ${validTags[0]}) File already in database`);
+            // TODO: delete the file if it exists on local
           }
           processedPics++;
         } else {

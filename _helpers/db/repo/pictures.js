@@ -124,7 +124,7 @@ class PicturesRepository {
    */
   async twoRandomPics(selectedtag) {
     const picData = await this.db.many(
-        `SELECT p.id,p.filename,p.tags
+        `SELECT p.id,p.filename,p.tags,p.description
         FROM pictures p
         WHERE (
           SELECT tag FROM tags WHERE id=${selectedtag} LIMIT 1
@@ -132,19 +132,7 @@ class PicturesRepository {
         ORDER BY RANDOM() 
         LIMIT 2;`,
     );
-    const r = [
-      {
-        id: picData[0].id,
-        filename: picData[0].filename,
-        tags: picData[0].tags,
-      },
-      {
-        id: picData[1].id,
-        filename: picData[1].filename,
-        tags: picData[1].tags,
-      },
-    ];
-    return r;
+    return picData;
   }
 
   /**

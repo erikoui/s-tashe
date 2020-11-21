@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <% include ../partials/header.ejs %>
+</head>
+
+<style>
+  #row_style {
+    margin-top: 30px;
+  }
+
+  #submit {
+    display: block;
+    margin: auto;
+  }
+</style>
+<!-- you need to include the shieldui css and js assets in order for the charts to work -->
+<link rel="stylesheet" type="text/css" href="http://www.shieldui.com/shared/components/latest/css/light/all.min.css" />
+<script type="text/javascript" src="http://www.shieldui.com/shared/components/latest/js/shieldui-all.min.js"></script>
+
+<script>
+  $(function () {
+    $("#editor").shieldEditor({
+      height: 260
+    });
+  })
+</script>
+
+<body>
+  <% include ../partials/nav.ejs %>
+  <div class="container-fluid" style="width:1200px">
+    <div class="row">
+      <div class="col-sm-2">
+        <div class="col-sm-12 bg-left" id="left-bar">
+          <% include ../partials/leftad.ejs %>
+        </div>
+      </div>
+      <div class="col-sm-8">
+        <div class="row">
+          <div class="col-sm-12 bg-mid">
+            <h2 class="text-center">Create/Edit Post</h2>
+            <form method="POST">
+              <input type="hidden" id="postid" name="id" value="<%-id%>">
+              <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" name="title" class="form-control" value="<%- (!!title)?title:'' %>">
+              </div>
+              <div class="form-group">
+                <label for="abstravt">Abstract</label>
+                <input type="text" name="abstract" class="form-control" value="<%- (!!abstract)?abstract:'' %>">
+              </div>
+              <div class="form-group">
+                <textarea id="editor" name="body"><%= (!!body)?body:'' %></textarea>
+              </div><br>
+              <div class="form-group">
+                <button class="btn btn-primary" id="submit"><%- (!!title)?'Save Changes':'Create New Post' %></button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-2">
+        <div class="col-sm-12 bg-right" id="right-bar">
+          <% include ../partials/rightad.ejs %>
+        </div>
+      </div>
+    </div>
+  </div>
+  <% include ../partials/stickyad.ejs %>
+</body>
+<% include ../partials/footer.ejs %>
+
+</html>

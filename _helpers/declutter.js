@@ -4,6 +4,8 @@ const fs = require('fs');
 
 const RateLimiter = require('limiter').RateLimiter;
 const ChanDownloader = require('./chan-downloader');
+const ChanParser = require('./chan-parser');
+const chanParser = new ChanParser();
 
 /**
  * Some helper functions to make index.js smaller
@@ -33,6 +35,9 @@ class Declutter {
     this.tags=[];
     this.archivePicList=[];
     this.refreshTags().then(()=>{
+      console.log('Tags:'+this.tags.map((({tag})=>tag)));
+      this.updateArchivePicList();
+      // this.chinScanner();
       console.log('Declutter loaded');
     }).catch((e)=>{
       console.log(e);
@@ -40,25 +45,52 @@ class Declutter {
   }
 
   /**
+   * Wrapper for running chanParser and chanDownloader
+   */
+  chinScanner() {
+    chanParser.loadBoardJson('/s/').then((data) => {
+      for (let i = 0; i < data.length; i++) {
+        this.imageLimiter.removeTokens(1, () => {
+          this.downloadThreadAndSaveToCloud(data[i]).then(() => {
+          }).catch((e) => {
+            console.error(e);
+            console.error('error with download thread:' + e);
+          });
+        });
+      }
+    }).catch((e) => {
+      console.error('error with loadBoardJson: ' + e);
+    });
+  };
+
+  /**
    * Updates the best pics list for each tag because it takes time.
    * Only the admin should call this directly, otherwise run it every 2 hours
    * or so.
    */
-  async updateArchivePicList() {
+  updateArchivePicList() {
     console.log('Updating archive pic list');
     this.archivePicList=[];
-    console.log(this.tags);
-    for (let i=0; i<this.tags.length; i++) {
-      const r=await this.db.pictures.topNandTag(
-          1, this.minVotes, this.tags[i].tag,
-      );
-      console.log(r);
-      this.archivePicList.push({
-        src: this.imgPrefixURL+r[0].filename,
-        tag: this.tags[i].tag,
-      });
-    }
-    console.log(this.archivePicList);
+    const that=this;
+    const getTop=function(i) {
+      if (i<that.tags.length) {
+        that.db.pictures.topNandTag(
+            1, that.minVotes, that.tags[i].tag,
+        ).then((r)=>{
+          that.archivePicList.push({
+            src: that.imgPrefixURL+r[0].filename,
+            tag: that.tags[i].tag,
+          });
+          getTop(i+1);
+        }).catch((e)=>{
+          console.log(e);
+          getTop(i+1);
+        });
+      } else {
+        console.log('Archive pic list updated');
+      }
+    };
+    getTop(0);
   }
   /**
    * Converts the users points to a text description
