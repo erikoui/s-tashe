@@ -33,6 +33,8 @@ class Declutter {
     this.tags=[];
     this.archivePicList=[];
     this.refreshTags().then(()=>{
+      console.log('Tags:'+this.tags.map((({tag})=>tag)));
+      this.updateArchivePicList();
       console.log('Declutter loaded');
     }).catch((e)=>{
       console.log(e);
@@ -44,21 +46,29 @@ class Declutter {
    * Only the admin should call this directly, otherwise run it every 2 hours
    * or so.
    */
-  async updateArchivePicList() {
+  updateArchivePicList() {
     console.log('Updating archive pic list');
     this.archivePicList=[];
-    console.log(this.tags);
-    for (let i=0; i<this.tags.length; i++) {
-      const r=await this.db.pictures.topNandTag(
-          1, this.minVotes, this.tags[i].tag,
-      );
-      console.log(r);
-      this.archivePicList.push({
-        src: this.imgPrefixURL+r[0].filename,
-        tag: this.tags[i].tag,
-      });
-    }
-    console.log(this.archivePicList);
+    const that=this;
+    const getTop=function(i) {
+      if (i<that.tags.length) {
+        that.db.pictures.topNandTag(
+            1, that.minVotes, that.tags[i].tag,
+        ).then((r)=>{
+          that.archivePicList.push({
+            src: that.imgPrefixURL+r[0].filename,
+            tag: that.tags[i].tag,
+          });
+          getTop(i+1);
+        }).catch((e)=>{
+          console.log(e);
+          getTop(i+1);
+        });
+      } else {
+        console.log('Archive pic list updated');
+      }
+    };
+    getTop(0);
   }
   /**
    * Converts the users points to a text description
