@@ -1,59 +1,59 @@
 # Critical
-    moderation for pic uploads & upload link
-    *image thumbnails and better css in /tag endpoint (also archive link in front page) - sort by score, auto min votes
-    merge report and edittags, rename to picInfo or something
-    *chinScanner output to special admin page (not realtime) via saving a file on cloud or db
-    twitter and discord buttons
-    *give feedback to user when voting so that they feel they are actually doing something (tell them the ranking change of the pic or the new score)
-    add tags form admin page
-    refresh page after 10 votes for new ads
-    limit cos requests (like caching) because free plan will hit cap easy (check heroku transfer caps etc - 500MB storage limit tho)
-    terms of service
-    faq
-    privacy policy
-    img alts 
-    10 blog posts of at least 300 words for ads lmao wtf
-    generate descriptions for pics (markov chain/random adjective-noun from bag)
-    blog system frontend
-    doante button
 
-# New Features
+### Very critical
+* give feedback to user when voting so that they feel they are actually doing something (tell them the ranking change of the pic or the new score)
+* image thumbnails and better css in /tag endpoint (also archive link in front page) - sort by score, auto min votes
 
-## Interface
-    User leaderboards
-    allow the user to view previous pics (like a history feature)
-    nicer login front end (invalid login message or similar)
-    tag field for uploaded pictures
-    diagram explaining how zip file tagging works
-    update archive button for admin
-    comments
-
+### Little bit critical
+* chinScanner output to special admin page (not realtime) via saving a file on cloud or db
+* limit cos requests (like caching) because free plan will hit cap easy (check heroku transfer caps etc - 500MB storage limit tho)
+* generate descriptions for pics (markov chain/random adjective-noun from bag)
     
-## Operational
-    points on edid pic info - awarded once per picture, after moderation.
-    vote on the tags to classify the images?
-    allow user to see pics without tags
+# Content
+* terms of service
+* faq
+* privacy policy
+* 10 blog posts of at least 300 words for ads lmao wtf
 
-## money
-    ads - native reccomnendataion every 10 votes
-    twitter account header image (thubnails page)
-    matketing on 4chin and twittr
+# Frontend 
+* Nicer frontend for the whole blog system
+* Merge report and edittags pages, rename them to picInfo or something
+* Login frontend needs to show invalid login message instead of just reloading
+* Tell the user when registering when the username is already in use
+* Tag and description field for picture uploads
+* Diagram explaining how zip file tagging works
+* Upload page nicer frontend
+* Disable register and change password button on empty fields
+    
+# New Features
+* User leaderboards
+* Allow the user to view previous pics (like a history feature underneath the control buttons in the frontpage, similar to what amazon does with last viewed products)
+* Points on edit pic info - awarded once per picture, after moderation. Limit edits/day/week
+* Allow user to see pics without tags
+* Add/edit tags form admin page
+* Admin page with buttons for all the hardcore api calls (update archive, delete all pics etc)
+* Comments
 
+# Money
+* Ads - native recommendataion every N votes (like tinder does)
+* Twitter account header image (the thubnails page or a collage of best N pics)
+* Marketing on 4chin and twittr
+* Donate button
 
-# Nice-to-haves
-    dark theme
-    Tell the user when registering when the username is already in use
-    progress for the downloader script
-    upload page css
-    suggest tag feature
-    cleanup what ejs does and what frontend javascript does(right now both add elements to the page conditionally)
-    replace all ejs with api calls
-    save favorites (user favorite pics button)
+# Ideas
+* Multi-word tags
+* Vote on the tags to classify the images?
+* Refresh page after N votes for new ads
+* Moderation for pic uploads & upload link for users
+* Dark theme
+* Progress for the downloader script
+* Suggest tag feature
+* Save favorite pics (user favorite pics button)
 
 # Bugs
-    sometimes tag leaderboard fails to load
-    user can just call the /vote api using external tools. block this somehow - limit votes per day/week
-    disable register and change password button on empty fields
+* sometimes tag leaderboard fails to load
+* user can just call the /vote api using external tools. block this somehow - limit votes per day/week
 
-# Don't forget
-    Check for SQL/html injection
+
+# Security
+* Check for SQL/html/xss injection
