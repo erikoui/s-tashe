@@ -98,7 +98,9 @@ class ChanDownloader {
           const imageExtension = posts[i]['ext'];
           const imageName = posts[i]['tim'];
           const imageUrl = `https://i.4cdn.org/${board}/${imageName + imageExtension}`;
+          // TODO: use path.join or similar here.
           const filePath = threadFolder + imageName + imageExtension;
+
           // Here we check if the file is in the database, even though it is
           // also checked in declutter.uploadAndUpdateDb because we want to skip
           // the download of the picture as well.
@@ -153,6 +155,7 @@ class ChanDownloader {
           } else {
             // eslint-disable-next-line max-len
             console.log(`(${processedPics}/${totalPics} ${validTags[0]}) File already in database`);
+            // TODO: delete the file if it exists on local
           }
           processedPics++;
         } else {
