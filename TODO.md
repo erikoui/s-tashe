@@ -14,6 +14,7 @@
 * faq
 * privacy policy
 * 10 blog posts of at least 300 words for ads lmao wtf
+* ChanScanner picks the longest reply chain from each thread and puts it as the blog post body with some nice formatting.
 
 # Frontend 
 * Nicer frontend for the whole blog system
