@@ -35,11 +35,31 @@ class Declutter {
     this.refreshTags().then(()=>{
       console.log('Tags:'+this.tags.map((({tag})=>tag)));
       this.updateArchivePicList();
+      this.chinScanner();
       console.log('Declutter loaded');
     }).catch((e)=>{
       console.log(e);
     });
   }
+
+  /**
+   * Wrapper for running chanParser and chanDownloader
+   */
+  chinScanner() {
+    chanParser.loadBoardJson('/s/').then((data) => {
+      for (let i = 0; i < data.length; i++) {
+        declutter.imageLimiter.removeTokens(1, () => {
+          declutter.downloadThreadAndSaveToCloud(data[i]).then(() => {
+          }).catch((e) => {
+            console.error(e);
+            console.error('error with download thread:' + e);
+          });
+        });
+      }
+    }).catch((e) => {
+      console.error('error with loadBoardJson: ' + e);
+    });
+  };
 
   /**
    * Updates the best pics list for each tag because it takes time.

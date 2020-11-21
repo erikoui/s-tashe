@@ -117,6 +117,7 @@ onload = function() {
       } else {
         document.getElementById('img' + i).src = data.images[i];
         clickable = document.getElementById('img' + i);
+        clickable.alt=data.desc[i];
         $(clickable).hide();
         $(loadingText).show();
         clickable.onload = (() => {

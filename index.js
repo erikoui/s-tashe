@@ -73,27 +73,17 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// Set up 4chan scanner to run every 58 mins, and right after server start
-chinScanner=() => {
-  chanParser.loadBoardJson('/s/').then((data) => {
-    for (let i = 0; i < data.length; i++) {
-      declutter.imageLimiter.removeTokens(1, () => {
-        declutter.downloadThreadAndSaveToCloud(data[i]).then(() => {
-        }).catch((e) => {
-          console.error(e);
-          console.error('error with download thread:' + e);
-        });
-      });
-    }
-  }).catch((e) => {
-    console.error('error with loadBoardJson: ' + e);
-  });
-};
-// chinScanner();
-// setInterval(chinScanner, 58 * 60 * 1000);
+// Set up 4chan scanner to run every 12 hrs, and right after server start.
+// This is also ran in declutter right after tags are loaded
+setInterval(()=>{
+  declutter.chinScanner();
+}, 12 * 60 * 60 * 1000);
 
-// update the archive pictures every 6 hrs
-setInterval(declutter.updateArchivePicList, 6*60*60*1000);
+// update the archive pictures every 6 hrs. This is also ran in declutter
+// right after tags are loaded
+setInterval(()=>{
+  declutter.updateArchivePicList();
+}, 6*60*60*1000);
 
 app = express();
 // ------------ init middlewares ------------
@@ -122,18 +112,14 @@ app.set('view engine', 'ejs');
 
 // ------------ Load views ------------
 app.get('/', (req, res) => {
-  let cookieTag=2;
-  console.log('Cookies: ', req.cookies);
+  let cookieTag=1;
   if (!req.cookies.selectedTag) {
-    res.cookie('selectedTag', 2, {
+    res.cookie('selectedTag', 1, {
       maxAge: 60 * 60 * 24 * 30, // 1 month
     });
-    console.log('No cookies found, made one');
   } else {
-    console.log('Got selected tag from cookie:'+req.cookies.selectedTag);
     cookieTag=req.cookies.selectedTag;
   }
-  // db.pictures.topN(10, 3).then((top) => {
   res.render('pages/index.ejs', {
     user: req.user,
     cookieTag: cookieTag,
@@ -141,17 +127,6 @@ app.get('/', (req, res) => {
     prefix: '/edittags/',
     rankingData: declutter.rankingData,
   });
-  // }).catch((e) => {
-  //   console.error(e);
-  //   res.render('pages/index.ejs', {
-  //     user: req.user,
-  //     cookieTag: declutter.cookieTag,
-  //     top10: [],
-  //     tags: declutter.tags,
-  //     prefix: '/edittags/',
-  //     rankingData: declutter.rankingData,
-  //   });
-  // });
 });
 app.get('/tag', (req, res) => {
   const tag = req.query.tag;
@@ -171,6 +146,9 @@ app.get('/login', (req, res) => {
 });
 app.get('/about', (req, res) => {
   res.render('pages/about.ejs', {user: req.user});
+});
+app.get('/blog', (req, res) => {
+  res.render('pages/blog.ejs', {user: req.user});
 });
 app.get('/register', (req, res) => {
   res.render('pages/register.ejs', {user: req.user});
@@ -228,8 +206,37 @@ app.get('/showreports', ensureLoggedIn(), declutter.checkLevel(10, false),
         res.end(e);
       });
     });
-
+app.get('/blogpost/:id/*', (req, res)=>{
+  console.log(req.params);
+  db.blog.getBlogPost(req.params.id).then((data)=>{
+    res.render('pages/blogpost', {
+      user: req.user,
+      title: data.title,
+      filename: imgPrefixURL+data.filename,
+      abstract: data.abstract,
+      body: data.body,
+    });
+  }).catch((e)=>{
+    res.end('Database error '+e);
+  });
+});
 // ----------- API calls ----------
+app.get('/API/getBlogData', (req, res)=>{
+  db.blog.getRecentN(10).then((blogData) => {
+    res.json({
+      err: false,
+      message: 'OK',
+      data: blogData,
+      prefix: imgPrefixURL,
+    });
+  }).catch((e)=>{
+    console.error(e);
+    res.json({
+      err: true,
+      message: e.message,
+    });
+  });
+});
 app.get('/API/getPicData', (req, res)=>{
   db.pictures.getPicDataById(req.query.picid).then((imgData) => {
     res.json({
@@ -440,12 +447,12 @@ app.get('/API/changeTagId', (req, res) => {
   }
 });
 app.get('/API/getTwoRandomPics', (req, res) => {
-  let selectedTag = 2;
+  let selectedTag = 1;
   if (req.user) { // if logged in, load the users' selected tag
     selectedTag = req.user.selectedtag;
   } else {
     console.log(req.cookies.selectedTag);
-    selectedTag = (req.cookies.selectedTag?req.cookies.selectedTag:2);
+    selectedTag = (req.cookies.selectedTag?req.cookies.selectedTag:1);
   }
   db.pictures.twoRandomPics(selectedTag).then((data) => {
     res.json({
@@ -462,8 +469,8 @@ app.get('/API/getTwoRandomPics', (req, res) => {
         data[1].id,
       ],
       desc: [
-        data[0].desc,
-        data[1].desc,
+        data[0].description,
+        data[1].description,
       ],
     });
   }).catch((err) => {
