@@ -57,6 +57,39 @@ class BlogRepository {
         },
     );
   }
+
+  /**
+   * edits a post
+   * @param {post} data - contains id,title,abstract and body
+   */
+  async editPost(data) {
+    return this.db.none(
+        // eslint-disable-next-line max-len
+        'UPDATE blog SET title=${t}, abstract=${a}, body=${b}, filename=${f} WHERE id=${id}', {
+          a: data.abstract,
+          b: data.body,
+          id: data.id,
+          t: data.title,
+          f: data.filename,
+        },
+    );
+  }
+
+  /**
+   * adds a post
+   * @param {post} data - same as editPost
+   */
+  async addPost(data) {
+    return this.db.none(
+        // eslint-disable-next-line max-len
+        'INSERT INTO blog (title, abstract, body, date) VALUES (${t}, ${a}, ${b}, CURRENT_TIMESTAMP)', {
+          a: data.abstract,
+          b: data.body,
+          id: data.id,
+          t: data.title,
+        },
+    );
+  }
 }
 
 

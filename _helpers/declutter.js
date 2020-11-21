@@ -4,6 +4,8 @@ const fs = require('fs');
 
 const RateLimiter = require('limiter').RateLimiter;
 const ChanDownloader = require('./chan-downloader');
+const ChanParser = require('./chan-parser');
+const chanParser = new ChanParser();
 
 /**
  * Some helper functions to make index.js smaller
@@ -35,7 +37,7 @@ class Declutter {
     this.refreshTags().then(()=>{
       console.log('Tags:'+this.tags.map((({tag})=>tag)));
       this.updateArchivePicList();
-      this.chinScanner();
+      // this.chinScanner();
       console.log('Declutter loaded');
     }).catch((e)=>{
       console.log(e);
@@ -48,8 +50,8 @@ class Declutter {
   chinScanner() {
     chanParser.loadBoardJson('/s/').then((data) => {
       for (let i = 0; i < data.length; i++) {
-        declutter.imageLimiter.removeTokens(1, () => {
-          declutter.downloadThreadAndSaveToCloud(data[i]).then(() => {
+        this.imageLimiter.removeTokens(1, () => {
+          this.downloadThreadAndSaveToCloud(data[i]).then(() => {
           }).catch((e) => {
             console.error(e);
             console.error('error with download thread:' + e);

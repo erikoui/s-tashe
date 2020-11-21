@@ -8,13 +8,13 @@
     add tags form admin page
     refresh page after 10 votes for new ads
     limit cos requests (like caching) because free plan will hit cap easy (check heroku transfer caps etc - 500MB storage limit tho)
-    ****BLOG SYSTEM
     terms of service
     faq
     privacy policy
     img alts 
     10 blog posts of at least 300 words for ads lmao wtf
     generate descriptions for pics (markov chain/random adjective-noun from bag)
+    blog system frontend
 
 # New Features
 

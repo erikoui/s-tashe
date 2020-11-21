@@ -21,9 +21,6 @@ const cloud = new Cloud();
 const Declutter = require('./_helpers/declutter');
 const declutter = new Declutter(db, cloud);
 
-const ChanParser = require('./_helpers/chan-parser');
-const chanParser = new ChanParser();
-
 const PgService = require('./_helpers/postgresql-service.ts');
 const pgService = new PgService;
 const session = require('express-session');
@@ -220,6 +217,47 @@ app.get('/blogpost/:id/*', (req, res)=>{
     res.end('Database error '+e);
   });
 });
+app.get('/modblogpost/:id', ensureLoggedIn(), declutter.checkLevel(10, false),
+    (req, res)=>{
+      db.blog.getBlogPost(req.params.id).then((data)=>{
+        res.render('pages/modblogpost', {
+          user: req.user,
+          id: req.params.id,
+          title: data.title,
+          filename: imgPrefixURL+data.filename,
+          abstract: data.abstract,
+          body: data.body,
+        });
+      }).catch((e)=>{
+        res.render('pages/modblogpost', {
+          user: req.user,
+          id: null,
+          title: null,
+          filename: null,
+          abstract: null,
+          body: null,
+        });
+      });
+    });
+app.post('/modblogpost/:id', ensureLoggedIn(), declutter.checkLevel(10, false),
+    (req, res)=>{
+      if (req.body.id) {
+        // edit post
+        db.blog.editPost(req.body).then(()=>{
+          res.end('Post edited successfully');
+        }).catch((e)=>{
+          res.end(e);
+        });
+      } else {
+        // new post
+        db.blog.addPost(req.body).then(()=>{
+          res.end('Post added successfully');
+        }).catch((e)=>{
+          console.error(e);
+          res.end(e.message);
+        });
+      }
+    });
 // ----------- API calls ----------
 app.get('/API/getBlogData', (req, res)=>{
   db.blog.getRecentN(10).then((blogData) => {
