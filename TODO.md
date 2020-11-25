@@ -1,7 +1,6 @@
 # Critical
 
 ### Very critical
-* give feedback to user when voting so that they feel they are actually doing something (tell them the ranking change of the pic or the new score)
 * image thumbnails and better css in /tag endpoint (also archive link in front page) - sort by score, auto min votes
 
 ### Little bit critical
@@ -42,6 +41,7 @@
 * Donate button
 
 # Ideas
+* Voting bar chart when showing scores
 * Multi-word tags
 * Vote on the tags to classify the images?
 * Refresh page after N votes for new ads

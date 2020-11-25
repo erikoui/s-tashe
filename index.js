@@ -510,6 +510,14 @@ app.get('/API/getTwoRandomPics', (req, res) => {
         data[0].description,
         data[1].description,
       ],
+      votes: [
+        data[0].votes,
+        data[1].votes,
+      ],
+      views: [
+        data[0].views,
+        data[1].views,
+      ],
     });
   }).catch((err) => {
     res.json({
