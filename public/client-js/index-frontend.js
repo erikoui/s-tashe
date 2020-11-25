@@ -14,6 +14,8 @@ onload = function() {
       let score='<br><br><br><br>';
       if (i==votedindex) {
         score+='Voted! <br>';
+      } else {
+        score+='<br>';
       }
       if (data.views[i] > 5) {
         score += 'Score:'+(data.votes[i] / data.views[i]).toFixed(2);
