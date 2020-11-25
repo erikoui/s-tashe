@@ -7,14 +7,25 @@
 
 <body>
   <% include ../partials/nav.ejs %>
-  <ol>
+  <div class='tag-gallery'>
     <% for(let i=0;i<picList.length;i++){ %>
-    <li><a href="<%= prefix+'?picid='+picList[i].id %>"><%=picList[i].description%></a> (<%= picList[i].votes%>/<%=picList[i].views%> - <%= picList[i].score.toFixed(2) %>)</li>
+    <a href="<%= prefix+'?picid='+picList[i].id %>">
+      <div class='tag-group'>
+        <div class='tag-image'>
+          <img src='<%=urlPrefix+picList[i].filename%>'>
+        </div>
+        <div class='tag-txt'>
+          <%=picList[i].description%><br>
+          (<%= picList[i].votes%>/<%=picList[i].views%> - <%= picList[i].score.toFixed(2) %>)
+        </div>
+      </div>
+    </a>
     <% } %>
-  </ol>
+  </div>
 </body>
 <% include ../partials/rightad.ejs %>
 <% include ../partials/leftad.ejs %>
 <% include ../partials/stickyad.ejs %>
 <% include ../partials/footer.ejs %>
+
 </html>

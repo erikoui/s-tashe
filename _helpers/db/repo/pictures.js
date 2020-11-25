@@ -271,7 +271,7 @@ RETURNING *;`,
    * Returns all picture records
    */
   async all() {
-    return this.db.any('SELECT * FROM pictures');
+    return this.db.any('SELECT * FROM pictures ORDER BY filename');
   }
 
   /**

@@ -7,6 +7,7 @@
 * chinScanner output to special admin page (not realtime) via saving a file on cloud or db
 * limit cos requests (like caching) because free plan will hit cap easy (check heroku transfer caps etc - 500MB storage limit tho)
 * generate descriptions for pics (markov chain/random adjective-noun from bag)
+* save thumbnails locally
     
 # Content
 * terms of service

@@ -179,3 +179,33 @@ footer {
   font-size: 5vh;
   display:inline-block
 }
+
+.tag-gallery{
+  display:flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.tag-group{
+  width:150px;
+  height: 200px;
+  border: 1px;
+  border-radius: 2px;
+  margin:5px;
+  padding:5px;
+}
+
+.tag-image{
+  width: 150px;
+  height: 150px;
+  overflow: hidden;
+  padding-bottom: 100px;
+}
+
+.tag-image img{
+  width:100%;
+}
+
+.tag-txt{
+  text-align: center;
+}
