@@ -94,20 +94,6 @@ class PicturesRepository {
    * Deletes a picture record by id. note that this does not
    * delete the file from the cloud server.
    * @param {int} id - The id of the record to delete.
-   */
-  async remove(id) {
-    // TODO: delete picture by filename
-    // return this.db.result(
-    //   'DELETE FROM pictures WHERE id = $1', +id, r => r.rowCount
-    // );
-    console.log('pictures.js remove not yet implemented');
-    return 0;
-  }
-
-  /**
-   * Deletes a picture record by id. note that this does not
-   * delete the file from the cloud server.
-   * @param {int} id - The id of the record to delete.
    *
    * @return {object} - object.filename has the fn of the deleted file
    */

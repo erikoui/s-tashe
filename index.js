@@ -634,7 +634,7 @@ app.get('/API/updateArchive', ensureLoggedIn(), declutter.checkLevel(10, true),
     });
 app.get('/API/scan4chan', ensureLoggedIn(), declutter.checkLevel(10, true),
     (req, res) => {
-      chinScanner();
+      declutter.chinScanner();
       res.end('Scanning 4chan for threads now.');
     });
 app.get('/API/getLeaderboards', (req, res) => {
