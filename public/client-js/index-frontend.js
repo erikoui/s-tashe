@@ -1,17 +1,39 @@
 onload = function() {
   /**
-   * Hides the images so people cant click them
+   * Hides the images so people cant click them, and shows scores
+   *
+   * @param {data} data - JSON returned from api
+   * @param {int} votedindex - index of voted pic
    */
-  function hideImages() {
+  function showImgInfoWhileLoading(data, votedindex) {
     for (let i = 0; i < 2; i++) {
       const img = document.getElementById('img' + i);
       const vid = document.getElementById('vid' + i);
       const txt = document.getElementById('txt' + i);
       $(txt).show();
-      img.style.display = 'none';
-      vid.style.display = 'none';
+      let score='<br><br><br><br>';
+      if (i==votedindex) {
+        score+='Voted! <br>';
+      } else {
+        score+='<br>';
+      }
+      if (data.views[i] > 5) {
+        score += 'Score:'+(data.votes[i] / data.views[i]).toFixed(2);
+      } else {
+        score += 'Not enough votes for meaningful score';
+      }
+      $(txt).html(
+          `${score}`,
+          // <br>
+          // <div class='scorebar'
+          // style='min-width:${(data.votes[i] / data.views[i]) * 100}%'>
+          // &nbsp;</div>`,
+      );
+      console.log($(txt).html());
       img.onload = function() { };
       vid.onload = function() { };
+      img.onclick = () => { };
+      vid.onclick = () => { };
     }
   }
 
@@ -38,13 +60,13 @@ onload = function() {
    */
   function updateLeaderboard(data) {
     $.getJSON(
-        '/API/getLeaderboards?n=10&tag='+data.tags[0][0],
+        '/API/getLeaderboards?n=10&tag=' + data.tags[0][0],
         (top10) => {
           $('#tag-leaderboard').html(`<ul id='tleaders'></ul>`);
           if (!top10.err) {
             for (let i = 0; i < top10.top.length; i++) {
               $('#tleaders').append(
-                  // eslint-disable-next-line max-len
+              // eslint-disable-next-line max-len
                   `<li><a href="/edittags?picid=${top10.top[i].id}">${top10.top[i].description}</a> (${top10.top[i].votes}/${top10.top[i].views} - ${top10.top[i].score.toFixed(2)})</li>`,
               );
             }
@@ -57,7 +79,7 @@ onload = function() {
           if (!top10.err) {
             for (let i = 0; i < top10.top.length; i++) {
               $('#gleaders').append(
-                  // eslint-disable-next-line max-len
+              // eslint-disable-next-line max-len
                   `<li><a href="/edittags?picid=${top10.top[i].id}">${top10.top[i].description} </a> (${top10.top[i].votes}/${top10.top[i].views} - ${top10.top[i].score.toFixed(2)})</li>`,
               );
             }
@@ -117,7 +139,7 @@ onload = function() {
       } else {
         document.getElementById('img' + i).src = data.images[i];
         clickable = document.getElementById('img' + i);
-        clickable.alt=data.desc[i];
+        clickable.alt = data.desc[i];
         $(clickable).hide();
         $(loadingText).show();
         clickable.onload = (() => {
@@ -125,8 +147,10 @@ onload = function() {
           $(loadingText).hide();
         });
       }
+      $(clickable).removeClass('selected'); // Change the pic appearance
       clickable.onclick = () => {
-        vote(data.ids[i % 2], data.ids[(i+1)%2]);
+        $(clickable).addClass('selected'); // Change the pic appearance
+        vote(data.ids[i % 2], data.ids[(i + 1) % 2], i%2);
       };
     }
 
@@ -135,10 +159,11 @@ onload = function() {
      * calls the /API/vote endpoint
      * @param {int} voteid - image id to vote for
      * @param {int} otherid - the other image to increase its views
+     * @param {int} index - the index of the pic in this file (i)
      */
-    function vote(voteid, otherid) {
+    function vote(voteid, otherid, index) {
       if (!voted) {// prevent voting for both
-        hideImages();
+        showImgInfoWhileLoading(data, index);
         updatePointsDisplay();
         $.getJSON(
             `/API/vote?voteid=${voteid}&otherid=${otherid}`,

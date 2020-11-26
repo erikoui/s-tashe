@@ -94,20 +94,6 @@ class PicturesRepository {
    * Deletes a picture record by id. note that this does not
    * delete the file from the cloud server.
    * @param {int} id - The id of the record to delete.
-   */
-  async remove(id) {
-    // TODO: delete picture by filename
-    // return this.db.result(
-    //   'DELETE FROM pictures WHERE id = $1', +id, r => r.rowCount
-    // );
-    console.log('pictures.js remove not yet implemented');
-    return 0;
-  }
-
-  /**
-   * Deletes a picture record by id. note that this does not
-   * delete the file from the cloud server.
-   * @param {int} id - The id of the record to delete.
    *
    * @return {object} - object.filename has the fn of the deleted file
    */
@@ -124,7 +110,7 @@ class PicturesRepository {
    */
   async twoRandomPics(selectedtag) {
     const picData = await this.db.many(
-        `SELECT p.id,p.filename,p.tags,p.description
+        `SELECT p.id,p.filename,p.tags,p.description,p.votes,p.views
         FROM pictures p
         WHERE (
           SELECT tag FROM tags WHERE id=${selectedtag} LIMIT 1
@@ -271,7 +257,7 @@ RETURNING *;`,
    * Returns all picture records
    */
   async all() {
-    return this.db.any('SELECT * FROM pictures');
+    return this.db.any('SELECT * FROM pictures ORDER BY filename');
   }
 
   /**

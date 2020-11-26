@@ -1,29 +1,30 @@
 # Critical
 
 ### Very critical
-* give feedback to user when voting so that they feel they are actually doing something (tell them the ranking change of the pic or the new score)
-* image thumbnails and better css in /tag endpoint (also archive link in front page) - sort by score, auto min votes
 
 ### Little bit critical
 * chinScanner output to special admin page (not realtime) via saving a file on cloud or db
 * limit cos requests (like caching) because free plan will hit cap easy (check heroku transfer caps etc - 500MB storage limit tho)
 * generate descriptions for pics (markov chain/random adjective-noun from bag)
+* automatic thumbnail generation
     
 # Content
 * terms of service
 * faq
 * privacy policy
 * 10 blog posts of at least 300 words for ads lmao wtf
+* ChanScanner picks the longest reply chain from each thread and puts it as the blog post body with some nice formatting.
 
 # Frontend 
 * Nicer frontend for the whole blog system
-* Merge report and edittags pages, rename them to picInfo or something
+* Merge report and edittags pages, rename them to picInfo or something and make it work with webms
 * Login frontend needs to show invalid login message instead of just reloading
 * Tell the user when registering when the username is already in use
 * Tag and description field for picture uploads
 * Diagram explaining how zip file tagging works
 * Upload page nicer frontend
 * Disable register and change password button on empty fields
+* pages for /tag
     
 # New Features
 * User leaderboards
@@ -41,6 +42,7 @@
 * Donate button
 
 # Ideas
+* Voting bar chart when showing scores
 * Multi-word tags
 * Vote on the tags to classify the images?
 * Refresh page after N votes for new ads

@@ -9,8 +9,10 @@ const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 const extract = require('extract-zip');
 const multer = require('multer');
 const upload = multer({dest: 'uploads/'});
-const favicon=require('serve-favicon');
+const favicon = require('serve-favicon');
 const cookieParser = require('cookie-parser');
+const imageThumbnail = require('image-thumbnail');
+const needle = require('needle');
 
 // Load custom modules
 const {db} = require('./_helpers/db');
@@ -72,15 +74,15 @@ passport.deserializeUser(async (id, done) => {
 
 // Set up 4chan scanner to run every 12 hrs, and right after server start.
 // This is also ran in declutter right after tags are loaded
-setInterval(()=>{
+setInterval(() => {
   declutter.chinScanner();
 }, 12 * 60 * 60 * 1000);
 
 // update the archive pictures every 6 hrs. This is also ran in declutter
 // right after tags are loaded
-setInterval(()=>{
+setInterval(() => {
   declutter.updateArchivePicList();
-}, 6*60*60*1000);
+}, 6 * 60 * 60 * 1000);
 
 app = express();
 // ------------ init middlewares ------------
@@ -109,13 +111,13 @@ app.set('view engine', 'ejs');
 
 // ------------ Load views ------------
 app.get('/', (req, res) => {
-  let cookieTag=1;
+  let cookieTag = 1;
   if (!req.cookies.selectedTag) {
     res.cookie('selectedTag', 1, {
       maxAge: 60 * 60 * 24 * 30, // 1 month
     });
   } else {
-    cookieTag=req.cookies.selectedTag;
+    cookieTag = req.cookies.selectedTag;
   }
   res.render('pages/index.ejs', {
     user: req.user,
@@ -131,6 +133,7 @@ app.get('/tag', (req, res) => {
       .then((picList) => {
         res.render('pages/tag.ejs', {
           prefix: '/edittags/',
+          urlPrefix: 'thumbs/',
           picList: picList,
           user: req.user,
         });
@@ -172,7 +175,7 @@ app.get('/edittags',
         user: req.user,
       });
     });
-app.get('/archive', (req, res)=>{
+app.get('/archive', (req, res) => {
   res.render('pages/archive', {
     user: req.user,
   });
@@ -203,32 +206,32 @@ app.get('/showreports', ensureLoggedIn(), declutter.checkLevel(10, false),
         res.end(e);
       });
     });
-app.get('/blogpost/:id/*', (req, res)=>{
+app.get('/blogpost/:id/*', (req, res) => {
   console.log(req.params);
-  db.blog.getBlogPost(req.params.id).then((data)=>{
+  db.blog.getBlogPost(req.params.id).then((data) => {
     res.render('pages/blogpost', {
       user: req.user,
       title: data.title,
-      filename: imgPrefixURL+data.filename,
+      filename: imgPrefixURL + data.filename,
       abstract: data.abstract,
       body: data.body,
     });
-  }).catch((e)=>{
-    res.end('Database error '+e);
+  }).catch((e) => {
+    res.end('Database error ' + e);
   });
 });
 app.get('/modblogpost/:id', ensureLoggedIn(), declutter.checkLevel(10, false),
-    (req, res)=>{
-      db.blog.getBlogPost(req.params.id).then((data)=>{
+    (req, res) => {
+      db.blog.getBlogPost(req.params.id).then((data) => {
         res.render('pages/modblogpost', {
           user: req.user,
           id: req.params.id,
           title: data.title,
-          filename: imgPrefixURL+data.filename,
+          filename: imgPrefixURL + data.filename,
           abstract: data.abstract,
           body: data.body,
         });
-      }).catch((e)=>{
+      }).catch((e) => {
         res.render('pages/modblogpost', {
           user: req.user,
           id: null,
@@ -240,26 +243,26 @@ app.get('/modblogpost/:id', ensureLoggedIn(), declutter.checkLevel(10, false),
       });
     });
 app.post('/modblogpost/:id', ensureLoggedIn(), declutter.checkLevel(10, false),
-    (req, res)=>{
+    (req, res) => {
       if (req.body.id) {
-        // edit post
-        db.blog.editPost(req.body).then(()=>{
+      // edit post
+        db.blog.editPost(req.body).then(() => {
           res.end('Post edited successfully');
-        }).catch((e)=>{
+        }).catch((e) => {
           res.end(e);
         });
       } else {
-        // new post
-        db.blog.addPost(req.body).then(()=>{
+      // new post
+        db.blog.addPost(req.body).then(() => {
           res.end('Post added successfully');
-        }).catch((e)=>{
+        }).catch((e) => {
           console.error(e);
           res.end(e.message);
         });
       }
     });
 // ----------- API calls ----------
-app.get('/API/getBlogData', (req, res)=>{
+app.get('/API/getBlogData', (req, res) => {
   db.blog.getRecentN(10).then((blogData) => {
     res.json({
       err: false,
@@ -267,7 +270,7 @@ app.get('/API/getBlogData', (req, res)=>{
       data: blogData,
       prefix: imgPrefixURL,
     });
-  }).catch((e)=>{
+  }).catch((e) => {
     console.error(e);
     res.json({
       err: true,
@@ -275,7 +278,7 @@ app.get('/API/getBlogData', (req, res)=>{
     });
   });
 });
-app.get('/API/getPicData', (req, res)=>{
+app.get('/API/getPicData', (req, res) => {
   db.pictures.getPicDataById(req.query.picid).then((imgData) => {
     res.json({
       err: false,
@@ -285,7 +288,7 @@ app.get('/API/getPicData', (req, res)=>{
       tags: imgData.tags,
       alltags: declutter.tags,
     });
-  }).catch((e)=>{
+  }).catch((e) => {
     res.json({
       err: true,
       message: e.message,
@@ -305,13 +308,14 @@ app.get('/API/getReports', ensureLoggedIn(), declutter.checkLevel(10, true),
     });
 // eslint-disable-next-line max-len
 app.get('/API/changeDescription', declutter.checkLevel(5, true), ensureLoggedIn(),
-    (req, res)=>{
-      db.pictures.changeDesc(req.query.picid, req.query.newdesc).then((data)=>{
+    (req, res) => {
+      // eslint-disable-next-line max-len
+      db.pictures.changeDesc(req.query.picid, req.query.newdesc).then((data) => {
         res.json({
           err: false,
-          message: 'OK:'+data.description,
+          message: 'OK:' + data.description,
         });
-      }).catch((e)=>{
+      }).catch((e) => {
         res.json({
           err: true,
           message: e.message,
@@ -406,11 +410,31 @@ app.get('/API/deleteallfiles', ensureLoggedIn(), declutter.checkLevel(10, true),
 app.get('/API/cleanupdb', ensureLoggedIn(), declutter.checkLevel(10, true),
     (req, res) => {
       cloud.getBucketContents().then((data) => {
-        const filenames = [];
+        const cloudfns = [];
         for (let i = 0; i < data.Contents.length; i++) {
-          filenames.push(data.Contents[i].Key);
+          cloudfns.push(data.Contents[i].Key);
         }
-        db.pictures.cleanup(filenames);
+        db.pictures.cleanup(cloudfns);
+        db.pictures.all().then((dbdata) => {
+          const dbfns = [];
+          const delet = [];
+          for (let j = 0; j < dbdata.length; j++) {
+            dbfns.push(dbdata[j].filename);
+          }
+          for (let j = 0; j < cloudfns.length; j++) {
+            if (dbfns.indexOf(cloudfns[j]) == -1) {
+              delet.push(cloudfns[j]);
+            }
+          }
+          cloud.deleteItems(delet).then(() => {
+          // eslint-disable-next-line max-len
+            console.log(delet.length + ' Files deleted from cloud because they had no record');
+          }).catch((e) => {
+            console.error(e);
+          });
+        }).catch((e) => {
+          console.error(e);
+        });
       }).catch((err) => {
         console.log('error getting item list from cos:' + err);
         res.json({
@@ -490,7 +514,7 @@ app.get('/API/getTwoRandomPics', (req, res) => {
     selectedTag = req.user.selectedtag;
   } else {
     console.log(req.cookies.selectedTag);
-    selectedTag = (req.cookies.selectedTag?req.cookies.selectedTag:1);
+    selectedTag = (req.cookies.selectedTag ? req.cookies.selectedTag : 1);
   }
   db.pictures.twoRandomPics(selectedTag).then((data) => {
     res.json({
@@ -509,6 +533,14 @@ app.get('/API/getTwoRandomPics', (req, res) => {
       desc: [
         data[0].description,
         data[1].description,
+      ],
+      votes: [
+        data[0].votes,
+        data[1].votes,
+      ],
+      views: [
+        data[0].views,
+        data[1].views,
       ],
     });
   }).catch((err) => {
@@ -587,28 +619,28 @@ app.get('/API/deletePic', ensureLoggedIn(), declutter.checkLevel(10, true),
         console.error(e);
       });
     });
-app.get('/API/getBestEachTag', (req, res)=>{
+app.get('/API/getBestEachTag', (req, res) => {
   res.json({
     images: declutter.archivePicList,
   });
 });
 app.get('/API/updateArchive', ensureLoggedIn(), declutter.checkLevel(10, true),
-    (req, res)=>{
-      declutter.updateArchivePicList().then(()=>{
+    (req, res) => {
+      declutter.updateArchivePicList().then(() => {
         res.end('OK');
-      }).catch((e)=>{
+      }).catch((e) => {
         res.end(e.message);
       });
     });
 app.get('/API/scan4chan', ensureLoggedIn(), declutter.checkLevel(10, true),
-    (req, res)=>{
-      chinScanner();
+    (req, res) => {
+      declutter.chinScanner();
       res.end('Scanning 4chan for threads now.');
     });
-app.get('/API/getLeaderboards', (req, res)=>{
-  const minVotes=req.query.minvotes?req.query.minvotes:declutter.minVotes;
-  const numLeaders=req.query.n;
-  const tag=req.query.tag;
+app.get('/API/getLeaderboards', (req, res) => {
+  const minVotes = req.query.minvotes ? req.query.minvotes : declutter.minVotes;
+  const numLeaders = req.query.n;
+  const tag = req.query.tag;
   if (tag) {
     db.pictures.topNandTag(numLeaders, minVotes, tag).then((top) => {
       res.json({
@@ -641,6 +673,104 @@ app.get('/API/getLeaderboards', (req, res)=>{
     });
   }
 });
+app.get('/API/makeThumbnails', ensureLoggedIn(), declutter.checkLevel(10, true),
+    (req, res) => {
+      const thumbsDir='./public/thumbs';
+      // get list of thumbnails already in folder
+      const existingThumbs=[];
+      fs.readdir(thumbsDir, (err, files) => {
+        if (err) {
+          throw err;
+        }
+        // files object contains all files names
+        // log them on console
+        files.forEach((file) => {
+          existingThumbs.push(file);
+        });
+      });
+      // get list of all files on db
+      db.pictures.all().then((data) => {
+        // get File names to make thumbnails for
+        const makeThumbs = [];
+
+        // check if thumbs already exist
+        for (let i = 0; i < data.length; i++) {
+          if (!req.query.force) {
+            if (existingThumbs.indexOf(data[i].filename)==-1) {
+              makeThumbs.push(data[i].filename);
+            } else {
+              console.log(data[i].filename+' Thumbnail already exists');
+            }
+          } else {
+            makeThumbs.push(data[i].filename);
+          }
+        }
+        // Make directories
+        try {
+          fs.mkdirSync(thumbsDir);
+        } catch (e) {
+          console.log('Thumbnail directory could not be created.');
+        }
+        try {
+          fs.mkdirSync('./tmp');
+        } catch (e) {
+          console.log('Temp directory could not be created.');
+        }
+        for (let i = 0; i < makeThumbs.length; i++) {
+          declutter.imageLimiter.removeTokens(1, () => {
+            // download image
+            const filePath='./tmp/'+makeThumbs[i];
+            const out = fs.createWriteStream(filePath);
+            const res = needle.get(imgPrefixURL+makeThumbs[i]);
+            res.pipe(out);
+            res.on('end', function(err) {
+              if (!err) {
+                // generate thumbnail
+                imageThumbnail(
+                    filePath,
+                    {
+                      width: 150,
+                    // fit: 'cover',
+                    // jpegOptions: {force: true, quality: 80},
+                    },
+                ).then((thumbnail) => {
+                  // save thumbnail to disk
+                  try {
+                    fs.writeFileSync(thumbsDir+'/'+makeThumbs[i], thumbnail);
+                  } catch (e) {
+                    console.error(e);
+                  }
+
+                  // delete file
+                  fs.unlink('./tmp/'+makeThumbs[i], ()=>{
+                    console.log(makeThumbs[i]+' done');
+                  });
+                }).catch((e)=>{
+                  fs.copyFile(
+                      './public/video-thumb.png',
+                      thumbsDir+'/'+makeThumbs[i].split('.')[0]+'.png',
+                      ()=>{
+                        // delete file
+                        fs.unlink('./tmp/'+makeThumbs[i], ()=>{
+                          console.log(makeThumbs[i]+' done');
+                        });
+                        console.log('  *weird file type set generic thumbnail');
+                      },
+                  );
+                });
+              } else {
+                console.error(err);
+              }
+            });
+          });
+        }
+        // eslint-disable-next-line max-len
+        res.end(`${makeThumbs.length} Thumbnails will be generated.`);
+      }).catch((e) => {
+        console.error(e);
+        res.end(e.message);
+      });
+    });
 app.post('/login', passport.authenticate('local', {
   failureRedirect: '/login',
 }), async (req, res) => {

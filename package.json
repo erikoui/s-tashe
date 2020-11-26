@@ -32,6 +32,7 @@
     "gulp-shell": "^0.8.0",
     "ibm-cos-sdk": "^1.7.0",
     "ibm-cos-sdk-config": "^1.2.0",
+    "image-thumbnail": "^1.0.11",
     "jsdoc": "^3.6.6",
     "limiter": "^1.1.5",
     "md5-file": "^5.0.0",
@@ -46,6 +47,7 @@
     "request": "^2.88.2",
     "serve-favicon": "^2.5.0",
     "sha1": "^1.1.1",
+    "simple-thumbnail": "^1.6.5",
     "xml2js": "^0.4.23"
   },
   "devDependencies": {
