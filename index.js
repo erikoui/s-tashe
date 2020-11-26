@@ -12,6 +12,7 @@ const upload = multer({dest: 'uploads/'});
 const favicon = require('serve-favicon');
 const cookieParser = require('cookie-parser');
 const imageThumbnail = require('image-thumbnail');
+const needle = require('needle');
 
 // Load custom modules
 const {db} = require('./_helpers/db');
@@ -132,7 +133,7 @@ app.get('/tag', (req, res) => {
       .then((picList) => {
         res.render('pages/tag.ejs', {
           prefix: '/edittags/',
-          urlPrefix: imgPrefixURL+'thumbs/',
+          urlPrefix: 'thumbs/',
           picList: picList,
           user: req.user,
         });
@@ -674,42 +675,97 @@ app.get('/API/getLeaderboards', (req, res) => {
 });
 app.get('/API/makeThumbnails', ensureLoggedIn(), declutter.checkLevel(10, true),
     (req, res) => {
-    // get list of all files
-      db.pictures.all().then((data) => {
-        const makeThumbs = [];// File names to make thumbnails for
-        for (let i = 0; i < data.length; i++) {
-          makeThumbs.push(data[i].filename);
+      const thumbsDir='./public/thumbs';
+      // get list of thumbnails already in folder
+      const existingThumbs=[];
+      fs.readdir(thumbsDir, (err, files) => {
+        if (err) {
+          throw err;
         }
-        console.log(makeThumbs);
+        // files object contains all files names
+        // log them on console
+        files.forEach((file) => {
+          existingThumbs.push(file);
+        });
+      });
+      // get list of all files on db
+      db.pictures.all().then((data) => {
+        // get File names to make thumbnails for
+        const makeThumbs = [];
+
+        // check if thumbs already exist
+        for (let i = 0; i < data.length; i++) {
+          if (!req.query.force) {
+            if (existingThumbs.indexOf(data[i].filename)==-1) {
+              makeThumbs.push(data[i].filename);
+            } else {
+              console.log(data[i].filename+' Thumbnail already exists');
+            }
+          } else {
+            makeThumbs.push(data[i].filename);
+          }
+        }
+        // Make directories
+        try {
+          fs.mkdirSync(thumbsDir);
+        } catch (e) {
+          console.log('Thumbnail directory could not be created.');
+        }
+        try {
+          fs.mkdirSync('./tmp');
+        } catch (e) {
+          console.log('Temp directory could not be created.');
+        }
         for (let i = 0; i < makeThumbs.length; i++) {
           declutter.imageLimiter.removeTokens(1, () => {
-            imageThumbnail({
-              uri: imgPrefixURL + makeThumbs[i],
-              width: 250,
-              fit: 'cover',
-              jpegOptions: {force: true, quality: 80},
-            }).then((thumbnail) => {
-              try {
-                fs.mkdirSync('./tmp/');
-              } catch (e) {}
-              fs.writeFileSync('./tmp/'+makeThumbs[i], thumbnail);
-              cloud.simpleUpload(
-                  `thumbs/${makeThumbs[i]}`, './tmp/'+makeThumbs[i],
-              ).then(
-                  () => {
-                    fs.unlink('./tmp/'+makeThumbs[i], ()=>{
-                      console.log(makeThumbs[i]+' done');
-                    });
-                  }).catch((err) => {
+            // download image
+            const filePath='./tmp/'+makeThumbs[i];
+            const out = fs.createWriteStream(filePath);
+            const res = needle.get(imgPrefixURL+makeThumbs[i]);
+            res.pipe(out);
+            res.on('end', function(err) {
+              if (!err) {
+                // generate thumbnail
+                imageThumbnail(
+                    filePath,
+                    {
+                      width: 150,
+                    // fit: 'cover',
+                    // jpegOptions: {force: true, quality: 80},
+                    },
+                ).then((thumbnail) => {
+                  // save thumbnail to disk
+                  try {
+                    fs.writeFileSync(thumbsDir+'/'+makeThumbs[i], thumbnail);
+                  } catch (e) {
+                    console.error(e);
+                  }
+
+                  // delete file
+                  fs.unlink('./tmp/'+makeThumbs[i], ()=>{
+                    console.log(makeThumbs[i]+' done');
+                  });
+                }).catch((e)=>{
+                  fs.copyFile(
+                      './public/video-thumb.png',
+                      thumbsDir+'/'+makeThumbs[i].split('.')[0]+'.png',
+                      ()=>{
+                        // delete file
+                        fs.unlink('./tmp/'+makeThumbs[i], ()=>{
+                          console.log(makeThumbs[i]+' done');
+                        });
+                        console.log('  *weird file type set generic thumbnail');
+                      },
+                  );
+                });
+              } else {
                 console.error(err);
-              });
-            }).catch((err) => {
-              console.error(err);
+              }
             });
           });
         }
         // eslint-disable-next-line max-len
-        res.end(`${makeThumbs.length} Thumbnails generated.`);
+        res.end(`${makeThumbs.length} Thumbnails will be generated.`);
       }).catch((e) => {
         console.error(e);
         res.end(e.message);

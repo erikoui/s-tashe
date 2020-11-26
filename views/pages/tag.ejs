@@ -12,7 +12,11 @@
     <a href="<%= prefix+'?picid='+picList[i].id %>">
       <div class='tag-group'>
         <div class='tag-image'>
+          <% if(picList[i].filename.split('.')[1]==='webm') {%>
+          <img src='<%=urlPrefix+picList[i].filename.split('.')[0]%>.png'>
+          <%}else{%>
           <img src='<%=urlPrefix+picList[i].filename%>'>
+          <%}%>
         </div>
         <div class='tag-txt'>
           <%=picList[i].description%><br>
