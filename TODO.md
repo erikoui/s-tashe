@@ -3,10 +3,10 @@
 ### Very critical
 * chinScanner output to special admin page (not realtime) via saving a file on cloud or db
 * automatic thumbnail generation
-* content section
+* the entire content section below
 
 ### Little bit critical
-* Merge report and edittags pages, rename them to picInfo or something and make it work with webms
+* Merge report and edittags pages, rename them to picInfo or something and make it work with webms, and add next/previous buttons
 * generate descriptions for pics (markov chain/random adjective-noun from bag)
     
 # Content
@@ -56,6 +56,7 @@
 # Bugs
 * sometimes tag leaderboard fails to load
 * user can just call the /vote api using external tools. block this somehow - limit votes per day/week
+* heroku Server cannot make thumbnails for some jpg files?
 
 
 # Security

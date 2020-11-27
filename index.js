@@ -756,7 +756,8 @@ app.get('/API/makeThumbnails', ensureLoggedIn(), declutter.checkLevel(10, true),
                         fs.unlink('./tmp/'+makeThumbs[i], ()=>{
                           console.log(makeThumbs[i]+' done');
                         });
-                        console.log('  *weird file type set generic thumbnail');
+                        // eslint-disable-next-line max-len
+                        console.log('  *weird file type set generic thumbnail: '+e.message);
                       },
                   );
                 });
