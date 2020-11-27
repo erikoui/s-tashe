@@ -675,7 +675,13 @@ app.get('/API/getLeaderboards', (req, res) => {
 });
 app.get('/API/makeThumbnails', ensureLoggedIn(), declutter.checkLevel(10, true),
     (req, res) => {
+      // try to make thumbs directory
       const thumbsDir='./public/thumbs';
+      try {
+        fs.mkdirSync(thumbsDir);
+      } catch (e) {
+        console.log('Thumbnail directory could not be created.');
+      }
       // get list of thumbnails already in folder
       const existingThumbs=[];
       fs.readdir(thumbsDir, (err, files) => {
@@ -706,12 +712,7 @@ app.get('/API/makeThumbnails', ensureLoggedIn(), declutter.checkLevel(10, true),
             makeThumbs.push(data[i].filename);
           }
         }
-        // Make directories
-        try {
-          fs.mkdirSync(thumbsDir);
-        } catch (e) {
-          console.log('Thumbnail directory could not be created.');
-        }
+        // Make temp directories
         try {
           fs.mkdirSync('./tmp');
         } catch (e) {
