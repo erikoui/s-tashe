@@ -679,14 +679,15 @@ app.get('/API/makeThumbnails', ensureLoggedIn(), declutter.checkLevel(10, true),
       // get list of thumbnails already in folder
       const existingThumbs=[];
       fs.readdir(thumbsDir, (err, files) => {
-        if (err) {
-          throw err;
+        if (!err) {
+          files.forEach((file) => {
+            existingThumbs.push(file);
+          });
+        } else {
+          return res.end('error '+err.message);
         }
         // files object contains all files names
         // log them on console
-        files.forEach((file) => {
-          existingThumbs.push(file);
-        });
       });
       // get list of all files on db
       db.pictures.all().then((data) => {
