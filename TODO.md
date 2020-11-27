@@ -1,12 +1,13 @@
 # Critical
 
 ### Very critical
+* chinScanner output to special admin page (not realtime) via saving a file on cloud or db
+* automatic thumbnail generation
+* content section
 
 ### Little bit critical
-* chinScanner output to special admin page (not realtime) via saving a file on cloud or db
-* limit cos requests (like caching) because free plan will hit cap easy (check heroku transfer caps etc - 500MB storage limit tho)
+* Merge report and edittags pages, rename them to picInfo or something and make it work with webms
 * generate descriptions for pics (markov chain/random adjective-noun from bag)
-* automatic thumbnail generation
     
 # Content
 * terms of service
@@ -17,7 +18,6 @@
 
 # Frontend 
 * Nicer frontend for the whole blog system
-* Merge report and edittags pages, rename them to picInfo or something and make it work with webms
 * Login frontend needs to show invalid login message instead of just reloading
 * Tell the user when registering when the username is already in use
 * Tag and description field for picture uploads
@@ -40,6 +40,7 @@
 * Twitter account header image (the thubnails page or a collage of best N pics)
 * Marketing on 4chin and twittr
 * Donate button
+* limit cos requests (like caching) because free plan will hit cap easy (check heroku transfer caps etc - 500MB storage limit tho)
 
 # Ideas
 * Voting bar chart when showing scores
