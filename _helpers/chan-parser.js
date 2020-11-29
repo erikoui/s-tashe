@@ -1,5 +1,4 @@
-// TODO: replace got with needle
-const got = require('got');
+const needle = require('needle');
 const {db} = require('./db');
 
 /**
@@ -29,18 +28,18 @@ class ChanParser {
     const boardUrl = `https://a.4cdn.org/${board}/catalog.json`;
 
     try {
-      // TODO: replace got with needle
-      const parsedData = await got(boardUrl).json();
+      const boardRaw = await needle('get', boardUrl);
+      const parsedData = boardRaw.body;
       for (let i = 0; i < parsedData.length; i++) {// page
         for (let j = 0; j < parsedData[i].threads.length; j++) {// thread
           // eslint-disable-next-line max-len
-          const thisthread = `https://boards.4chan.org/${board}/thread/${parsedData[i].threads[j].no}`;
+          const thisThread = `https://boards.4chan.org/${board}/thread/${parsedData[i].threads[j].no}`;
           // eslint-disable-next-line max-len
           const subject = `${parsedData[i].threads[j].sub || ''} ${parsedData[i].threads[j].com || ''}`;
 
           // Check if thread has our tags in the subject or comment
           if (this.isInteresting(subject, checkTags)) {
-            urls.push(thisthread);
+            urls.push(thisThread);
           }
         }
       }
@@ -59,6 +58,7 @@ class ChanParser {
     // Clean them up to use as a single array of words
     let checkTags = [];
     for (let i = 0; i < tags.length; i++) {
+      // Check if auto download is enabled for this tag
       if (tags[i].auto_download) {
         checkTags.push(tags[i].tag);
         if (tags[i].alts != null) {
