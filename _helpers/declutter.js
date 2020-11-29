@@ -37,7 +37,7 @@ class Declutter {
     this.refreshTags().then(()=>{
       console.log('Tags:'+this.tags.map((({tag})=>tag)));
       this.updateArchivePicList();
-      // this.chinScanner();
+      this.chinScanner();
       console.log('Declutter loaded');
     }).catch((e)=>{
       console.log(e);
@@ -58,6 +58,13 @@ class Declutter {
           });
         });
       }
+      this.db.reports.add('chinScanner',
+          data.length + ' threads downloaded on ' + Date().toString(),
+          0,
+          0,
+          'System',
+          '',
+      );
     }).catch((e) => {
       console.error('error with loadBoardJson: ' + e);
     });
