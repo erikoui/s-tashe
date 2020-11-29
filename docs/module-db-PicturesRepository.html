@@ -625,7 +625,167 @@ for queries for security.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line253">line 253</a>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line259">line 259</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="changeDesc"><span class="type-signature">(async) </span>changeDesc<span class="signature">(picid, newDesc)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>Changes the description of a picture by id</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>picid</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>picture id</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>newDesc</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>new desctription</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line84">line 84</a>
     </li></ul></dd>
     
 
@@ -766,7 +926,7 @@ records with tags not in the tag table.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line169">line 169</a>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line157">line 157</a>
     </li></ul></dd>
     
 
@@ -1066,7 +1226,7 @@ If it doesnt find it, the promise will go to <code>.catch((rej) =&gt; {...})</co
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line153">line 153</a>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line141">line 141</a>
     </li></ul></dd>
     
 
@@ -1204,7 +1364,7 @@ If it doesnt find it, the promise will go to <code>.catch((rej) =&gt; {...})</co
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line141">line 141</a>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line129">line 129</a>
     </li></ul></dd>
     
 
@@ -1240,7 +1400,7 @@ If it doesnt find it, the promise will go to <code>.catch((rej) =&gt; {...})</co
     
 
     
-    <h4 class="name" id="getTagsById"><span class="type-signature">(async) </span>getTagsById<span class="signature">(picid)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="getPicDataById"><span class="type-signature">(async) </span>getPicDataById<span class="signature">(picid)</span><span class="type-signature"></span></h4>
     
 
     
@@ -1501,145 +1661,7 @@ If it doesnt find it, the promise will go to <code>.catch((rej) =&gt; {...})</co
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line203">line 203</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="remove"><span class="type-signature">(async) </span>remove<span class="signature">(id)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    <p>Deletes a picture record by id. note that this does not
-delete the file from the cloud server.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>id</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">int</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The id of the record to delete.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line84">line 84</a>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line191">line 191</a>
     </li></ul></dd>
     
 
@@ -1963,7 +1985,190 @@ delete the file from the cloud server.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line240">line 240</a>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line228">line 228</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="topNandTag"><span class="type-signature">(async) </span>topNandTag<span class="signature">(n, minviews, tag)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    <p>returns the top n pics by tag</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>n</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Number of pics</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>minviews</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>minmimum views to be shown as sorted</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>tag</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>tag</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line245">line 245</a>
     </li></ul></dd>
     
 
@@ -2051,7 +2256,7 @@ delete the file from the cloud server.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line260">line 260</a>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line266">line 266</a>
     </li></ul></dd>
     
 
@@ -2348,7 +2553,7 @@ delete the file from the cloud server.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line216">line 216</a>
+        <a href="db_repo_pictures.js.html">db/repo/pictures.js</a>, <a href="db_repo_pictures.js.html#line204">line 204</a>
     </li></ul></dd>
     
 
@@ -2394,13 +2599,13 @@ delete the file from the cloud server.</p>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-db.html">db</a></li></ul><h3>Classes</h3><ul><li><a href="ChanDownloader.html">ChanDownloader</a></li><li><a href="ChanParser.html">ChanParser</a></li><li><a href="Cloud.html">Cloud</a></li><li><a href="Declutter.html">Declutter</a></li><li><a href="module-db-PicturesRepository.html">PicturesRepository</a></li><li><a href="module-db-Reports.html">Reports</a></li><li><a href="module-db-TagsRepository.html">TagsRepository</a></li><li><a href="module-db-UsersRepository.html">UsersRepository</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-db.html">db</a></li></ul><h3>Classes</h3><ul><li><a href="ChanDownloader.html">ChanDownloader</a></li><li><a href="ChanParser.html">ChanParser</a></li><li><a href="Cloud.html">Cloud</a></li><li><a href="Declutter.html">Declutter</a></li><li><a href="module-db-BlogRepository.html">BlogRepository</a></li><li><a href="module-db-PicturesRepository.html">PicturesRepository</a></li><li><a href="module-db-Reports.html">Reports</a></li><li><a href="module-db-TagsRepository.html">TagsRepository</a></li><li><a href="module-db-UsersRepository.html">UsersRepository</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Mon Nov 09 2020 23:35:53 GMT+0200 (Eastern European Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Nov 29 2020 23:08:54 GMT+0200 (Eastern European Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
