@@ -11,8 +11,6 @@ const multer = require('multer');
 const upload = multer({dest: 'uploads/'});
 const favicon = require('serve-favicon');
 const cookieParser = require('cookie-parser');
-const imageThumbnail = require('image-thumbnail');
-const needle = require('needle');
 
 // Load custom modules
 const {db} = require('./_helpers/db');
@@ -76,6 +74,10 @@ passport.deserializeUser(async (id, done) => {
 // This is also ran in declutter right after tags are loaded
 setInterval(() => {
   declutter.chinScanner();
+  // make thumbnails 1 hour after
+  setTimeout(()=>{
+    declutter.makeThumbs(false);
+  }, 1*60*60*1000);
 }, 12 * 60 * 60 * 1000);
 
 // update the archive pictures every 6 hrs. This is also ran in declutter
@@ -675,104 +677,7 @@ app.get('/API/getLeaderboards', (req, res) => {
 });
 app.get('/API/makeThumbnails', ensureLoggedIn(), declutter.checkLevel(10, true),
     (req, res) => {
-      // try to make thumbs directory
-      const thumbsDir='./public/thumbs';
-      try {
-        fs.mkdirSync(thumbsDir);
-      } catch (e) {
-        console.log('Thumbnail directory could not be created.');
-      }
-      // get list of thumbnails already in folder
-      const existingThumbs=[];
-      fs.readdir(thumbsDir, (err, files) => {
-        if (!err) {
-          files.forEach((file) => {
-            existingThumbs.push(file);
-          });
-        } else {
-          return res.end('error '+err.message);
-        }
-        // files object contains all files names
-        // log them on console
-      });
-      // get list of all files on db
-      db.pictures.all().then((data) => {
-        // get File names to make thumbnails for
-        const makeThumbs = [];
-
-        // check if thumbs already exist
-        for (let i = 0; i < data.length; i++) {
-          if (!req.query.force) {
-            if (existingThumbs.indexOf(data[i].filename)==-1) {
-              makeThumbs.push(data[i].filename);
-            } else {
-              console.log(data[i].filename+' Thumbnail already exists');
-            }
-          } else {
-            makeThumbs.push(data[i].filename);
-          }
-        }
-        // Make temp directories
-        try {
-          fs.mkdirSync('./tmp');
-        } catch (e) {
-          console.log('Temp directory could not be created.');
-        }
-        for (let i = 0; i < makeThumbs.length; i++) {
-          declutter.imageLimiter.removeTokens(1, () => {
-            // download image
-            const filePath='./tmp/'+makeThumbs[i];
-            const out = fs.createWriteStream(filePath);
-            const res = needle.get(imgPrefixURL+makeThumbs[i]);
-            res.pipe(out);
-            res.on('end', function(err) {
-              if (!err) {
-                // generate thumbnail
-                imageThumbnail(
-                    filePath,
-                    {
-                      width: 150,
-                    // fit: 'cover',
-                    // jpegOptions: {force: true, quality: 80},
-                    },
-                ).then((thumbnail) => {
-                  // save thumbnail to disk
-                  try {
-                    fs.writeFileSync(thumbsDir+'/'+makeThumbs[i], thumbnail);
-                  } catch (e) {
-                    console.error(e);
-                  }
-
-                  // delete file
-                  fs.unlink('./tmp/'+makeThumbs[i], ()=>{
-                    console.log(makeThumbs[i]+' done');
-                  });
-                }).catch((e)=>{
-                  fs.copyFile(
-                      './public/video-thumb.png',
-                      thumbsDir+'/'+makeThumbs[i].split('.')[0]+'.png',
-                      ()=>{
-                        // delete file
-                        fs.unlink('./tmp/'+makeThumbs[i], ()=>{
-                          console.log(makeThumbs[i]+' done');
-                        });
-                        // eslint-disable-next-line max-len
-                        console.log('  *weird file type set generic thumbnail: '+e.message);
-                      },
-                  );
-                });
-              } else {
-                console.error(err);
-              }
-            });
-          });
-        }
-        // eslint-disable-next-line max-len
-        res.end(`${makeThumbs.length} Thumbnails will be generated.`);
-      }).catch((e) => {
-        console.error(e);
-        res.end(e.message);
-      });
+      res.end(declutter.makeThumbs(req.query.force));
     });
 app.post('/login', passport.authenticate('local', {
   failureRedirect: '/login',

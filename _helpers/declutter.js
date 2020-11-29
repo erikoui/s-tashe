@@ -6,7 +6,8 @@ const RateLimiter = require('limiter').RateLimiter;
 const ChanDownloader = require('./chan-downloader');
 const ChanParser = require('./chan-parser');
 const chanParser = new ChanParser();
-
+const needle = require('needle');
+const imageThumbnail = require('image-thumbnail');
 /**
  * Some helper functions to make index.js smaller
  * @class
@@ -38,6 +39,7 @@ class Declutter {
       console.log('Tags:'+this.tags.map((({tag})=>tag)));
       this.updateArchivePicList();
       this.chinScanner();
+      this.makeThumbs(false);
       console.log('Declutter loaded');
     }).catch((e)=>{
       console.log(e);
@@ -70,6 +72,125 @@ class Declutter {
     });
   };
 
+  /**
+   * Generates thumbnails
+   * @param {bool} force - when true, makes all thumbs. when false, makes
+   * only missing thumbs
+   *
+   * @return {string} - message
+   */
+  makeThumbs(force) {
+    // try to make thumbs directory
+    const thumbsDir='./public/thumbs';
+    try {
+      fs.mkdirSync(thumbsDir);
+    } catch (e) {
+      console.log('Thumbnail directory could not be created.');
+    }
+    // get list of thumbnails already in folder
+    const existingThumbs=[];
+    try {
+      fs.readdir(thumbsDir, (err, files) => {
+        if (!err) {
+          files.forEach((file) => {
+            existingThumbs.push(file);
+          });
+        } else {
+          throw new Error('error '+err.message);
+        }
+      });
+    } catch (e) {
+      return e;
+    }
+    // get list of all files on db
+    this.db.pictures.all().then((data) => {
+      // get File names to make thumbnails for
+      const makeThumbs = [];
+      let existing=0;
+      // check if thumbs already exist
+      for (let i = 0; i < data.length; i++) {
+        if (!force) {
+          if (existingThumbs.indexOf(data[i].filename)==-1) {
+            makeThumbs.push(data[i].filename);
+          } else {
+            ++existing;
+          }
+        } else {
+          makeThumbs.push(data[i].filename);
+        }
+      }
+      console.log(existing+' Thumbnails already exists');
+      // Make temp directories
+      try {
+        fs.mkdirSync('./tmp');
+      } catch (e) {
+        console.log('Temp directory could not be created.');
+      }
+      for (let i = 0; i < makeThumbs.length; i++) {
+        this.imageLimiter.removeTokens(1, () => {
+          // download image
+          const filePath='./tmp/'+makeThumbs[i];
+          const out = fs.createWriteStream(filePath);
+          const res = needle.get(this.imgPrefixURL+makeThumbs[i]);
+          res.pipe(out);
+          res.on('end', function(err) {
+            if (!err) {
+              // generate thumbnail
+              imageThumbnail(
+                  filePath,
+                  {
+                    width: 150,
+                    // fit: 'cover',
+                    // jpegOptions: {force: true, quality: 80},
+                  },
+              ).then((thumbnail) => {
+                // save thumbnail to disk
+                try {
+                  fs.writeFileSync(thumbsDir+'/'+makeThumbs[i], thumbnail);
+                } catch (e) {
+                  console.error(e);
+                }
+
+                // delete file
+                fs.unlink('./tmp/'+makeThumbs[i], ()=>{
+                  console.log(makeThumbs[i]+' done');
+                });
+              }).catch((e)=>{
+                fs.copyFile(
+                    './public/video-thumb.png',
+                    thumbsDir+'/'+makeThumbs[i].split('.')[0]+'.png',
+                    ()=>{
+                      // delete file
+                      fs.unlink('./tmp/'+makeThumbs[i], ()=>{
+                        console.log(makeThumbs[i]+' done');
+                      });
+                      // eslint-disable-next-line max-len
+                      console.log('  *weird file type set generic thumbnail: '+e.message);
+                    },
+                );
+              });
+            } else {
+              console.error(err);
+            }
+          });
+        });
+      }
+      // eslint-disable-next-line max-len
+      this.db.reports.add('thumbnails',
+          makeThumbs.length +
+            ' thumbnails set to be generated on ' +
+            Date().toString(),
+          0,
+          0,
+          'System',
+          '',
+      );
+      return (`${makeThumbs.length} Thumbnails will be generated.`);
+    }).catch((e) => {
+      console.error(e);
+      return (e.message);
+    });
+  }
   /**
    * Updates the best pics list for each tag because it takes time.
    * Only the admin should call this directly, otherwise run it every 2 hours

@@ -1,8 +1,6 @@
 # Critical
 
 ### Very critical
-* chinScanner output to special admin page (not realtime) via saving a file on cloud or db
-* automatic thumbnail generation
 * the entire content section below
 
 ### Little bit critical
