@@ -129,6 +129,18 @@ app.get('/', (req, res) => {
     rankingData: declutter.rankingData,
   });
 });
+app.get('/tos', (req, res)=>{
+  res.render('pages/tos.ejs', {user: req.user});
+});
+app.get('/privacy', (req, res)=>{
+  res.render('pages/privacy.ejs', {user: req.user});
+});
+app.get('/cookies', (req, res)=>{
+  res.render('pages/cookies.ejs', {user: req.user});
+});
+app.get('/faq', (req, res)=>{
+  res.render('pages/faq.ejs', {user: req.user});
+});
 app.get('/tag', (req, res) => {
   const tag = req.query.tag;
   db.pictures.listByTag(tag, declutter.minVotes)

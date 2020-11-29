@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <% include ../partials/header.ejs %>
+</head>
+
+<!-- you need to include the shieldui css and js assets in order for the charts to work -->
+<link rel="stylesheet" type="text/css" href="http://www.shieldui.com/shared/components/latest/css/light/all.min.css" />
+<script type="text/javascript" src="http://www.shieldui.com/shared/components/latest/js/shieldui-all.min.js"></script>
+
+<body>
+    <% include ../partials/nav.ejs %>
+    <div class="container-fluid" style="width:1200px">
+        <div class="row">
+            <div class="col-sm-2">
+                <div class="col-sm-12 bg-left" id="left-bar">
+                    <% include ../partials/leftad.ejs %>
+                </div>
+            </div>
+            <div class="col-sm-8">
+                <div class="row">
+                    <div class="col-sm-12 bg-mid">
+                        <h2>Cookie Policy</h2>
+                        <h2><b>What are cookies and how we use them?</b></h2>
+                        <p><span style="font-weight: 400;">A cookie is a small text file that is stored on a user’s
+                                computer for record-keeping purposes. We do not link the information we store in cookies
+                                to any personally identifiable information you submit while on our Website. By accessing
+                                the Site, you expressly accept the use of these types of cookies on your devices.</span>
+                        </p>
+                        <p><span style="font-weight: 400;">There are two types of cookies: session cookies and
+                                persistent cookies. We also allow third parties to use cookies on our Website.</span>
+                        </p>
+                        <ul>
+                            <li style="font-weight: 400;"><span style="font-weight: 400;">Session Cookies. Session
+                                    cookies exist only during one online session. They are deleted from your computer
+                                    when the browser is closed or the computer is turned off. We use session cookies to
+                                    allow our systems to uniquely identify you during a session.</span></li>
+                            <li style="font-weight: 400;"><span style="font-weight: 400;">Persistent Cookies. Persistent
+                                    cookies are saved on your computer after you have closed the browser or shut down
+                                    your computer. We use persistent cookies to track statistical and aggregate
+                                    information about your activity, which can be combined with other
+                                    information.</span></li>
+                            <li style="font-weight: 400;"><span style="font-weight: 400;">Third Party Cookies. We also
+                                    hire third parties to track and analyse personal and non-personal information. To do
+                                    so, we allow third parties to send cookies to users of our Website, as permitted by
+                                    law and without prejudice to your right to disable such cookies. We use the data
+                                    collected by said third parties to help us manage and improve the quality of the
+                                    Website and to analyse the use of the Website. The use of these cookies is not
+                                    covered by our Privacy &amp; Cookies Policy, we do not have access or control over
+                                    these cookies.</span></li>
+                        </ul>
+                        <h2><b>Which cookies do we use?</b></h2>
+                        <p><span style="font-weight: 400;">We use both session ID cookies and persistent cookies. We use
+                                session cookies to make it easier for you to navigate our Website. A session ID cookie
+                                expires when you close your browser. A persistent cookie remains on your hard drive for
+                                an extended period of time</span></p>
+                        <style type="text/css">
+                            .waffle {
+                                font-size: .9em;
+                            }
+
+                            .waffle td {
+                                border-style: solid;
+                                border-collapse: collapse;
+                                border-width: 1px;
+                                padding-left: .5em;
+                            }
+
+                            .waffle td.s0,
+                            .waffle td.s1 {
+                                background-color: #555;
+                                color: white;
+                                border-color: black;
+                            }
+
+                            .waffle td.s0,
+                            .waffle td.s1,
+                            .waffle td.s2 {
+                                font-weight: bold;
+                            }
+
+                            .waffle td.s2 {
+                                text-align: center;
+                            }
+
+                            .waffle td.s3 {
+                                min-width: 80px;
+                            }
+
+                            .waffle th {
+                                display: none
+                            }
+                        </style>
+                        <table class="waffle" cellspacing="0" cellpadding="0">
+                            <thead>
+                                <tr>
+                                    <th class="row-header freezebar-origin-ltr header-shim row-header-shim"></th>
+                                    <th id="1626924949C0" class="header-shim" style="width: 270px;"></th>
+                                    <th id="1626924949C1" class="header-shim" style="width: 107px;"></th>
+                                    <th id="1626924949C2" class="header-shim" style="width: 129px;"></th>
+                                    <th id="1626924949C3" class="header-shim" style="width: 578px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R0" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">1</div>
+                                    </th>
+                                    <td class="s0" dir="ltr">Name</td>
+                                    <td class="s0" dir="ltr">Owner</td>
+                                    <td class="s0" dir="ltr">Duration</td>
+                                    <td class="s1" dir="ltr">Purpose</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R1" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">2</div>
+                                    </th>
+                                    <td class="s2" dir="ltr" colspan="4">In the context of a user viewing ExoClick ads
+                                        on a Publisher site</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R16" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">17</div>
+                                    </th>
+                                    <td class="s3">exo-splash-i</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3">1 year</td>
+                                    <td class="s4">Defines if the user is under incognito mode.</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R17" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">18</div>
+                                    </th>
+                                    <td class="s3">img_click_&lt;idzone&gt;</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3">15 minutes</td>
+                                    <td class="s4">Defines the click URL when ad serving output is defined to be image.
+                                    </td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R18" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">19</div>
+                                    </th>
+                                    <td class="s3">md5(instream_frequency_cap_&lt;idzone&gt;)</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3">1 day</td>
+                                    <td class="s4" dir="ltr">To check if the frequency capping for a given zone is
+                                        reached.</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R19" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">20</div>
+                                    </th>
+                                    <td class="s3">tag</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3">1 day</td>
+                                    <td class="s4">User context data and ad data to allow the conversion tracking and
+                                        register it correctly.</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R20" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">21</div>
+                                    </th>
+                                    <td class="s3">cimp-registry</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3">1 hour 50 seconds</td>
+                                    <td class="s4" dir="ltr">Control clicks on RTB.</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R21" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">22</div>
+                                    </th>
+                                    <td class="s3">impressions</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3">1 day</td>
+                                    <td class="s4">Used to apply the frequency capping of campaigns to user.</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R22" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">23</div>
+                                    </th>
+                                    <td class="s3">c-&lt;id_campaign&gt;</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3">1 day</td>
+                                    <td class="s4">Used to check if a campaign is already clicked.</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R23" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">24</div>
+                                    </th>
+                                    <td class="s3">goals</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3">1 year</td>
+                                    <td class="s4">Used to eliminiate retargeting campaigns.</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R24" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">25</div>
+                                    </th>
+                                    <td class="s3">__uvt</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3" dir="ltr">2 years</td>
+                                    <td class="s4">Get unique user id on common context.</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R25" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">26</div>
+                                    </th>
+                                    <td class="s3">splash-&lt;idzone&gt;</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3">1 day</td>
+                                    <td class="s4">To check if the frequency capping for a given zone is reached.</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R26" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">27</div>
+                                    </th>
+                                    <td class="s3">splashWeb-&lt;idzone&gt;-42</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3">1 day</td>
+                                    <td class="s4">To check if the frequency capping for a given zone is reached.</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R27" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">28</div>
+                                    </th>
+                                    <td class="s3">exoBillboardClosed_&lt;idzone&gt;</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3">1 day</td>
+                                    <td class="s4">To check if the frequency capping for a given zone is reached.</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R28" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">29</div>
+                                    </th>
+                                    <td class="s3">exoexit_shown_&lt;idzone&gt;</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3">1 day</td>
+                                    <td class="s4">To check if the frequency capping for a given zone is reached.</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R29" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">30</div>
+                                    </th>
+                                    <td class="s3">exointer_shown_&lt;idzone&gt;</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3">1 day</td>
+                                    <td class="s4">To check if the frequency capping for a given zone is reached.</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R30" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">31</div>
+                                    </th>
+                                    <td class="s3">splashWeb-&lt;idzone&gt;-42</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3">1 day</td>
+                                    <td class="s4">To check if the frequency capping for a given zone is reached.</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R31" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">32</div>
+                                    </th>
+                                    <td class="s3">splash-&lt;idzone&gt;</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3">1 day</td>
+                                    <td class="s4">To check if the frequency capping for a given zone is reached.</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R32" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">33</div>
+                                    </th>
+                                    <td class="s3">nb-no-req-&lt;idzone&gt;</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3">1 day</td>
+                                    <td class="s4">To avoid Neverblock from doing more ads requests once the capping
+                                        limit is reached.</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R33" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">34</div>
+                                    </th>
+                                    <td class="s3">splash-closed-&lt;idzone</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3">1 day</td>
+                                    <td class="s4" dir="ltr">To check if the user closed the ad.</td>
+                                </tr>
+                                <tr style="height: 20px;">
+                                    <th id="1626924949R34" class="row-headers-background row-header-shim"
+                                        style="height: 20px;">
+                                        <div class="row-header-wrapper" style="line-height: 20px;">35</div>
+                                    </th>
+                                    <td class="s3">sticky-closed-&lt;idzone&gt;</td>
+                                    <td class="s3">ExoClick</td>
+                                    <td class="s3">1 day</td>
+                                    <td class="s4">To check if the user closed the ad.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p>&nbsp;</p>
+                        <h2><b>Can I refuse or opt out of cookies?</b></h2>
+                        <p><span style="font-weight: 400;">You can delete cookies at any time using the special settings
+                                of your web browser. Given the large number of browsers and versions available on the
+                                market, we cannot provide technical assistance on the process of blocking or removing
+                                cookies from each of them. For such purposes, you should consult the manuals and support
+                                services provided by the manufacturer of the browser that you are using. In any case,
+                                for information only, we provide the following links that detail how to allow, block or
+                                delete cookies in the main browsers in the market at the time of writing this
+                                Policy:</span></p>
+                        <ul>
+                            <li style="font-weight: 400;"><span style="font-weight: 400;">Safari: </span><a
+                                    href="http://support.apple.com/kb/PH17191?viewlocale=es_ES&amp;locale=es_ES"><span
+                                        style="font-weight: 400;">http://support.apple.com/kb/PH17191?viewlocale=es_ES&amp;locale=es_ES</span></a>
+                            </li>
+                            <li style="font-weight: 400;"><span style="font-weight: 400;">Firefox: </span><a
+                                    href="https://support.mozilla.org/es/kb/cookies-informacion-que-los-sitios-web-guardan-en-?esab=a&amp;s=cookies&amp;r=1&amp;as=s"><span
+                                        style="font-weight: 400;">https://support.mozilla.org/es/kb/cookies-informacion-que-los-sitios-web-guardan-en-?esab=a&amp;s=cookies&amp;r=1&amp;as=s</span></a>
+                            </li>
+                            <li style="font-weight: 400;"><span style="font-weight: 400;">Google Chrome: </span><a
+                                    href="https://support.google.com/accounts/answer/61416?hl=es"><span
+                                        style="font-weight: 400;">https://support.google.com/accounts/answer/61416?hl=es</span></a>
+                            </li>
+                            <li style="font-weight: 400;"><span style="font-weight: 400;">Internet Explorer: </span><a
+                                    href="http://windows.microsoft.com/es-es/windows7/how-to-manage-cookies-in-internet-explorer-9"><span
+                                        style="font-weight: 400;">http://windows.microsoft.com/es-es/windows7/how-to-manage-cookies-in-internet-explorer-9</span></a>
+                            </li>
+                            <li style="font-weight: 400;"><span style="font-weight: 400;">Opera: </span><a
+                                    href="http://help.opera.com/Windows/11.50/es-ES/cookies.html"><span
+                                        style="font-weight: 400;">http://help.opera.com/Windows/11.50/es-ES/cookies.html</span></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="col-sm-12 bg-right" id="right-bar">
+                    <% include ../partials/rightad.ejs %>
+                </div>
+            </div>
+        </div>
+    </div>
+    <% include ../partials/stickyad.ejs %>
+</body>
+<% include ../partials/footer.ejs %>
+
+</html>

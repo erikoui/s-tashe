@@ -8,9 +8,7 @@
 * generate descriptions for pics (markov chain/random adjective-noun from bag)
     
 # Content
-* terms of service
 * faq
-* privacy policy
 * 10 blog posts of at least 300 words for ads lmao wtf
 * ChanScanner picks the longest reply chain from each thread and puts it as the blog post body with some nice formatting.
 
