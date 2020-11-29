@@ -32,7 +32,10 @@ const fs = require('fs');
 
 const RateLimiter = require('limiter').RateLimiter;
 const ChanDownloader = require('./chan-downloader');
-
+const ChanParser = require('./chan-parser');
+const chanParser = new ChanParser();
+const needle = require('needle');
+const imageThumbnail = require('image-thumbnail');
 /**
  * Some helper functions to make index.js smaller
  * @class
@@ -55,11 +58,196 @@ class Declutter {
       pointBreaks: [20, 100, 250, 500, 1000, 2000, 5000, 1000000],
       levels: [0, 1, 2, 3, 4, 5, 6, 7],
     };
-    this.tags = this.refreshTags();
     this.chanDownloader = new ChanDownloader(this);
-    console.log('Declutter loaded');
+    this.minVotes=7;
+    this.imgPrefixURL=`https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/`;
+    this.tags=[];
+    this.archivePicList=[];
+    this.refreshTags().then(()=>{
+      console.log('Tags:'+this.tags.map((({tag})=>tag)));
+      this.updateArchivePicList();
+      this.chinScanner();
+      this.makeThumbs(false);
+      console.log('Declutter loaded');
+    }).catch((e)=>{
+      console.log(e);
+    });
   }
 
+  /**
+   * Wrapper for running chanParser and chanDownloader
+   */
+  chinScanner() {
+    chanParser.loadBoardJson('/s/').then((data) => {
+      for (let i = 0; i &lt; data.length; i++) {
+        this.imageLimiter.removeTokens(1, () => {
+          this.downloadThreadAndSaveToCloud(data[i]).then(() => {
+          }).catch((e) => {
+            console.error(e);
+            console.error('error with download thread:' + e);
+          });
+        });
+      }
+      this.db.reports.add('chinScanner',
+          data.length + ' threads downloaded on ' + Date().toString(),
+          0,
+          0,
+          'System',
+          '',
+      );
+    }).catch((e) => {
+      console.error('error with loadBoardJson: ' + e);
+    });
+  };
+
+  /**
+   * Generates thumbnails
+   * @param {bool} force - when true, makes all thumbs. when false, makes
+   * only missing thumbs
+   *
+   * @return {string} - message
+   */
+  makeThumbs(force) {
+    // try to make thumbs directory
+    const thumbsDir='./public/thumbs';
+    try {
+      fs.mkdirSync(thumbsDir);
+    } catch (e) {
+      console.log('Thumbnail directory could not be created.');
+    }
+    // get list of thumbnails already in folder
+    const existingThumbs=[];
+    try {
+      fs.readdir(thumbsDir, (err, files) => {
+        if (!err) {
+          files.forEach((file) => {
+            existingThumbs.push(file);
+          });
+        } else {
+          throw new Error('error '+err.message);
+        }
+      });
+    } catch (e) {
+      return e;
+    }
+    // get list of all files on db
+    this.db.pictures.all().then((data) => {
+      // get File names to make thumbnails for
+      const makeThumbs = [];
+      let existing=0;
+      // check if thumbs already exist
+      for (let i = 0; i &lt; data.length; i++) {
+        if (!force) {
+          if (existingThumbs.indexOf(data[i].filename)==-1) {
+            makeThumbs.push(data[i].filename);
+          } else {
+            ++existing;
+          }
+        } else {
+          makeThumbs.push(data[i].filename);
+        }
+      }
+      console.log(existing+' Thumbnails already exists');
+      // Make temp directories
+      try {
+        fs.mkdirSync('./tmp');
+      } catch (e) {
+        console.log('Temp directory could not be created.');
+      }
+      for (let i = 0; i &lt; makeThumbs.length; i++) {
+        this.imageLimiter.removeTokens(1, () => {
+          // download image
+          const filePath='./tmp/'+makeThumbs[i];
+          const out = fs.createWriteStream(filePath);
+          const res = needle.get(this.imgPrefixURL+makeThumbs[i]);
+          res.pipe(out);
+          res.on('end', function(err) {
+            if (!err) {
+              // generate thumbnail
+              imageThumbnail(
+                  filePath,
+                  {
+                    width: 150,
+                    // fit: 'cover',
+                    // jpegOptions: {force: true, quality: 80},
+                  },
+              ).then((thumbnail) => {
+                // save thumbnail to disk
+                try {
+                  fs.writeFileSync(thumbsDir+'/'+makeThumbs[i], thumbnail);
+                } catch (e) {
+                  console.error(e);
+                }
+
+                // delete file
+                fs.unlink('./tmp/'+makeThumbs[i], ()=>{
+                  console.log(makeThumbs[i]+' done');
+                });
+              }).catch((e)=>{
+                fs.copyFile(
+                    './public/video-thumb.png',
+                    thumbsDir+'/'+makeThumbs[i].split('.')[0]+'.png',
+                    ()=>{
+                      // delete file
+                      fs.unlink('./tmp/'+makeThumbs[i], ()=>{
+                        console.log(makeThumbs[i]+' done');
+                      });
+                      // eslint-disable-next-line max-len
+                      console.log('  *weird file type set generic thumbnail: '+e.message);
+                    },
+                );
+              });
+            } else {
+              console.error(err);
+            }
+          });
+        });
+      }
+      // eslint-disable-next-line max-len
+      this.db.reports.add('thumbnails',
+          makeThumbs.length +
+            ' thumbnails set to be generated on ' +
+            Date().toString(),
+          0,
+          0,
+          'System',
+          '',
+      );
+      return (`${makeThumbs.length} Thumbnails will be generated.`);
+    }).catch((e) => {
+      console.error(e);
+      return (e.message);
+    });
+  }
+  /**
+   * Updates the best pics list for each tag because it takes time.
+   * Only the admin should call this directly, otherwise run it every 2 hours
+   * or so.
+   */
+  updateArchivePicList() {
+    console.log('Updating archive pic list');
+    this.archivePicList=[];
+    const that=this;
+    const getTop=function(i) {
+      if (i&lt;that.tags.length) {
+        that.db.pictures.topNandTag(
+            1, that.minVotes, that.tags[i].tag,
+        ).then((r)=>{
+          that.archivePicList.push({
+            src: that.imgPrefixURL+r[0].filename,
+            tag: that.tags[i].tag,
+          });
+          getTop(i+1);
+        }).catch((e)=>{
+          console.log(e);
+          getTop(i+1);
+        });
+      } else {
+        console.log('Archive pic list updated');
+      }
+    };
+    getTop(0);
+  }
   /**
    * Converts the users points to a text description
    * @param {any} user - the user object returned by login
@@ -306,7 +494,12 @@ class Declutter {
      * Reloads the tags from the tags table
      */
   async refreshTags() {
-    this.tags = await this.db.tags.all();
+    await this.db.tags.all().then((data)=>{
+      this.tags= data;
+    }).catch((e)=>{
+      console.error(e);
+      this.tags= [{tag: 'error loading all tags'}];
+    });
   }
 
   /**
@@ -329,13 +522,13 @@ module.exports = Declutter;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-db.html">db</a></li></ul><h3>Classes</h3><ul><li><a href="ChanDownloader.html">ChanDownloader</a></li><li><a href="ChanParser.html">ChanParser</a></li><li><a href="Cloud.html">Cloud</a></li><li><a href="Declutter.html">Declutter</a></li><li><a href="module-db-PicturesRepository.html">PicturesRepository</a></li><li><a href="module-db-Reports.html">Reports</a></li><li><a href="module-db-TagsRepository.html">TagsRepository</a></li><li><a href="module-db-UsersRepository.html">UsersRepository</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-db.html">db</a></li></ul><h3>Classes</h3><ul><li><a href="ChanDownloader.html">ChanDownloader</a></li><li><a href="ChanParser.html">ChanParser</a></li><li><a href="Cloud.html">Cloud</a></li><li><a href="Declutter.html">Declutter</a></li><li><a href="module-db-BlogRepository.html">BlogRepository</a></li><li><a href="module-db-PicturesRepository.html">PicturesRepository</a></li><li><a href="module-db-Reports.html">Reports</a></li><li><a href="module-db-TagsRepository.html">TagsRepository</a></li><li><a href="module-db-UsersRepository.html">UsersRepository</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Mon Nov 09 2020 23:35:53 GMT+0200 (Eastern European Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Nov 29 2020 23:08:54 GMT+0200 (Eastern European Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

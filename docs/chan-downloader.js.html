@@ -32,6 +32,7 @@ const fs = require('fs');
 const path = require('path');
 const {db} = require('./db');
 const needle = require('needle');
+const {RateLimiter} = require('limiter');
 
 let threadFolder = __dirname;
 /**
@@ -45,6 +46,7 @@ class ChanDownloader {
    */
   constructor(declutter) {
     this.imageLimiter = declutter.imageLimiter;
+    this.uploadLimiter = new RateLimiter(3, 'minute');
     this.declutter = declutter;
   }
 
@@ -124,7 +126,8 @@ class ChanDownloader {
           const imageExtension = posts[i]['ext'];
           const imageName = posts[i]['tim'];
           const imageUrl = `https://i.4cdn.org/${board}/${imageName + imageExtension}`;
-          const filePath = threadFolder + imageName + imageExtension;
+          const filePath =path.join(threadFolder, imageName+imageExtension);
+
           // Here we check if the file is in the database, even though it is
           // also checked in declutter.uploadAndUpdateDb because we want to skip
           // the download of the picture as well.
@@ -133,32 +136,42 @@ class ChanDownloader {
 
             this.imageLimiter.removeTokens(1, () => {
               try {
+                // This never trues when i remove console log???
+                console.log(filePath);
                 if (fs.existsSync(filePath)) {
-                  console.log(`(${processedPics}/${totalPics}) Image ${imageName}${imageExtension} already exists on local, not saving this image.`);
+                  // eslint-disable-next-line max-len
+                  console.log(`(${processedPics}/${totalPics} ${validTags[0]}) Image ${imageName}${imageExtension} already exists on local, not saving this image.`);
                   // Upload the file and delete it
-                  that.declutter.uploadAndUpdateDb(
-                      filePath,
-                      'no description',
-                      validTags,
-                      true,
-                  );
+                  that.uploadLimiter.removeTokens(1, ()=>{
+                    that.declutter.uploadAndUpdateDb(
+                        filePath,
+                        'no description',
+                        validTags,
+                        true,
+                    );
+                  });
                 } else {
-                  console.log(`(${processedPics}/${totalPics}) Downloading ${imageUrl}`);
+                  // eslint-disable-next-line max-len
+                  console.log(`(${processedPics}/${totalPics} ${validTags[0]}) Downloading ${imageUrl}`);
                   const out = fs.createWriteStream(filePath);
                   const res = needle.get(imageUrl);
                   res.pipe(out);
                   res.on('end', function(err) {
                     if (err) {
-                      console.log(`(${processedPics}/${totalPics}) An error ocurred: ${err.message}`);
+                      // eslint-disable-next-line max-len
+                      console.log(`(${processedPics}/${totalPics} ${validTags[0]}) An error ocurred: ${err.message}`);
                     } else {
-                      console.log(`(${processedPics}/${totalPics}) Image ${imageName} saved.`);
+                      // eslint-disable-next-line max-len
+                      console.log(`(${processedPics}/${totalPics} ${validTags[0]}) Image ${imageName} saved.`);
                       // Upload the file and delete it
-                      that.declutter.uploadAndUpdateDb(
-                          filePath,
-                          'no description',
-                          validTags,
-                          true,
-                      );
+                      that.uploadLimiter.removeTokens(1, ()=>{
+                        that.declutter.uploadAndUpdateDb(
+                            filePath,
+                            'no description',
+                            validTags,
+                            true,
+                        );
+                      });
                     }
                   });
                 }
@@ -167,7 +180,9 @@ class ChanDownloader {
               }
             });
           } else {
-            console.log(`(${processedPics}/${totalPics}) File already in database`);
+            // eslint-disable-next-line max-len
+            console.log(`(${processedPics}/${totalPics} ${validTags[0]}) File already in database`);
+            // TODO: delete the file if it exists on local
           }
           processedPics++;
         } else {
@@ -196,13 +211,13 @@ module.exports = ChanDownloader;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-db.html">db</a></li></ul><h3>Classes</h3><ul><li><a href="ChanDownloader.html">ChanDownloader</a></li><li><a href="ChanParser.html">ChanParser</a></li><li><a href="Cloud.html">Cloud</a></li><li><a href="Declutter.html">Declutter</a></li><li><a href="module-db-PicturesRepository.html">PicturesRepository</a></li><li><a href="module-db-Reports.html">Reports</a></li><li><a href="module-db-TagsRepository.html">TagsRepository</a></li><li><a href="module-db-UsersRepository.html">UsersRepository</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-db.html">db</a></li></ul><h3>Classes</h3><ul><li><a href="ChanDownloader.html">ChanDownloader</a></li><li><a href="ChanParser.html">ChanParser</a></li><li><a href="Cloud.html">Cloud</a></li><li><a href="Declutter.html">Declutter</a></li><li><a href="module-db-BlogRepository.html">BlogRepository</a></li><li><a href="module-db-PicturesRepository.html">PicturesRepository</a></li><li><a href="module-db-Reports.html">Reports</a></li><li><a href="module-db-TagsRepository.html">TagsRepository</a></li><li><a href="module-db-UsersRepository.html">UsersRepository</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Mon Nov 09 2020 23:35:53 GMT+0200 (Eastern European Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Nov 29 2020 23:08:54 GMT+0200 (Eastern European Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>
