@@ -327,8 +327,14 @@ app.get('/API/changeDescription', declutter.checkLevel(5, true), ensureLoggedIn(
       db.pictures.changeDesc(req.query.picid, req.query.newdesc).then((data) => {
         res.json({
           err: false,
-          message: 'OK:' + data.description,
+          message: 'OK:' + req.query.newdesc,
         });
+        db.edits.add(
+            'desc',
+            req.user.id,
+            data.description,
+            req.query.picid,
+        );
       }).catch((e) => {
         res.json({
           err: true,
@@ -365,6 +371,12 @@ app.get('/API/addTag', declutter.checkLevel(3, true), ensureLoggedIn(),
             err: false,
             message: 'Tag ' + req.query.tag + ' added.',
           });
+          db.edits.add(
+              'addtag',
+              req.user.id,
+              null,
+              req.query.picid,
+          );
         }).catch((e) => {
           res.json({
             err: true,
@@ -393,6 +405,12 @@ app.get('/API/removeTag', declutter.checkLevel(3, true), ensureLoggedIn(),
             err: false,
             message: 'Tag ' + req.query.tag + ' removed.',
           });
+          db.edits.add(
+              'removetag',
+              req.user.id,
+              req.query.tag,
+              req.query.picid,
+          );
         }).catch((e) => {
           res.json({
             err: true,
@@ -629,6 +647,7 @@ app.get('/API/deletePic', ensureLoggedIn(), declutter.checkLevel(10, true),
         }).catch((e) => {
           console.error(e);
         });
+        db.edits.add('del', req.user.id, rec[0].filename, req.query.picid);
       }).catch((e) => {
         console.error(e);
       });

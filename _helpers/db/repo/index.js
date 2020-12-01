@@ -5,4 +5,5 @@ module.exports = {
   Tags: require('./tags'),
   Reports: require('./reports'),
   Blog: require('./blog'),
+  Edits: require('./edits'),
 };

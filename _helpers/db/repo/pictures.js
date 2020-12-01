@@ -83,7 +83,8 @@ class PicturesRepository {
    */
   async changeDesc(picid, newDesc) {
     return this.db.one(
-        'UPDATE pictures SET description=${newD} WHERE id=${id} RETURNING *;',
+        // eslint-disable-next-line max-len
+        'UPDATE pictures x SET description=${newD} FROM (SELECT id, description FROM pictures WHERE id=${id} FOR UPDATE) y WHERE x.id=y.id RETURNING y.description;',
         {
           id: picid,
           newD: newDesc,

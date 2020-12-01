@@ -4,7 +4,7 @@
 * the entire content section below
 
 ### Little bit critical
-* Merge report and edittags pages, rename them to picInfo or something and make it work with webms, and add next/previous buttons
+* Merge report and edittags pages, rename them to picInfo or something and make it work with webms, and add next/previous buttons and edit history for admins
 * generate descriptions for pics (markov chain/random adjective-noun from bag)
     
 # Content
@@ -28,7 +28,7 @@
 * Points on edit pic info - awarded once per picture, after moderation. Limit edits/day/week
 * Allow user to see pics without tags
 * Add/edit tags form admin page
-* Admin page with buttons for all the hardcore api calls (update archive, delete all pics etc)
+* Admin page with buttons for all the hardcore api calls (update archive, delete all pics etc) - section to list all users with point controls (add/remove points/make admin/delete) 
 * Comments
 
 # Money
