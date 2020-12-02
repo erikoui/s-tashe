@@ -125,7 +125,7 @@ app.get('/', (req, res) => {
     user: req.user,
     cookieTag: cookieTag,
     tags: declutter.tags,
-    prefix: '/edittags/',
+    prefix: '/image/',
     rankingData: declutter.rankingData,
   });
 });
@@ -146,7 +146,7 @@ app.get('/tag', (req, res) => {
   db.pictures.listByTag(tag, declutter.minVotes)
       .then((picList) => {
         res.render('pages/tag.ejs', {
-          prefix: '/edittags/',
+          prefix: '/image/',
           urlPrefix: 'thumbs/',
           picList: picList,
           user: req.user,
@@ -182,33 +182,17 @@ app.get('/admin', ensureLoggedIn(), declutter.checkLevel(10, false),
 app.get('/profile', ensureLoggedIn(), (req, res) => {
   res.render('pages/profile', {user: req.user});
 });
-app.get('/edittags',
-    (req, res) => {
-      res.render('pages/edittags', {
-        picid: req.query.picid,
-        user: req.user,
-      });
-    });
 app.get('/archive', (req, res) => {
   res.render('pages/archive', {
     user: req.user,
   });
 });
-app.get('/report', ensureLoggedIn(), declutter.checkLevel(2, false),
-    (req, res) => {
-      db.pictures.getPicDataById(req.query.picid).then((imgData) => {
-        res.render('pages/report', {
-          picid: req.query.picid,
-          user: req.user,
-          fn: imgPrefixURL + imgData.filename,
-          description: imgData.description,
-          tags: imgData.tags,
-          votes: imgData.votes,
-          views: imgData.views,
-          alltags: declutter.tags,
-        });
-      });
-    });
+app.get('/image', (req, res) => {
+  res.render('pages/image', {
+    picid: req.query.picid,
+    user: req.user,
+  });
+});
 app.get('/showreports', ensureLoggedIn(), declutter.checkLevel(10, false),
     (req, res) => {
       db.reports.all().then((data) => {
@@ -301,6 +285,8 @@ app.get('/API/getPicData', (req, res) => {
       description: imgData.description,
       tags: imgData.tags,
       alltags: declutter.tags,
+      votes: imgData.votes,
+      views: imgData.views,
     });
   }).catch((e) => {
     res.json({
@@ -791,7 +777,7 @@ app.post('/register', (req, res) => {
     res.redirect('/register');
   });
 });
-app.post('/report', ensureLoggedIn(), declutter.checkLevel(2, true),
+app.post('/report', declutter.checkLevel(2, true), ensureLoggedIn(),
     (req, res) => {
       db.reports.add(
           req.body.rtype,

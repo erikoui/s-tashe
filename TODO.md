@@ -4,7 +4,7 @@
 * the entire content section below
 
 ### Little bit critical
-* Merge report and edittags pages, rename them to picInfo or something and make it work with webms, and add next/previous buttons and edit history for admins
+* /image add next/previous buttons and edit history for admins
 * generate descriptions for pics (markov chain/random adjective-noun from bag)
     
 # Content
@@ -23,6 +23,7 @@
 * pages for /tag
     
 # New Features
+* report button opens a popup form instead of taking to /image
 * User leaderboards
 * Allow the user to view previous pics (like a history feature underneath the control buttons in the frontpage, similar to what amazon does with last viewed products)
 * Points on edit pic info - awarded once per picture, after moderation. Limit edits/day/week
