@@ -85,7 +85,6 @@ class BlogRepository {
         'INSERT INTO blog (title, abstract, body, date) VALUES (${t}, ${a}, ${b}, CURRENT_TIMESTAMP)', {
           a: data.abstract,
           b: data.body,
-          id: data.id,
           t: data.title,
         },
     );

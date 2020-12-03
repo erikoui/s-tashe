@@ -2,11 +2,10 @@
 
 ### Very critical
 * the entire content section below
+* delete button for blog posts
 
 ### Little bit critical
-* /image add next/previous buttons
-* generate descriptions for pics (markov chain/random adjective-noun from bag)
-    
+
 # Content
 * faq
 * 10 blog posts of at least 300 words for ads lmao wtf
@@ -20,6 +19,7 @@
 * Diagram explaining how zip file tagging works
 * Upload page nicer frontend
 * Disable register and change password button on empty fields
+* declutter.beautifyContent
     
 # New Features
 * report button opens a popup form instead of taking to /image
@@ -48,6 +48,7 @@
 * Progress for the downloader script
 * Suggest tag feature
 * Save favorite pics (user favorite pics button)
+* generate descriptions for pics (markov chain/random adjective-noun from bag)
 
 # Bugs
 * sometimes tag leaderboard fails to load
