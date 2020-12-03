@@ -4,7 +4,7 @@
 * the entire content section below
 
 ### Little bit critical
-* /image add next/previous buttons and edit history for admins
+* /image add next/previous buttons
 * generate descriptions for pics (markov chain/random adjective-noun from bag)
     
 # Content
@@ -20,7 +20,6 @@
 * Diagram explaining how zip file tagging works
 * Upload page nicer frontend
 * Disable register and change password button on empty fields
-* pages for /tag
     
 # New Features
 * report button opens a popup form instead of taking to /image

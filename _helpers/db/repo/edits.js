@@ -60,7 +60,7 @@ class Edits {
    */
   async getByPicId(pic_id) {
     // eslint-disable-next-line max-len
-    return this.db.any('SELECT * FROM edits WHERE pic_id=${id} ORDER BY date;', {
+    return this.db.any('SELECT edits.date, edits.edit_type, users.uname, edits.previous_data FROM edits INNER JOIN users ON edits.user_id=users.id WHERE pic_id=${id} ORDER BY date;', {
       id: pic_id,
     });
   }

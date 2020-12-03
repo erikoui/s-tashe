@@ -295,10 +295,20 @@ app.get('/API/getPicData', (req, res) => {
     });
   });
 });
-app.get('/API/getReports', ensureLoggedIn(), declutter.checkLevel(10, true),
+app.get('/API/getReportsAndEdits',
+    ensureLoggedIn(),
+    declutter.checkLevel(10, true),
     (req, res) => {
-      db.reports.getByPicId(req.query.picid).then((data) => {
-        res.json(data);
+      db.reports.getByPicId(req.query.picid).then((reports) => {
+        db.edits.getByPicId(req.query.picid).then((edits)=>{
+          res.json({
+            err: false,
+            edits: edits,
+            reports: reports,
+          });
+        }).catch((e)=>{
+          throw e;
+        });
       }).catch((e) => {
         res.json({
           err: true,
@@ -360,7 +370,7 @@ app.get('/API/addTag', declutter.checkLevel(3, true), ensureLoggedIn(),
           db.edits.add(
               'addtag',
               req.user.id,
-              null,
+              req.query.tag,
               req.query.picid,
           );
         }).catch((e) => {

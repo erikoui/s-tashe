@@ -38,8 +38,8 @@ class Declutter {
     this.refreshTags().then(()=>{
       console.log('Tags:'+this.tags.map((({tag})=>tag)));
       this.updateArchivePicList();
-      this.chinScanner();
-      this.makeThumbs(false);
+      // this.chinScanner();
+      // this.makeThumbs(false);
       console.log('Declutter loaded');
     }).catch((e)=>{
       console.log(e);

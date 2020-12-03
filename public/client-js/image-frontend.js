@@ -11,34 +11,48 @@ $(document).ready(function() {
 });
 
 onload = function() {
-  $('.removeallreports').click((e) => {
-    e.preventDefault();
-    $.getJSON(e.target.href, () => {
-      location.assign('/showreports');
-    });
-  });
-  $('.confirm-button').click((e)=>{
-    e.preventDefault();
-    if (confirm('Are you sure?')) {
-      $.getJSON(e.target.href, (data)=>{
-        $.getJSON($('#remove-all-reports').attr('href'), ()=>{
-          location.assign('/');
-        });
-      });
-    }
-  });
-
-
+  // Get pic id
   const picid = $('#picid').text();
   $('#picid').html('');
 
-
-  $.getJSON('/API/getReports?picid=' + picid, (data) => {
-    if (!data.err) {
-      for (let i = 0; i < data.length; i++) {
+  // Get reports list (also checks if user is admin)
+  $.getJSON('/API/getReportsAndEdits?picid=' + picid, (data) => {
+    if (!data.err) {// if user is not admin, err will be true
+      $('.removeallreports').click((e) => {
+        e.preventDefault();
+        $.getJSON(e.target.href, () => {
+          location.assign('/showreports');
+        });
+      });
+      $('.confirm-button').click((e)=>{
+        e.preventDefault();
+        if (confirm('Are you sure?')) {
+          $.getJSON(e.target.href, (data)=>{
+            $.getJSON($('#remove-all-reports').attr('href'), ()=>{
+              location.assign('/');
+            });
+          });
+        }
+      });
+      // Render reports
+      for (let i = 0; i < data.reports.length; i++) {
         const reprot = document.createElement('li');
-        reprot.innerText = data[i].rtype + ': ' + data[i].details;
+        // eslint-disable-next-line max-len
+        reprot.innerText = data.reports[i].rtype + ': ' + data.reports[i].details;
         document.getElementById('reports').appendChild(reprot);
+      }
+      // Render edits
+      for (let i = 0; i < data.edits.length; i++) {
+        const edit = document.createElement('li');
+        console.log(JSON.stringify(data.edits[i]));
+
+        const dd=Math.floor(
+            (new Date() - new Date(data.edits[i].date)
+            ) / (1000*60*60*24),
+        );
+        // eslint-disable-next-line max-len
+        edit.innerText = `${data.edits[i].uname}: ${data.edits[i].edit_type}: "${data.edits[i].previous_data}" (${dd}) days ago.`;
+        document.getElementById('edits').appendChild(edit);
       }
     }
     $('#loading').text('');
@@ -63,7 +77,7 @@ onload = function() {
         } else {
           document.getElementById('pic').src = data.fn;
           clickable = document.getElementById('pic');
-          clickable.alt = data.desc[i];
+          clickable.alt = data.description;
           $(clickable).hide();
           clickable.onload = (() => {
             $(clickable).fadeIn(500);
