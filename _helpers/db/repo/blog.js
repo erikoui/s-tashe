@@ -36,7 +36,7 @@ class BlogRepository {
   async getRecentN(n) {
     return this.db.many(
         // eslint-disable-next-line max-len
-        'SELECT b.id,b.title,b.abstract,b.filename,b.date FROM blog b ORDER BY b.date LIMIT ${n};',
+        'SELECT b.id,b.title,b.abstract,b.filename,b.date FROM blog b ORDER BY "date" DESC LIMIT ${n};',
         {
           n: n,
         },

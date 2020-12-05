@@ -64,6 +64,7 @@ class ChanBlogger {
       return this.makeJson(postsMap, maxPost, []);
     } catch (e) {
       console.error(`Error while downloading thread json: ${e}`);
+      throw e;
     }
   }
 
@@ -76,6 +77,9 @@ class ChanBlogger {
    * @return {int} - depth
    */
   countDepth(map, start, count) {
+    if (count>25) {
+      return count;
+    }
     if (!map[start]) {
       return count;
     }
