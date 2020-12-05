@@ -18,7 +18,8 @@ onload = function() {
         ><p>${data.data[post].abstract}</p></a>
         <p><small class="text-muted">
         Posted on ${date.toLocaleDateString()}
-        <a href='modblogpost/${data.data[post].id}'>edit</a></small></p>`;
+        <a href='modblogpost/${data.data[post].id}'>edit</a> 
+        <a href='delblogpost/${data.data[post].id}'>delete</a> </small></p>`;
 
         card.appendChild(body);
         container.appendChild(card);

@@ -58,6 +58,19 @@ class BlogRepository {
     );
   }
 
+  /** deletes
+   * @param {int} id - id
+   */
+  async deleteBlogPost(id) {
+    return this.db.none(
+        // eslint-disable-next-line max-len
+        'DELETE FROM blog b WHERE b.id=${id};',
+        {
+          id: id,
+        },
+    );
+  }
+
   /**
    * edits a post
    * @param {post} data - contains id,title,abstract and body
