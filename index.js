@@ -125,7 +125,7 @@ app.get('/', (req, res) => {
     user: req.user,
     cookieTag: cookieTag,
     tags: declutter.tags,
-    prefix: '/edittags/',
+    prefix: '/image/',
     rankingData: declutter.rankingData,
   });
 });
@@ -146,7 +146,7 @@ app.get('/tag', (req, res) => {
   db.pictures.listByTag(tag, declutter.minVotes)
       .then((picList) => {
         res.render('pages/tag.ejs', {
-          prefix: '/edittags/',
+          prefix: '/image/',
           urlPrefix: 'thumbs/',
           picList: picList,
           user: req.user,
@@ -182,33 +182,17 @@ app.get('/admin', ensureLoggedIn(), declutter.checkLevel(10, false),
 app.get('/profile', ensureLoggedIn(), (req, res) => {
   res.render('pages/profile', {user: req.user});
 });
-app.get('/edittags',
-    (req, res) => {
-      res.render('pages/edittags', {
-        picid: req.query.picid,
-        user: req.user,
-      });
-    });
 app.get('/archive', (req, res) => {
   res.render('pages/archive', {
     user: req.user,
   });
 });
-app.get('/report', ensureLoggedIn(), declutter.checkLevel(2, false),
-    (req, res) => {
-      db.pictures.getPicDataById(req.query.picid).then((imgData) => {
-        res.render('pages/report', {
-          picid: req.query.picid,
-          user: req.user,
-          fn: imgPrefixURL + imgData.filename,
-          description: imgData.description,
-          tags: imgData.tags,
-          votes: imgData.votes,
-          views: imgData.views,
-          alltags: declutter.tags,
-        });
-      });
-    });
+app.get('/image', (req, res) => {
+  res.render('pages/image', {
+    picid: req.query.picid,
+    user: req.user,
+  });
+});
 app.get('/showreports', ensureLoggedIn(), declutter.checkLevel(10, false),
     (req, res) => {
       db.reports.all().then((data) => {
@@ -301,6 +285,8 @@ app.get('/API/getPicData', (req, res) => {
       description: imgData.description,
       tags: imgData.tags,
       alltags: declutter.tags,
+      votes: imgData.votes,
+      views: imgData.views,
     });
   }).catch((e) => {
     res.json({
@@ -309,10 +295,20 @@ app.get('/API/getPicData', (req, res) => {
     });
   });
 });
-app.get('/API/getReports', ensureLoggedIn(), declutter.checkLevel(10, true),
+app.get('/API/getReportsAndEdits',
+    ensureLoggedIn(),
+    declutter.checkLevel(10, true),
     (req, res) => {
-      db.reports.getByPicId(req.query.picid).then((data) => {
-        res.json(data);
+      db.reports.getByPicId(req.query.picid).then((reports) => {
+        db.edits.getByPicId(req.query.picid).then((edits)=>{
+          res.json({
+            err: false,
+            edits: edits,
+            reports: reports,
+          });
+        }).catch((e)=>{
+          throw e;
+        });
       }).catch((e) => {
         res.json({
           err: true,
@@ -327,8 +323,14 @@ app.get('/API/changeDescription', declutter.checkLevel(5, true), ensureLoggedIn(
       db.pictures.changeDesc(req.query.picid, req.query.newdesc).then((data) => {
         res.json({
           err: false,
-          message: 'OK:' + data.description,
+          message: 'OK:' + req.query.newdesc,
         });
+        db.edits.add(
+            'desc',
+            req.user.id,
+            data.description,
+            req.query.picid,
+        );
       }).catch((e) => {
         res.json({
           err: true,
@@ -365,6 +367,12 @@ app.get('/API/addTag', declutter.checkLevel(3, true), ensureLoggedIn(),
             err: false,
             message: 'Tag ' + req.query.tag + ' added.',
           });
+          db.edits.add(
+              'addtag',
+              req.user.id,
+              req.query.tag,
+              req.query.picid,
+          );
         }).catch((e) => {
           res.json({
             err: true,
@@ -393,6 +401,12 @@ app.get('/API/removeTag', declutter.checkLevel(3, true), ensureLoggedIn(),
             err: false,
             message: 'Tag ' + req.query.tag + ' removed.',
           });
+          db.edits.add(
+              'removetag',
+              req.user.id,
+              req.query.tag,
+              req.query.picid,
+          );
         }).catch((e) => {
           res.json({
             err: true,
@@ -629,6 +643,7 @@ app.get('/API/deletePic', ensureLoggedIn(), declutter.checkLevel(10, true),
         }).catch((e) => {
           console.error(e);
         });
+        db.edits.add('del', req.user.id, rec[0].filename, req.query.picid);
       }).catch((e) => {
         console.error(e);
       });
@@ -772,7 +787,7 @@ app.post('/register', (req, res) => {
     res.redirect('/register');
   });
 });
-app.post('/report', ensureLoggedIn(), declutter.checkLevel(2, true),
+app.post('/report', declutter.checkLevel(2, true), ensureLoggedIn(),
     (req, res) => {
       db.reports.add(
           req.body.rtype,

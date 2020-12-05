@@ -7,55 +7,58 @@
 
 <body>
   <% include ../partials/nav.ejs %>
-  <script>
-    $(document).ready(function () {
-      $("#reprot").on("submit", function (event) {
-        event.preventDefault();
-        var formValues = $(this).serialize();
-        $.post("/report", formValues, function (data) {
-          // Display the returned data in browser
-          console.log("data received" + JSON.stringify(data))
-          $("#result").html(data.message);
-        }, 'json');
-      });
-    });
-
-  </script>
+  <script src='/client-js/image-frontend.js'></script>
   <div class="container-fluid" style="width:90%">
     <div class="row">
       <div class="col-sm-2">
         <div class="col-sm-12 bg-left" id="left-bar">
-          <h3>Image tags</h3>
-          <div id="tag-list">
-            <% for(let i=0;i<tags.length;i++){ %>
-            <a class="removetag btn btn-sm btn-default"><%= tags[i] %></a>
-            <% } %>
-          </div>
+          Click on any of these tags to remove it:
+          <div id="loading-tags" inline>Loading tags...</div>
+          <div id="remove-tag-list"></div>
+          Click on any of these tags to add it:
+          <div id="add-tag-list"></div>
           <h3>Image description</h3>
-          <div id="img-desc">
-            <%= description %>
-          </div>
+          <div id="img-desc" class="inline-div">Loading description...</div>
+          <div class="inline-div"><a id='edit-desc' href=''><span
+                class="glyphicon glyphicon glyphicon-pencil"></span></a></div>
           <h3>Model name</h3>
-          Coming soon
+          <div id="img-modelname">Coming soon</div>
           <h3>Sauce</h3>
-          Coming soon
+          <div id="img-sauce">Coming soon</div>
           <h3>Score</h3>
-          <%=votes/views%>(<%=votes%>/<%=views%>)
+          <div id="img-score"></div>
           <% include ../partials/leftad.ejs %>
+
         </div>
       </div>
       <div class="col-sm-8">
         <div class="row">
           <div class="col-sm-12 bg-mid">
-            <div class="row" id='pictainer'>
-              <img src="<%- fn %>" id="pic" class="img-responsive" style="margin: 0 auto; border-radius: 5px;">
+            <div class="row vote-container" id='pictainer' style="padding-left:20px;padding-right:20px">
+              <img id="pic" class="img-responsive" style="width:100%; margin: 0 auto; border-radius: 5px;">
+              <video id="vid" muted autoplay loop style="width:100%; margin: auto; border-radius: 5px; display:none">
+                <source id="src" type='video/webm'>
+              </video>
             </div>
           </div>
         </div>
       </div>
       <div class="col-sm-2">
         <div class="col-sm-12 bg-right" id="right-bar">
-          <form id="reprot" method="POST" class="form-vertical">
+          <%if(user) if(user.admin){%>
+          <h3>Reports</h3>
+          <div>
+            <ul id="reports"></ul>
+            <div id="loading">Loading reports...</div>
+          </div>
+          <a id='remove-all-reports' href='/API/removereports?picid=<%=picid%>'
+            class="removeallreports btn btn-sm btn-success">Remove all
+            reports</a>
+          <a id='deletebutton' href='/API/deletePic?picid=<%=picid%>'
+            class="confirm-button btn btn-sm btn-danger">Delete pic</a>
+          <div id="edits"></div>
+          <%}%>
+          <form id="reprot" method="POST" action='/report' class="form-vertical">
             <!-- Form Name -->
             <legend>Report</legend>
 
@@ -87,11 +90,11 @@
             <!-- Also send the pic id -->
             <input type="hidden" name="picid" value="<%- picid %>" />
 
-            <!-- Button -->
-            <div class="form-group">
-              <button id="submit" name="submit" class="btn btn-primary">Submit</button>
-            </div>
-            </fieldset>
+          <!-- Button -->
+          <div class="form-group">
+            <button id="submit" name="submit" class="btn btn-primary">Submit</button>
+          </div>
+          </fieldset>
           </form>
           <div id="result"></div>
           <% include ../partials/rightad.ejs %>
@@ -99,6 +102,7 @@
       </div>
     </div>
   </div>
+  <div id='picid' style="display:none;"><%=picid%></div>
   <% include ../partials/stickyad.ejs %>
 </body>
 <% include ../partials/footer.ejs %>

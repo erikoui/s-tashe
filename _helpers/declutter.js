@@ -5,6 +5,7 @@ const fs = require('fs');
 const RateLimiter = require('limiter').RateLimiter;
 const ChanDownloader = require('./chan-downloader');
 const ChanParser = require('./chan-parser');
+const ChanBlogger = require('./chan-blogger');
 const chanParser = new ChanParser();
 const needle = require('needle');
 const imageThumbnail = require('image-thumbnail');
@@ -31,6 +32,7 @@ class Declutter {
       levels: [0, 1, 2, 3, 4, 5, 6, 7],
     };
     this.chanDownloader = new ChanDownloader(this);
+    this.chanBlogger = new ChanBlogger(this);
     this.minVotes=7;
     this.imgPrefixURL=`https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/`;
     this.tags=[];
@@ -46,6 +48,7 @@ class Declutter {
     });
   }
 
+
   /**
    * Wrapper for running chanParser and chanDownloader
    */
@@ -53,7 +56,8 @@ class Declutter {
     chanParser.loadBoardJson('/s/').then((data) => {
       for (let i = 0; i < data.length; i++) {
         this.imageLimiter.removeTokens(1, () => {
-          this.downloadThreadAndSaveToCloud(data[i]).then(() => {
+          this.getReplyChainAndMakeBlogPost(data[i], 5).then(() => {
+            this.downloadThreadAndSaveToCloud(data[i]);
           }).catch((e) => {
             console.error(e);
             console.error('error with download thread:' + e);
@@ -71,6 +75,37 @@ class Declutter {
       console.error('error with loadBoardJson: ' + e);
     });
   };
+
+  /**
+ * wrapper for chan-blogger
+ * @param {string} url - thread url
+ * @param {int} worth - how many replies needed to make this blog post
+ */
+  async getReplyChainAndMakeBlogPost(url, worth) {
+    console.log('getting blog content');
+    const content=await this.chanBlogger.getLongestReplyChain(url, 10);
+    console.log(content);
+    if (content.length>=worth) {
+      console.log('worht');
+      await this.db.blog.addPost({
+        abstract: this.beautifyContent(content),
+        body: this.beautifyContent(content),
+        title: 'Thread tea',
+      });
+    }
+  }
+  /**
+   * makes it into readable html
+   * @param {content} content
+   * @return {string} yes
+   */
+  beautifyContent(content) {
+    let nice='';
+    for (let i=0; i<content.length; i++) {
+      nice=nice+'\n'+content[i].post;
+    }
+    return nice;
+  }
 
   /**
    * Generates thumbnails

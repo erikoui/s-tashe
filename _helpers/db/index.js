@@ -1,6 +1,6 @@
 const promise = require('bluebird'); // best promise library today
 const pgPromise = require('pg-promise'); // pg-promise core library
-const {Users, Pictures, Tags, Reports, Blog} = require('./repo');
+const {Users, Pictures, Tags, Reports, Blog, Edits} = require('./repo');
 
 
 const dbConfig = {
@@ -28,6 +28,7 @@ const initOptions = {
     obj.tags = new Tags(obj, pgp);
     obj.reports = new Reports(obj, pgp);
     obj.blog = new Blog(obj, pgp);
+    obj.edits = new Edits(obj, pgp);
   },
 };
 

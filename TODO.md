@@ -2,15 +2,13 @@
 
 ### Very critical
 * the entire content section below
+* delete button for blog posts
 
 ### Little bit critical
-* Merge report and edittags pages, rename them to picInfo or something and make it work with webms, and add next/previous buttons
-* generate descriptions for pics (markov chain/random adjective-noun from bag)
-    
+
 # Content
 * faq
 * 10 blog posts of at least 300 words for ads lmao wtf
-* ChanScanner picks the longest reply chain from each thread and puts it as the blog post body with some nice formatting.
 
 # Frontend 
 * Nicer frontend for the whole blog system
@@ -20,15 +18,16 @@
 * Diagram explaining how zip file tagging works
 * Upload page nicer frontend
 * Disable register and change password button on empty fields
-* pages for /tag
+* declutter.beautifyContent
     
 # New Features
+* report button opens a popup form instead of taking to /image
 * User leaderboards
 * Allow the user to view previous pics (like a history feature underneath the control buttons in the frontpage, similar to what amazon does with last viewed products)
 * Points on edit pic info - awarded once per picture, after moderation. Limit edits/day/week
 * Allow user to see pics without tags
 * Add/edit tags form admin page
-* Admin page with buttons for all the hardcore api calls (update archive, delete all pics etc)
+* Admin page with buttons for all the hardcore api calls (update archive, delete all pics etc) - section to list all users with point controls (add/remove points/make admin/delete) 
 * Comments
 
 # Money
@@ -48,6 +47,7 @@
 * Progress for the downloader script
 * Suggest tag feature
 * Save favorite pics (user favorite pics button)
+* generate descriptions for pics (markov chain/random adjective-noun from bag)
 
 # Bugs
 * sometimes tag leaderboard fails to load
