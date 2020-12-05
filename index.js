@@ -240,6 +240,14 @@ app.get('/modblogpost/:id', ensureLoggedIn(), declutter.checkLevel(10, false),
         });
       });
     });
+app.get('/delblogpost/:id', ensureLoggedIn(), declutter.checkLevel(10, false),
+    (req, res) => {
+      db.blog.deleteBlogPost(req.params.id).then((data) => {
+        res.end('Post deleted successfully');
+      }).catch((e) => {
+        res.end('ERROROORO: '+e.message);
+      });
+    });
 app.post('/modblogpost/:id', ensureLoggedIn(), declutter.checkLevel(10, false),
     (req, res) => {
       if (req.body.id) {

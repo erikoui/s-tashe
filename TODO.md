@@ -1,17 +1,13 @@
 # Critical
 
 ### Very critical
-* the entire content section below
-* delete button for blog posts
 
 ### Little bit critical
 
 # Content
 * faq
-* 10 blog posts of at least 300 words for ads lmao wtf
 
 # Frontend 
-* Nicer frontend for the whole blog system
 * Login frontend needs to show invalid login message instead of just reloading
 * Tell the user when registering when the username is already in use
 * Tag and description field for picture uploads
