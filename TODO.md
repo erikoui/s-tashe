@@ -1,6 +1,7 @@
 # Critical
 
 ### Very critical
+* Make it not do duplicate blog posts
 
 ### Little bit critical
 
