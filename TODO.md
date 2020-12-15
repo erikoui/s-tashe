@@ -1,9 +1,15 @@
 # Critical
 
 ### Very critical
-* Make it not do duplicate blog posts
+* fix bug when vid loaded it stays under the next pic
+* rate limit api calls
+* log user votes and ability to remove all of one user's votes??
+* report button opens a popup form instead of taking to /image
+* Allow the user to view previous pics (like a history feature underneath the control buttons in the frontpage, similar to what amazon does with last viewed products)
 
 ### Little bit critical
+* pages in blog post list
+* use number of words to determine good blog posts
 
 # Content
 * faq
@@ -18,14 +24,13 @@
 * declutter.beautifyContent
     
 # New Features
-* report button opens a popup form instead of taking to /image
 * User leaderboards
-* Allow the user to view previous pics (like a history feature underneath the control buttons in the frontpage, similar to what amazon does with last viewed products)
-* Points on edit pic info - awarded once per picture, after moderation. Limit edits/day/week
+* Points on edit pic info - awarded once per picture. Limit edits/day/week
 * Allow user to see pics without tags
 * Add/edit tags form admin page
 * Admin page with buttons for all the hardcore api calls (update archive, delete all pics etc) - section to list all users with point controls (add/remove points/make admin/delete) 
 * Comments
+* sauce field
 
 # Money
 * Ads - native recommendataion every N votes (like tinder does)

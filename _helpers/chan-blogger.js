@@ -61,7 +61,11 @@ class ChanBlogger {
           };
         }
       }
-      return this.makeJson(postsMap, maxPost, []);
+      const retval={
+        thread: thread,
+        content: this.makeJson(postsMap, maxPost, []),
+      };
+      return retval;
     } catch (e) {
       console.error(`Error while downloading thread json: ${e}`);
       throw e;

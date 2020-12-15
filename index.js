@@ -70,7 +70,7 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// Set up 4chan scanner to run every 12 hrs, and right after server start.
+// Set up 4chan scanner to run every 24 hrs
 // This is also ran in declutter right after tags are loaded
 setInterval(() => {
   declutter.chinScanner();
@@ -78,7 +78,12 @@ setInterval(() => {
   setTimeout(()=>{
     declutter.makeThumbs(false);
   }, 1*60*60*1000);
-}, 12 * 60 * 60 * 1000);
+}, 24 * 60 * 60 * 1000);
+
+// Set up auto blog posts to run every 72
+setInterval(() => {
+  declutter.blogPoster();
+}, 72 * 60 * 60 * 1000);
 
 // update the archive pictures every 6 hrs. This is also ran in declutter
 // right after tags are loaded
