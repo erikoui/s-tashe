@@ -138,6 +138,12 @@ onload = function() {
         $(clickable).show();
       } else {
         document.getElementById('img' + i).src = data.images[i];
+        document.getElementById('vid' + i).pause();
+        document.getElementById('src' + i).src='';
+        document.getElementById('src' + i).removeAttribute('src');
+        document.getElementById('vid' + i).removeAttribute('src');
+        document.getElementById('vid' + i).load();
+
         clickable = document.getElementById('img' + i);
         clickable.alt = data.desc[i];
         $(clickable).hide();

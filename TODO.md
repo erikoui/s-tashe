@@ -1,11 +1,12 @@
 # Critical
 
 ### Very critical
-* fix bug when vid loaded it stays under the next pic
+* download thread etc timers based on real time and not on server uptime
 * rate limit api calls
 * log user votes and ability to remove all of one user's votes??
 * report button opens a popup form instead of taking to /image
 * Allow the user to view previous pics (like a history feature underneath the control buttons in the frontpage, similar to what amazon does with last viewed products)
+* force update archive causes error 500 but actuallly works?
 
 ### Little bit critical
 * pages in blog post list
