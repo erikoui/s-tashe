@@ -39,10 +39,10 @@ class Declutter {
     this.archivePicList = [];
     this.refreshTags().then(() => {
       console.log('Tags:' + this.tags.map((({tag}) => tag)));
-      // this.updateArchivePicList();
-      // this.chinScanner();
+      this.updateArchivePicList();
+      this.chinScanner();
       this.blogPoster();
-      // this.makeThumbs(false);
+      this.makeThumbs(false);
       console.log('Declutter loaded');
     }).catch((e) => {
       console.log(e);
