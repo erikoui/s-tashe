@@ -70,26 +70,23 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// Set up 4chan scanner to run every 24 hrs
-// This is also ran in declutter right after tags are loaded
-setInterval(() => {
+// ----------------------------Schedule tasks-------------
+const schedule = require('node-schedule');
+// run chinScanner every 4 hours
+schedule.scheduleJob('0 */4 * * *', function() {
   declutter.chinScanner();
-  // make thumbnails 1 hour after
-  setTimeout(()=>{
-    declutter.makeThumbs(false);
-  }, 1*60*60*1000);
-}, 24 * 60 * 60 * 1000);
+});
 
-// Set up auto blog posts to run every 72
-setInterval(() => {
-  declutter.blogPoster();
-}, 72 * 60 * 60 * 1000);
+// make thumbnails 30 mins after every 4 hours
+schedule.scheduleJob('30 */4 * * *', function() {
+  declutter.makeThumbs(false);
+});
 
-// update the archive pictures every 6 hrs. This is also ran in declutter
-// right after tags are loaded
-setInterval(() => {
+// make blog posts every day at 00:00
+schedule.scheduleJob('0 0 * * *', function() {
   declutter.updateArchivePicList();
-}, 6 * 60 * 60 * 1000);
+  declutter.blogPoster();
+});
 
 app = express();
 // ------------ init middlewares ------------
