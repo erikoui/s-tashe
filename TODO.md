@@ -5,6 +5,7 @@
 * rate limit api calls
 * Pages in archive
 * thumbnail limiter faster
+* Backup function
 
 ### Little bit critical
 * pages in blog post list

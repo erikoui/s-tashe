@@ -21,7 +21,8 @@ class Declutter {
    * @param {Cloud} cloudStorage - the cloud object in index.js
    */
   constructor(database, cloudStorage) {
-    this.imageLimiter = new RateLimiter(1, 1100);
+    this.imageLimiter = new RateLimiter(1, 1100);// 1 every 1100 ms
+    this.thumbnailLimiter = new RateLimiter(3, 500);// 3 every 500 ms
     this.db = database;
     this.cloud = cloudStorage;
     this.votePointIncrement = 1;
@@ -192,7 +193,7 @@ class Declutter {
         console.log('Temp directory could not be created.');
       }
       for (let i = 0; i < makeThumbs.length; i++) {
-        this.imageLimiter.removeTokens(1, () => {
+        this.thumbnailLimiter.removeTokens(1, () => {
           // download image
           const filePath = './tmp/' + makeThumbs[i];
           const out = fs.createWriteStream(filePath);
@@ -213,7 +214,18 @@ class Declutter {
                 try {
                   fs.writeFileSync(thumbsDir + '/' + makeThumbs[i], thumbnail);
                 } catch (e) {
-                  console.error(e);
+                  fs.copyFile(
+                      './public/image-broken.png',
+                      thumbsDir + '/' + makeThumbs[i].split('.')[0] + '.png',
+                      () => {
+                        console.log(makeThumbs[i] + ' saved as broken.png');
+                      },
+                  );
+                  // delete file after thumbnail is made
+                  fs.unlink('./tmp/' + makeThumbs[i], () => {
+                    console.log(makeThumbs[i] + ' done');
+                  });
+                  console.error(makeThumbs[i]+ 'error:'+e);
                 }
 
                 // delete file
@@ -225,17 +237,28 @@ class Declutter {
                     './public/video-thumb.png',
                     thumbsDir + '/' + makeThumbs[i].split('.')[0] + '.png',
                     () => {
-                    // delete file
+                    // delete file after thumbnail is made
                       fs.unlink('./tmp/' + makeThumbs[i], () => {
                         console.log(makeThumbs[i] + ' done');
                       });
-                      // eslint-disable-next-line max-len
-                      console.log('  *weird file type set generic thumbnail: ' + e.message);
                     },
                 );
+                // eslint-disable-next-line max-len
+                console.log(makeThumbs[i] + '  *weird file type set generic thumbnail: ' + e.message);
               });
             } else {
-              console.error(err);
+              fs.copyFile(
+                  './public/image-broken.png',
+                  thumbsDir + '/' + makeThumbs[i].split('.')[0] + '.png',
+                  () => {
+                    // delete file after thumbnail is made
+                    fs.unlink('./tmp/' + makeThumbs[i], () => {
+                      console.log(makeThumbs[i] + ' done');
+                    });
+                  },
+              );
+              // eslint-disable-next-line max-len
+              console.log('  *some error while making thumbnail, used broken.png: ' + e.message);
             }
           });
         });
