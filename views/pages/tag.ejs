@@ -26,6 +26,10 @@
     </a>
     <% } %>
   </div>
+  <hr>
+  <div style="text-align: center;"> 
+    <a href="tag?tag=<%=tag%>&page=1&ipp=121">1</a> <a href = "tag?tag=<%=tag%>&page=<%=page-1%>&ipp=121">&#60;</a> Page <%= page%> <a href="tag?tag=<%=tag%>&page=<%=page+1%>&ipp=121">&#62;</a> <a href = "tag?tag=<%=tag%>&page=<%=maxPage%>&ipp=121"><%=maxPage%></a>
+  </div>
 </body>
 <% include ../partials/rightad.ejs %>
 <% include ../partials/leftad.ejs %>

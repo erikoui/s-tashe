@@ -145,17 +145,33 @@ app.get('/faq', (req, res)=>{
 });
 app.get('/tag', (req, res) => {
   const tag = req.query.tag;
-  db.pictures.listByTag(tag, declutter.minVotes)
-      .then((picList) => {
+  let page = Number(req.query.page);
+  const ipp = Number(req.query.ipp);
+  if (page<=0) {
+    page=1;
+  }
+  if (!isNaN(ipp) && !isNaN(page)) {
+    // q is a promis of an array of promises, so use .then before Promise.all(q)
+    // eslint-disable-next-line max-len
+    db.pictures.listByTag(tag, declutter.minVotes, (page-1)*ipp, ipp).then((q)=>{
+      Promise.all(q).then((picList)=>{
+        console.log(picList[1]);
         res.render('pages/tag.ejs', {
           prefix: '/image/',
           urlPrefix: 'thumbs/',
-          picList: picList,
+          picList: picList[0],
           user: req.user,
+          page: page,
+          maxPage: Math.ceil(Number(picList[1][0].count)/ipp),
+          tag: tag,
         });
       }).catch((e) => {
-        res.end(`Error while oading tag ${tag}`);
+        res.end(`Error while oading tag ${tag}: ${e.message}`);
       });
+    });
+  } else {
+    res.end(`Error: params must be integers, got ${page} and ${ipp}`);
+  }
 });
 app.get('/login', (req, res) => {
   res.render('pages/login.ejs', {user: req.user});

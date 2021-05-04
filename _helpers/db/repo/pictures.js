@@ -188,13 +188,27 @@ RETURNING *;`,
    * Tries to find many pics from a single tag
    * @param {array<string>} tag - some description as in the database.
    * @param {int} minviews - minmimum views to be shown as sorted
+   * @param {int} offset - how many items to skip
+   * @param {int} imagesPerPage - how many items to return
    */
-  async listByTag(tag, minviews) {
-    return this.db.any(
+  async listByTag(tag, minviews, offset, imagesPerPage) {
+    return [this.db.any(
         // eslint-disable-next-line max-len
-        'SELECT *, CAST(votes+1 AS real) / CAST(views+1 AS real) AS score FROM pictures WHERE ${tag} = ANY (tags) ORDER BY CASE WHEN views >= ' + minviews + ' THEN 0 ELSE 1 END, score DESC;',
-        {tag: tag},
-    );
+        'SELECT *, CAST(votes+1 AS real) / CAST(views+1 AS real) AS score FROM pictures WHERE ${tag} = ANY (tags) ORDER BY CASE WHEN views >= ${minviews} THEN 0 ELSE 1 END, score DESC OFFSET ${offset} LIMIT ${ipp};',
+        {tag: tag,
+          minviews: minviews,
+          offset: offset,
+          ipp: imagesPerPage,
+        }),
+    this.db.any(
+        // eslint-disable-next-line max-len
+        'SELECT COUNT (*) FROM pictures WHERE ${tag} = ANY (tags);',
+        {tag: tag,
+          minviews: minviews,
+          offset: offset,
+          ipp: imagesPerPage,
+        }),
+    ];
   }
 
   /**

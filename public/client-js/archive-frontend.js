@@ -50,7 +50,7 @@ onload = function() {
         column.appendChild(mediaContainer);
       }
       clickable.onclick = () => {
-        window.location.href='/tag?tag='+data.images[i].tag;
+        window.location.href='/tag?tag='+data.images[i].tag+'&page=1&ipp=121';
       };
     }
   }
