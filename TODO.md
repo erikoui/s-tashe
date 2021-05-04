@@ -4,6 +4,7 @@
 * Ads - native recommendataion every N votes (like tinder does)
 * rate limit api calls
 * Pages in archive
+* Backup function
 
 ### Little bit critical
 * pages in blog post list
