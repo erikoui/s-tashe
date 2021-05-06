@@ -21,6 +21,9 @@ const cloud = new Cloud();
 const Declutter = require('./_helpers/declutter');
 const declutter = new Declutter(db, cloud);
 
+const Backup = require('./_helpers/backup');
+const backup = new Backup(declutter, db, cloud);
+
 const PgService = require('./_helpers/postgresql-service.ts');
 const pgService = new PgService;
 const session = require('express-session');
@@ -461,46 +464,7 @@ app.get('/API/deleteallfiles', ensureLoggedIn(), declutter.checkLevel(10, true),
         res.end(`Error: ${err}`);
       });
     });
-app.get('/API/cleanupdb', ensureLoggedIn(), declutter.checkLevel(10, true),
-    (req, res) => {
-      cloud.getBucketContents().then((data) => {
-        const cloudfns = [];
-        for (let i = 0; i < data.Contents.length; i++) {
-          cloudfns.push(data.Contents[i].Key);
-        }
-        db.pictures.cleanup(cloudfns);
-        db.pictures.all().then((dbdata) => {
-          const dbfns = [];
-          const delet = [];
-          for (let j = 0; j < dbdata.length; j++) {
-            dbfns.push(dbdata[j].filename);
-          }
-          for (let j = 0; j < cloudfns.length; j++) {
-            if (dbfns.indexOf(cloudfns[j]) == -1) {
-              delet.push(cloudfns[j]);
-            }
-          }
-          cloud.deleteItems(delet).then(() => {
-          // eslint-disable-next-line max-len
-            console.log(delet.length + ' Files deleted from cloud because they had no record');
-          }).catch((e) => {
-            console.error(e);
-          });
-        }).catch((e) => {
-          console.error(e);
-        });
-      }).catch((err) => {
-        console.log('error getting item list from cos:' + err);
-        res.json({
-          err: true,
-          message: err,
-        });
-      });
-      res.json({
-        err: false,
-        message: 'Done',
-      });
-    });
+
 app.get('/API/listallfiles', ensureLoggedIn(), declutter.checkLevel(10, true),
     (req, res) => {
       cloud.getBucketContents().then((data) => {
@@ -534,6 +498,20 @@ app.get('/API/download', ensureLoggedIn(), declutter.checkLevel(10, true),
         console.error(e);
       });
       res.end('running download script');
+    });
+app.get('/API/dlZipFile', ensureLoggedIn(), declutter.checkLevel(10, true),
+    (req, res) => {
+      backup.download(
+          req.query.tagId, 'zips/'+req.query.tagId, imgPrefixURL,
+      ).then((output) => {
+        // TODO: wait for backup.download to end and then prompt for download
+        // const file = output;
+        // res.download(file); // Set disposition and send it.
+        res.end('Check console log to see when it is done.');
+      }).catch((e) => {
+        console.error(e);
+      });
+      // res.end('running backup script, wait till you get a download prompt');
     });
 app.get('/API/changeTagId', (req, res) => {
   const tagId = req.query.newid;

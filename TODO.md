@@ -3,10 +3,10 @@
 ### Very critical
 * Ads - native recommendataion every N votes (like tinder does)
 * rate limit api calls
-* Pages in archive
-* Backup function
+* fix webm breaking the css after vote
 
 ### Little bit critical
+* test backup function cuz im not sure it works 100%
 * pages in blog post list
 * use number of words to determine good blog posts
 

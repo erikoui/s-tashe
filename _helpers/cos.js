@@ -52,6 +52,18 @@ class Cloud {
   }
 
   /**
+   * Returns a promise of a readstream
+   * @param {string} itemName - The cloud filename (aka Key)
+   */
+  async getObjectReadStream(itemName) {
+    console.log('Getting object');
+    return this.cos.getObject({
+      Bucket: bucketName,
+      Key: itemName,
+    }).createReadStream();
+  }
+
+  /**
    * Uploads a single file to the cloud
    * @param {string} itemName - The cloud filename (aka Key)
    * @param {string} filePath - The local absolute file path
