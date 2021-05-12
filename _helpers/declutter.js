@@ -34,7 +34,7 @@ class Declutter {
     };
     this.chanDownloader = new ChanDownloader(this);
     this.chanBlogger = new ChanBlogger(this);
-    this.minVotes = 7;
+    this.minVotes = 12;
     this.imgPrefixURL = `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/`;
     this.tags = [];
     this.archivePicList = [];

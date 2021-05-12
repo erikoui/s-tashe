@@ -186,7 +186,7 @@ RETURNING *;`,
   }
   /**
    * Tries to find many pics from a single tag
-   * @param {array<string>} tag - some description as in the database.
+   * @param {array<string>} tag - same description as in the database.
    * @param {int} minviews - minmimum views to be shown as sorted
    * @param {int} offset - how many items to skip
    * @param {int} imagesPerPage - how many items to return
@@ -209,6 +209,15 @@ RETURNING *;`,
           ipp: imagesPerPage,
         }),
     ];
+  }
+
+  /**
+   * Tries to find many pics from a tag id
+   * @param {int} tagId - tag id
+   */
+  async getAllByTagId(tagId) {
+    // eslint-disable-next-line max-len
+    return this.db.any('SELECT * FROM pictures WHERE (SELECT tag FROM tags WHERE id = ${tagid}) = ANY (tags);', {tagid: tagId});
   }
 
   /**
