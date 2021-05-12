@@ -37,7 +37,8 @@
 
 * Twitter account header image (the thubnails page or a collage of best N pics)
 * Marketing on 4chin and twittr
-* Donate button
+* Donate button 
+* Premium
 * limit cos requests (like caching) because free plan will hit cap easy (check heroku transfer caps etc - 500MB storage limit tho)
 
 # Ideas
