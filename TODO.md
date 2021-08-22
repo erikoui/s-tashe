@@ -5,10 +5,12 @@
 * rate limit api calls
 * fix webm breaking the css after vote
 
+
 ### Little bit critical
 * test backup function cuz im not sure it works 100%
 * pages in blog post list
 * use number of words to determine good blog posts
+* buy more database rows or auto delete worst pics
 
 # Content
 * faq
