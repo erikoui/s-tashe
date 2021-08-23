@@ -118,7 +118,7 @@ app.set('view engine', 'ejs');
 
 // ------------ Load views ------------
 app.get('/', (req, res) => {
-  let cookieTag = 1;
+  let cookieTag = 4;// default tag for first visitor
   if (!req.cookies.selectedTag) {
     res.cookie('selectedTag', 1, {
       maxAge: 60 * 60 * 24 * 30, // 1 month
