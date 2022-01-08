@@ -35,6 +35,7 @@ onload = function() {
       img.onclick = () => { };
       vid.onclick = () => { };
     }
+    location.reload();
   }
 
   /**
@@ -269,6 +270,9 @@ onload = function() {
   function renderPage() {
     $.getJSON('/API/getTwoRandomPics', function(data) {
       if (data) {
+        if (data.reload) {
+          location.reload();
+        }
         showControls(data);
         showImages(data);
         showTags(data);
