@@ -8,6 +8,7 @@
 
 const archiver = require('archiver');
 const fs = require('fs');
+const fetch = require('node-fetch');
 /**
   * Backups from the ibm server
   * @class
@@ -81,6 +82,58 @@ class Backup {
 
     archive.finalize();
     return destination;
+  }
+
+  /**
+    * Downloads a tag directly to the server
+    * @param {integer} tagId - tag id
+    * @param {string} destination - where to save the zip file
+    * @param {string} prefixURL - cloud storage link prefix
+    *
+    * @return {string} path to the zip file
+    * works only locally cuz 500mb limit on heroku - no need to make it send a
+    * download response
+    */
+  async dlPics(tagId, destination, prefixURL) {
+    return;// remove this when running locally
+    console.log('In the download files function');
+    const allFileLinks=[];
+    console.log('loading query');
+    const rawData=await this.db.pictures.getAllByTagId(tagId);
+
+    // get existing files
+    const existingFiles=fs.readdirSync(
+        `${__dirname}/${destination}`, {withFileTypes: true},
+    ).filter((item) => !item.isDirectory())
+        .map((item) => item.name);
+
+    let c=0;
+    for (let i=0; i<rawData.length; i++) {
+      // if filename i is not in existingfiles, add it to the list.
+      if (!existingFiles.includes(rawData[i].filename)) {
+        allFileLinks.push({
+          name: rawData[i].filename,
+          source: prefixURL+rawData[i].filename,
+          index: c,
+        });
+        c++;
+      }
+    }
+    console.log(`${allFileLinks.length} images to download.`);
+    allFileLinks.map((file) => {
+      fetch(file.source).then((response) => {
+        new Promise((resolve, reject) => {
+          // eslint-disable-next-line max-len
+          console.log('Downloading ' +file.source +' ('+file.index+'/'+allFileLinks.length+')');
+          const ws=fs.createWriteStream(
+              `${__dirname}/${destination}/${file.name}`,
+          );
+          response.body.pipe(ws);
+          response.body.on('end', () => resolve('Downloaded '+file.name));
+          ws.on('error', reject);
+        });
+      }).then((x) => console.log(x));
+    });
   }
 }
 

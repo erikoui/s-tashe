@@ -513,6 +513,17 @@ app.get('/API/dlZipFile', ensureLoggedIn(), declutter.checkLevel(10, true),
       });
       // res.end('running backup script, wait till you get a download prompt');
     });
+// ----LOCAL BACKUP FUNCTION-------- ALSO REMOVE RETURN STATEMENT FROM BACKUP.JS
+// app.get('/API/dlTagToLocal',
+//     (req, res) => {
+//       backup.dlPics(
+//           req.query.tagId, 'zips/'+req.query.tagId, imgPrefixURL,
+//       ).then((output) => {
+//         res.end('Check console log to see when it is done.');
+//       }).catch((e) => {
+//         console.error(e);
+//       });
+//     });
 app.get('/API/changeTagId', (req, res) => {
   const tagId = req.query.newid;
   res.cookie('selectedTag', tagId, {
