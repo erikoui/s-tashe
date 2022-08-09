@@ -1,3 +1,8 @@
+// TODO: Handle aliases with new db
+//       Handle multiple tags 
+
+
+
 // Load dependencies
 const express = require('express');
 const fs = require('fs');
