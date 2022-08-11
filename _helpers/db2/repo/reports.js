@@ -1,4 +1,4 @@
-
+const db = require('../services/db');
 /**
  * @module db
  */
@@ -12,17 +12,7 @@
   * @class
   */
 class Reports {
-  /**
-     * @constructor
-     * @param {*} db - the database object
-     * @param {*} pgp - probably unnescessary, check it out
-     */
-  constructor(db, pgp) {
-    this.db = db;
-    this.pgp = pgp;
-  }
-
-  /**
+  /** [UNTESTED]
    * Adds a report to the reports table
    * @param {string} rtype - report type (from declutter.reportTypes)
    * @param {string} details - details if entered
@@ -39,44 +29,40 @@ class Reports {
       reportedbyuname,
       suggestedfix,
   ) {
-    return this.db.any(
-        'INSERT INTO reports(${this:name}) VALUES(${this:csv})',
-        {
-          rtype: rtype,
-          details: details,
-          picid: picid,
-          reportedbyid: reportedbyid,
-          reportedbyuname: reportedbyuname,
-          suggestedfix: suggestedfix,
-        },
+    return db.query(
+        `INSERT INTO reports(
+        rtype,
+        details,
+        picid,
+        reportedbyid,
+        reportedbyuname,
+        suggestedfix) 
+        VALUES(?,?,?,?,?,?);`,
+        [rtype, details, picid, reportedbyid, reportedbyuname, suggestedfix],
     );
   }
 
-  /**
+  /** [UNTESTED]
    * Returns all report records
    */
   async all() {
-    return this.db.any('SELECT * FROM reports');
+    return db.query('SELECT * FROM reports');
   }
 
-  /**
+  /** [UNTESTED]
    * deletes reports
    * @param {int} picid - picture id
    */
   async deleteByPicId(picid) {
-    return this.db.any('DELETE FROM reports WHERE picid=${id};', {
-      id: picid,
-    });
+    return db.query('DELETE FROM reports WHERE picid=?;', [picid]);
   }
 
-  /**
+  /** [UNTESTED]
    * returns all reports of a picture
    * @param {int} picid - picture id
    */
   async getByPicId(picid) {
-    return this.db.any('SELECT * FROM reports WHERE picid=${id};', {
-      id: picid,
-    });
+    return db.query('SELECT * FROM reports WHERE picid=?;', [picid]);
   }
 }
 

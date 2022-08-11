@@ -7,3 +7,4 @@ module.exports = {
   Blog: require('./blog'),
   Edits: require('./edits'),
 };
+

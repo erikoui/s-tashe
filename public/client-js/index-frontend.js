@@ -68,7 +68,7 @@ onload = function() {
             for (let i = 0; i < top10.top.length; i++) {
               $('#tleaders').append(
               // eslint-disable-next-line max-len
-                  `<li><a href="/image?picid=${top10.top[i].id}">${top10.top[i].description}</a> (${top10.top[i].votes}/${top10.top[i].views} - ${top10.top[i].score.toFixed(2)})</li>`,
+                  `<li><a href="/image?picid=${top10.top[i].id}">${top10.top[i].description}</a> (${top10.top[i].votes}/${top10.top[i].views} - ${top10.top[i].score})</li>`,
               );
             }
           }
@@ -81,7 +81,7 @@ onload = function() {
             for (let i = 0; i < top10.top.length; i++) {
               $('#gleaders').append(
               // eslint-disable-next-line max-len
-                  `<li><a href="/image?picid=${top10.top[i].id}">${top10.top[i].description} </a> (${top10.top[i].votes}/${top10.top[i].views} - ${top10.top[i].score.toFixed(2)})</li>`,
+                  `<li><a href="/image?picid=${top10.top[i].id}">${top10.top[i].description} </a> (${top10.top[i].votes}/${top10.top[i].views} - ${top10.top[i].score})</li>`,
               );
             }
           }

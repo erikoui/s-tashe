@@ -1,5 +1,6 @@
+const db = require('../services/db');
+
 /**
- *
  * @module db
  */
 
@@ -12,22 +13,11 @@
  */
 class TagsRepository {
   /**
-   * @constructor
-   * @param {*} db - the database object
-   * @param {*} pgp - probably unnescessary, check it out
-   */
-  constructor(db, pgp) {
-    this.db = db;
-    this.pgp = pgp;
-  }
-
-  /**
    * Returns all tag records;
    */
   async all() {
-    return this.db.many('SELECT * FROM tags');
+    return db.query('SELECT * FROM tags');
   }
 }
-
 
 module.exports = TagsRepository;

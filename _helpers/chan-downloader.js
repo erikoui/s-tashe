@@ -2,7 +2,7 @@
 // downloads the images from a 4chan thread.
 const fs = require('fs');
 const path = require('path');
-const {db} = require('./db');
+const {db} = require('./db2');
 const needle = require('needle');
 const {RateLimiter} = require('limiter');
 
