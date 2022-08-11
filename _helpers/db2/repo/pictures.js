@@ -39,9 +39,8 @@ class PicturesRepository {
   async addTag(picid, tag) {
     return db.query(
         `INSERT INTO pic_tag (fk_picid,fk_tagid)
-        VALUES (?, (SELECT id FROM tags WHERE tag=?))
-        RETURNING *;`,
-        [picid, tag]);
+        VALUES (?, (SELECT id FROM tags WHERE tag=?))`,
+        [picid+'', tag+'']);
   }
 
   /** [UNTESTED]
