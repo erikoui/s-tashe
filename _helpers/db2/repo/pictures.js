@@ -17,14 +17,18 @@ class PicturesRepository {
    *  Adds a new record and returns the full object
    * @param {string} desc - Description field
    * @param {string} fname - The filename on the cloud (the key).
-   * @param {array<string>} tags - array of tags
+   * @param {string} tag - tag string
    */
-  async add(desc, fname, tags) {
+  async add(desc, fname, tag) {
+    await db.query(
+        `INSERT INTO pictures(description, filename)
+        VALUES(?, ?);`,
+        [desc, fname]);
     return db.query(
-        `INSERT INTO pictures(description, filename, tags)
-        VALUES(?, ?, ?) 
-        RETURNING *`,
-        [desc, fname, tags]);
+        `INSERT INTO pic_tag(fk_tagid,fk_picid)
+        VALUES ((SELECT id FROM tags WHERE tag=?),
+        (SELECT id FROM pictures WHERE filename=?))`,
+        [tag+'', fname+'']);
   }
 
   /** [UNTESTED]
@@ -51,16 +55,36 @@ class PicturesRepository {
         WHERE fk_picid=? AND fk_tagid=(SELECT id FROM tags WHERE tag=?)`,
         [picid, tag]);
   }
-  /** [UNTESTED]
+  /**
    * returns the tags of a picture by id
    * @param {int} picid pic id
    */
   async getPicDataById(picid) {
-    return db.query(
+    const pic=await db.query(
         `SELECT * 
         FROM pictures p 
-        WHERE p.id=$?`,
+        WHERE p.id=?`,
         [picid]);
+
+    const p1tags=await db.query(
+        `SELECT t.tag
+        FROM tags t
+        INNER JOIN pic_tag pt
+        ON t.id=pt.fk_tagid
+        INNER JOIN pictures p
+        ON pt.fk_picid=p.id
+        WHERE p.id=?`,
+        [picid]);
+
+    // convert tag objects to arrays of strings
+    const flat1=[];
+
+    p1tags.forEach((x)=>{
+      flat1.push(x.tag);
+    });
+    console.log(flat1);
+
+    return {...pic[0], tags: flat1};
   }
 
   /** [UNTESTED]
@@ -185,7 +209,7 @@ class PicturesRepository {
   async cleanup(cloudfiles) {
   }
 
-  /** [UNTESTED]
+  /**
    * Finds many pics from a single tag
    * @param {string} tag - name of tag
    * @param {int} minviews - minmimum views to be shown as sorted
@@ -206,7 +230,7 @@ class PicturesRepository {
           LIMIT ? OFFSET ?;`,
           [tag, minviews, imagesPerPage, offset]),
       db.query(
-          `SELECT COUNT (*) 
+          `SELECT COUNT (*) as count 
           FROM pictures p
           INNER JOIN pic_tag pt
           ON p.id=pt.fk_picid

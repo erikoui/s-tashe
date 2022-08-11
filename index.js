@@ -46,11 +46,11 @@ passport.use(
             // we actually only need the user id from db.users.login
             // so that passport can serialize them.
             const user = await db.users.login(username, hashPass);
-            console.log(user);
-            if (!user) {
+            if (user.length===0) {
               return cb(null, false, {message: 'Invalid login'});
             } else {
-              return cb(null, user);
+              console.log(user[0]);
+              return cb(null, user[0]);
             }
           } catch (e) {
             return cb(e);
@@ -60,6 +60,7 @@ passport.use(
 
 // Configure Passport authenticated session persistence.
 passport.serializeUser((user, cb) => {
+  console.log(user);
   cb(null, user.id);
 });
 
@@ -67,11 +68,11 @@ passport.serializeUser((user, cb) => {
 passport.deserializeUser(async (id, done) => {
   try {
     let user = await db.users.findById(id);
-    if (!user) {
+    if (user.length===0) {
       return done(new Error('user not found'));
     }
-    const userExtras = declutter.makeRank(user);
-    user = {...user, ...userExtras};
+    const userExtras = declutter.makeRank(user[0]);
+    user = {...user[0], ...userExtras};
     done(null, user);
   } catch (e) {
     done(e);
@@ -194,7 +195,12 @@ app.get('/upload', ensureLoggedIn(), declutter.checkLevel(6, false),
       res.render('pages/upload', {user: req.user});
     });
 app.get('/logout', (req, res) => {
-  req.logout();
+  req.logout(function(err) {
+    if (err) {
+      return next(err);
+    }
+    res.redirect('/');
+  });
   res.redirect('/');
 });
 app.get('/admin', ensureLoggedIn(), declutter.checkLevel(10, false),
@@ -307,7 +313,8 @@ app.get('/API/getBlogData', (req, res) => {
   });
 });
 app.get('/API/getPicData', (req, res) => {
-  db.pictures.getPicDataById(req.query.picid).then((imgData) => {
+  db.pictures.getPicDataById(req.query.picid).then((queryData) => {
+    const imgData=queryData;
     res.json({
       err: false,
       picid: req.query.picid,

@@ -49,7 +49,7 @@ class Edits {
    */
   async getByPicId(picId) {
     // eslint-disable-next-line max-len
-    return this.db.any(
+    return db.query(
         `SELECT edits.date, edits.edit_type, users.uname, edits.previous_data 
         FROM edits 
         INNER JOIN users 

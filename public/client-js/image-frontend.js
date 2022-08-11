@@ -160,7 +160,7 @@ onload = function() {
 
       // Show image score
       $('#img-score').html(
-          `${(data.votes/data.views).toFixed(2)}(${data.votes}/${data.views})`,
+          `${(parseFloat(data.votes)/parseFloat(data.views)).toFixed(2)}(${data.votes}/${data.views})`,
       );
     });
   };

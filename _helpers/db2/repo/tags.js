@@ -18,6 +18,18 @@ class TagsRepository {
   async all() {
     return db.query('SELECT * FROM tags');
   }
+
+  /**
+   * Returns tags with downolad enabled and their aliases
+   */
+  async downloadTagListAndAlias() {
+    return db.query(
+        `SELECT t.tag, a.alias
+        FROM tags t
+        INNER JOIN tag_aliases a
+        ON t.id=a.fk_tagid
+        WHERE t.auto_download=true;`);
+  }
 }
 
 module.exports = TagsRepository;

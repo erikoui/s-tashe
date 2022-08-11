@@ -20,7 +20,7 @@
         </div>
         <div class='tag-txt'>
           <%=picList[i].description%><br>
-          (<%= picList[i].votes%>/<%=picList[i].views%> - <%= picList[i].score.toFixed(2) %>)
+          (<%= picList[i].votes%>/<%=picList[i].views%> - <%= parseFloat(picList[i].score).toFixed(2) %>)
         </div>
       </div>
     </a>
