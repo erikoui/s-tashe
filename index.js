@@ -1,7 +1,5 @@
 // TODO: Handle aliases with new db
-//       Handle multiple tags 
-
-
+//       Handle multiple tags
 
 // Load dependencies
 const express = require('express');
@@ -18,7 +16,7 @@ const favicon = require('serve-favicon');
 const cookieParser = require('cookie-parser');
 
 // Load custom modules
-const {db} = require('./_helpers/db');
+const {db} = require('./_helpers/db2');
 
 const Cloud = require('./_helpers/cos');
 const cloud = new Cloud();
@@ -29,9 +27,10 @@ const declutter = new Declutter(db, cloud);
 const Backup = require('./_helpers/backup');
 const backup = new Backup(declutter, db, cloud);
 
-const PgService = require('./_helpers/postgresql-service.ts');
-const pgService = new PgService;
+// const PgService = require('./_helpers/postgresql-service.ts');
+// const pgService = new PgService;
 const session = require('express-session');
+const sessdb = require('./_helpers/session');
 
 // Server port to listen on
 const PORT = process.env.PORT || 5000;
@@ -47,6 +46,7 @@ passport.use(
             // we actually only need the user id from db.users.login
             // so that passport can serialize them.
             const user = await db.users.login(username, hashPass);
+            console.log(user);
             if (!user) {
               return cb(null, false, {message: 'Invalid login'});
             } else {
@@ -102,17 +102,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(path.join(__dirname, 'public', 'favicon.png')));
 app.use(require('morgan')('combined'));
 app.use(require('body-parser').urlencoded({extended: true}));
+
 app.use(session({
-  store: pgService.sessionHandler(session),
-  secret: process.env.SESSION_SECRET,
-  saveUninitialized: false,
+  key: 's_tashe',
+  secret: 'process.env.SESSION_SECRET',
+  store: sessdb,
   resave: false,
-  unset: 'destroy',
-  cookie: {
-    sameSite: 'Lax',
-    maxAge: 30 * 24 * 60 * 60 * 1000,
-    secure: false,
-  },
+  saveUninitialized: false,
 }));
 app.use(cookieParser());
 app.use(passport.initialize());
@@ -161,7 +157,7 @@ app.get('/tag', (req, res) => {
   if (!isNaN(ipp) && !isNaN(page)) {
     // q is a promis of an array of promises, so use .then before Promise.all(q)
     // eslint-disable-next-line max-len
-    db.pictures.listByTag(tag, declutter.minVotes, (page-1)*ipp, ipp).then((q)=>{
+    db.pictures.listByTagName(tag, declutter.minVotes, (page-1)*ipp, ipp).then((q)=>{
       Promise.all(q).then((picList)=>{
         console.log(picList[1]);
         res.render('pages/tag.ejs', {
@@ -564,15 +560,16 @@ app.get('/API/getTwoRandomPics', (req, res) => {
     console.log(req.cookies.selectedTag);
     selectedTag = (req.cookies.selectedTag ? req.cookies.selectedTag : 1);
   }
-  db.pictures.twoRandomPics(selectedTag).then((data) => {
+  db.pictures.twoRandomPics(selectedTag).then((aggregate) => {
+    const data=aggregate.pics;
     res.json({
       images: [
         `${imgPrefixURL}${data[0].filename}`,
         `${imgPrefixURL}${data[1].filename}`,
       ],
       tags: [
-        data[0].tags,
-        data[1].tags,
+        aggregate.t1,
+        aggregate.t2,
       ],
       ids: [
         data[0].id,
@@ -635,7 +632,7 @@ app.get('/API/vote', (req, res) => {
     if (userid) {
       db.users.addPoints(
           userid, declutter.votePointIncrement,
-      ).then((data) => {
+      ).then(() => {
         // console.log(data);
       }).catch((e) => {
         console.log('error increasing points: ' + e);

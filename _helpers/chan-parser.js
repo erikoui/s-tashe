@@ -1,5 +1,5 @@
 const needle = require('needle');
-const {db} = require('./db');
+const {db} = require('./db2');
 
 /**
  * checks 4chan and returns an array of interesting thread urls.
