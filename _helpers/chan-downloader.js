@@ -2,7 +2,7 @@
 // downloads the images from a 4chan thread.
 const fs = require('fs');
 const path = require('path');
-const {db} = require('./db');
+const {db} = require('./db2');
 const needle = require('needle');
 const {RateLimiter} = require('limiter');
 
@@ -70,13 +70,31 @@ class ChanDownloader {
       tbag = tbag.toLowerCase();
       const bag = tbag.split(' ');
 
+      // Get list of tags (main tags - no aliases)
       const tags = await db.tags.all();
-      const validTags = [];
-      for (let i = 0; i < tags.length; i++) {
-        let checkTags = [tags[i].tag];
-        if (tags[i].alts != null) {
-          checkTags = tags[i].alts.concat(tags[i].tag);
+      // Generate object {tag="...",alias=[..]}
+      const alts = await db.tags.downloadTagListAndAlias();
+      const tagObject={};
+      tags.forEach((x)=>{
+        tagObject[x.tag]=[x.tag];
+      });
+      alts.forEach((x)=>{
+        if (x.tag in tagObject) {
+          tagObject[x.tag].push(x.alias);
+        } else {
+          tagObject[x.tag]=[x.alias];
         }
+      });
+      /* {latex: [ 'latex' ],
+          bimbo: [ 'bimbo', 'fake', 'bimbos', 'plastic' ],
+          insta: [ 'insta', 'social', 'socials', 'fb', 'instagram' ],
+          milf: [ 'milf' ],
+          amateur: [ 'amateur', 'amateurs' ],
+          celeb: [ 'celeb', 'celebs' ]
+      }*/
+      const validTags = [];
+      for (let i = 0; i < tags.length; i++) {// For each main tag
+        const checkTags = tagObject[tags[i].tag];
         for (let j = 0; j < bag.length; j++) {
           if ((checkTags.includes(bag[j])) &&
             !(validTags.includes(bag[j]))) {

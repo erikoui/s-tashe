@@ -190,7 +190,7 @@ class Declutter {
       try {
         fs.mkdirSync('./tmp');
       } catch (e) {
-        console.log('Temp directory could not be created.');
+        console.log('Temp directory (./tmp) could not be created.');
       }
       for (let i = 0; i < makeThumbs.length; i++) {
         this.thumbnailLimiter.removeTokens(1, () => {
@@ -284,7 +284,7 @@ class Declutter {
    * Only the admin should call this directly, otherwise run it every 2 hours
    * or so.
    */
-  updateArchivePicList() {
+  async updateArchivePicList() {
     console.log('Updating archive pic list');
     this.archivePicList = [];
     const that = this;
@@ -315,7 +315,7 @@ class Declutter {
    * @return {Object} the user rank
    */
   makeRank(user) {
-    if (user.admin) {
+    if (user.admin==1) {
       return {level: 10, rank: 'Master baiter (admin)'};
     }
 
@@ -435,7 +435,7 @@ class Declutter {
     */
   async addPicToDb(filename, tags, desc) {
     this.db.pictures.add(desc, filename, tags).then((data) => {
-      console.log(`${data.filename} added to database.`);
+      console.log(`${filename} added to database.`);
     }).catch((e) => {
       console.log(`error adding to database: ${e}`);
     });
@@ -524,9 +524,8 @@ class Declutter {
      * @return {boolean} - wether it exists
      */
   async checkMd5ExistsInDb(md5, ext) {
-    try {
-      await this.db.pictures.findByFilename(md5 + ext);
-    } catch (e) {
+    const check=await this.db.pictures.findByFilename(md5 + ext);
+    if (check.length===0) {
       return false;
     }
     return true;

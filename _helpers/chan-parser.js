@@ -1,5 +1,5 @@
 const needle = require('needle');
-const {db} = require('./db');
+const {db} = require('./db2');
 
 /**
  * checks 4chan and returns an array of interesting thread urls.
@@ -54,18 +54,16 @@ class ChanParser {
    */
   async getAllTagsAndAltsArray() {
     // Load tags from database
-    const tags = await db.tags.all();
-    // Clean them up to use as a single array of words
-    let checkTags = [];
-    for (let i = 0; i < tags.length; i++) {
-      // Check if auto download is enabled for this tag
-      if (tags[i].auto_download) {
-        checkTags.push(tags[i].tag);
-        if (tags[i].alts != null) {
-          checkTags = checkTags.concat(tags[i].alts.concat(tags[i].tag));
-        }
+    const alts = await db.tags.downloadTagListAndAlias();
+    const checkTags=[];
+    alts.forEach((x) => {
+      if (checkTags.indexOf(x.alias)==-1) {
+        checkTags.push(x.alias);
       }
-    }
+      if (checkTags.indexOf(x.tag)==-1) {
+        checkTags.push(x.tag);
+      }
+    });
     console.log('Tags loaded: ' + checkTags);
     return checkTags;
   }
