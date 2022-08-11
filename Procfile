@@ -1,2 +1,2 @@
-web: bin/start-pgbouncer-stunnel node index.js
+web: node index.js
 lh: node index.js
