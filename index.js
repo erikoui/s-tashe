@@ -151,7 +151,7 @@ app.get('/faq', (req, res)=>{
 app.get('/tag', (req, res) => {
   const tag = req.query.tag;
   let page = Number(req.query.page);
-  const ipp = Number(req.query.ipp);
+  const ipp = Number(req.query.ipp)<165?Number(req.query.ipp):165;
   if (page<=0) {
     page=1;
   }
@@ -161,6 +161,7 @@ app.get('/tag', (req, res) => {
     db.pictures.listByTagName(tag, declutter.minVotes, (page-1)*ipp, ipp).then((q)=>{
       Promise.all(q).then((picList)=>{
         console.log(picList[1]);
+        console.log(picList[0][15]);
         res.render('pages/tag.ejs', {
           prefix: '/image/',
           urlPrefix: 'thumbs/',

@@ -218,7 +218,8 @@ class PicturesRepository {
   async listByTagName(tag, minviews, offset, imagesPerPage) {
     return [
       db.query(
-          `SELECT *, (votes+1) / (views+1) AS score 
+          `SELECT p.id as id, description, votes, views, filename, 
+          tag, (votes+1) / (views+1) AS score 
           FROM pictures p
           INNER JOIN pic_tag pt
           ON p.id=pt.fk_picid
