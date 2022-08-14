@@ -316,7 +316,8 @@ class PicturesRepository {
    */
   async topNandTag(n, minviews, tag) {
     return db.query(
-        `SELECT *, (votes+1) / (views+1 ) AS score 
+        `SELECT description, votes,views,
+        p.id as id, (votes+1) / (views+1 ) AS score 
         FROM pictures p
         INNER JOIN pic_tag pt
         ON p.id=pt.fk_picid
