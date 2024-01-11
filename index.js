@@ -2,6 +2,7 @@
 //       Handle multiple tags
 
 // Load dependencies
+require('dotenv').config()
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -138,6 +139,16 @@ app.get('/', (req, res) => {
 });
 app.get('/tos', (req, res)=>{
   res.render('pages/tos.ejs', {user: req.user});
+});
+app.get('/all', (req, res)=>{
+  db.pictures.allwtags().then((a)=>{
+    fs.writeFile('dumpt.txt', JSON.stringify(a), err => {
+      if (err) {
+        console.error(err);
+      }
+  })
+  res.end("OK");
+});
 });
 app.get('/privacy', (req, res)=>{
   res.render('pages/privacy.ejs', {user: req.user});

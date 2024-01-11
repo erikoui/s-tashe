@@ -338,6 +338,16 @@ class PicturesRepository {
         FROM pictures 
         ORDER BY filename`);
   }
+
+  async allwtags(tagId) {
+    return db.query(
+        `SELECT * 
+        FROM pictures p
+        INNER JOIN pic_tag pt
+        ON p.id=pt.fk_picid
+        INNER JOIN tags t
+        ON pt.fk_tagid=t.id`);
+  }
 }
 
 module.exports = PicturesRepository;
