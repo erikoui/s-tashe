@@ -38,7 +38,7 @@ class Declutter {
     this.chanBlogger = new ChanBlogger(this);
     this.boardsToScanForImages = ['/s/', '/b/', '/gif/'];
     this.minVotes = 12;
-    this.imgPrefixURL = `./Data/`;
+    this.imgPrefixURL = `http://localhost:5000/Data/`;
     this.tags = [];
     this.archivePicList = [];
     this.refreshTags().then(() => {
@@ -299,6 +299,7 @@ class Declutter {
         that.db.pictures.topNandTag(
           1, that.minVotes, that.tags[i].tag,
         ).then((r) => {
+          console.log(r)
           that.archivePicList.push({
             src: that.imgPrefixURL + r[0].filename,
             tag: that.tags[i].tag,
@@ -426,9 +427,11 @@ class Declutter {
         }
       } else {
         console.log(`${cloudname} : image already in database`);
-        fs.unlink(filePath, () => {
-          console.log(`${cloudname} : file deleted from local`);
-        });
+        if (del) {
+          fs.unlink(filePath, () => {
+            console.log(`${cloudname} : file deleted from local`);
+          });
+        }
       }
     }).catch((e) => {
       console.error(`${filePath} : error callculating MD5: ${e}`);

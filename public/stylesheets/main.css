@@ -94,6 +94,15 @@
   margin-top: 8px;
   vertical-align: middle;
   width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+.gallery-column video {
+  margin-top: 8px;
+  vertical-align: middle;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
 }
 
 /* Responsive layout - makes a two column-layout instead of four columns */
@@ -119,6 +128,8 @@
 .gallery-container {
   position: relative;
   cursor: pointer;
+  
+  
 }
 
 /* gallery text box over image */

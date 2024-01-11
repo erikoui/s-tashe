@@ -36,7 +36,10 @@ onload = function() {
         vid.appendChild(src);
         vid.load();
         clickable=vid;
-        column.appendChild(vid);
+        vid.play();
+        vid.loop=true;
+        vid.muted=true;
+        mediaContainer.appendChild(vid);
       } else {
         const img=document.createElement('img');
         img.src = data.images[i].src;
@@ -46,9 +49,9 @@ onload = function() {
         });
 
         mediaContainer.appendChild(img);
-        mediaContainer.appendChild(tagBlock);
-        column.appendChild(mediaContainer);
       }
+      mediaContainer.appendChild(tagBlock);
+      column.appendChild(mediaContainer);
       clickable.onclick = () => {
         window.location.href='/tag?tag='+data.images[i].tag+'&page=1&ipp=121';
       };

@@ -216,6 +216,10 @@ class PicturesRepository {
    * @param {int} imagesPerPage - how many items to return
    */
   async listByTagName(tag, minviews, offset, imagesPerPage) {
+    let stag=String(tag)
+    let sminviews=String(minviews)
+    let soffset=String(offset)
+    let sipp=String(imagesPerPage)
     return [
       db.query(
           `SELECT p.id as id, description, votes, views, filename, 
@@ -228,7 +232,7 @@ class PicturesRepository {
           WHERE t.tag=?
           ORDER BY CASE WHEN views >= ? THEN 0 ELSE 1 END, score DESC
           LIMIT ? OFFSET ?;`,
-          [tag, minviews, imagesPerPage, offset]),
+          [stag, sminviews, sipp, soffset]),
       db.query(
           `SELECT COUNT (*) as count 
           FROM pictures p
@@ -237,7 +241,7 @@ class PicturesRepository {
           INNER JOIN tags t
           ON pt.fk_tagid=t.id
           WHERE t.tag=?`,
-          [tag]),
+          [stag]),
     ];
   }
 
@@ -315,8 +319,11 @@ class PicturesRepository {
    * @param {string} tag - tag name
    */
   async topNandTag(n, minviews, tag) {
+    let num=String(n)
+    let minv=String(minviews)
+    let tags=String(tag)
     return db.query(
-        `SELECT description, votes,views,
+        `SELECT filename, votes,views,
         p.id as id, (votes+1) / (views+1 ) AS score 
         FROM pictures p
         INNER JOIN pic_tag pt
@@ -326,7 +333,7 @@ class PicturesRepository {
         WHERE t.tag=?
         ORDER BY CASE WHEN views >= ? THEN 0 ELSE 1 END, score DESC 
         LIMIT ?;`,
-        [tag, minviews, n]);
+        [tags, minv, num]);
   }
 
   /**
