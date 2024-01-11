@@ -19,3 +19,5 @@ marketing
 thumbs
 tmp
 dump.txt
+_helpers/*_*/*
+public/Data

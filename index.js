@@ -670,6 +670,7 @@ app.get('/API/deletePic', ensureLoggedIn(), declutter.checkLevel(10, true),
     (req, res) => {
       db.pictures.deleteById(req.query.picid).then((rec) => {
         console.log('file deleted from db');
+        console.log(rec);
         cloud.deleteItems([rec[0].filename]).then(() => {
           console.log('file deleted from cloud.');
           res.json({

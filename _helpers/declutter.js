@@ -21,8 +21,9 @@ class Declutter {
    * @param {Cloud} cloudStorage - the cloud object in index.js
    */
   constructor(database, cloudStorage) {
-    this.imageLimiter = new RateLimiter(1, 1100);// 1 every 1100 ms
+    this.imageDownloadLimiter = new RateLimiter(1, 1100);// 1 every 1100 ms
     this.thumbnailLimiter = new RateLimiter(3, 500);// 3 every 500 ms
+    this.uploadLimiter = new RateLimiter(3, 1000);// 3 every 1000 ms
     this.db = database;
     this.cloud = cloudStorage;
     this.votePointIncrement = 1;
@@ -34,12 +35,13 @@ class Declutter {
     };
     this.chanDownloader = new ChanDownloader(this);
     this.chanBlogger = new ChanBlogger(this);
+    this.boardsToScanForImages = ['/s/', '/b/', '/gif/'];
     this.minVotes = 12;
-    this.imgPrefixURL = `https://${process.env.COS_ENDPOINT}/${process.env.COS_BUCKETNAME}/`;
+    this.imgPrefixURL = `./Data/`;
     this.tags = [];
     this.archivePicList = [];
     this.refreshTags().then(() => {
-      console.log('Tags:' + this.tags.map((({tag}) => tag)));
+      console.log('Tags:' + this.tags.map((({ tag }) => tag)));
       if (!process.env.ISLOCAL) {
         this.updateArchivePicList();
         this.chinScanner();
@@ -57,26 +59,29 @@ class Declutter {
    * Wrapper for running chanParser and chanDownloader
    */
   chinScanner() {
-    chanParser.loadBoardJson('/s/').then((data) => {
-      for (let i = 0; i < data.length; i++) {
-        this.imageLimiter.removeTokens(1, () => {
-          this.downloadThreadAndSaveToCloud(data[i]).then(() => {
-          }).catch((e) => {
-            console.error(e);
-            console.error('error with download thread:' + e);
+    for (let board of this.boardsToScanForImages) {
+      chanParser.loadBoardJson(board).then((data) => {
+        for (let i = 0; i < data.length; i++) {
+          this.imageDownloadLimiter.removeTokens(1, () => {
+            this.downloadThreadAndSaveToCloud(data[i]).then(() => {
+            }).catch((e) => {
+              console.error(e);
+              console.error('error with download thread:' + e);
+            });
           });
-        });
-      }
-      this.db.reports.add('chinScanner',
+        }
+        this.db.reports.add('chinScanner',
           data.length + ' threads downloaded on ' + Date().toString(),
           0,
           0,
           'System',
           '',
-      );
-    }).catch((e) => {
-      console.error('error with loadBoardJson: ' + e);
-    });
+        );
+      }
+      ).catch((e) => {
+        console.error('error with loadBoardJson: ' + e);
+      });
+    }
   };
 
   /**
@@ -85,7 +90,7 @@ class Declutter {
   blogPoster() {
     chanParser.loadBoardJson('/s/').then((data) => {
       for (let i = 0; i < data.length; i++) {
-        this.imageLimiter.removeTokens(1, () => {
+        this.imageDownloadLimiter.removeTokens(1, () => {
           this.getReplyChainAndMakeBlogPost(data[i], 5).then(() => {
           }).catch((e) => {
             console.error(e);
@@ -94,11 +99,11 @@ class Declutter {
         });
       }
       this.db.reports.add('blogPoster',
-          data.length + ' threads downloaded on ' + Date().toString(),
-          0,
-          0,
-          'System',
-          '',
+        data.length + ' threads downloaded on ' + Date().toString(),
+        0,
+        0,
+        'System',
+        '',
       );
     }).catch((e) => {
       console.error('error with loadBoardJson: ' + e);
@@ -131,7 +136,7 @@ class Declutter {
    */
   beautifyContent(content) {
     let nice = '';
-    for (let i =content.length-1; i >=0; i--) {
+    for (let i = content.length - 1; i >= 0; i--) {
       nice = nice + '\n\n' + content[i].post.replace(/<a href=.+<\/a>/g, '');
     }
     console.log(nice);
@@ -199,33 +204,33 @@ class Declutter {
           const out = fs.createWriteStream(filePath);
           const res = needle.get(this.imgPrefixURL + makeThumbs[i]);
           res.pipe(out);
-          res.on('end', function(err) {
+          res.on('end', function (err) {
             if (!err) {
               // generate thumbnail
               imageThumbnail(
-                  filePath,
-                  {
-                    width: 150,
+                filePath,
+                {
+                  width: 150,
                   // fit: 'cover',
                   // jpegOptions: {force: true, quality: 80},
-                  },
+                },
               ).then((thumbnail) => {
                 // save thumbnail to disk
                 try {
                   fs.writeFileSync(thumbsDir + '/' + makeThumbs[i], thumbnail);
                 } catch (e) {
                   fs.copyFile(
-                      './public/image-broken.png',
-                      thumbsDir + '/' + makeThumbs[i].split('.')[0] + '.png',
-                      () => {
-                        console.log(makeThumbs[i] + ' saved as broken.png');
-                      },
+                    './public/image-broken.png',
+                    thumbsDir + '/' + makeThumbs[i].split('.')[0] + '.png',
+                    () => {
+                      console.log(makeThumbs[i] + ' saved as broken.png');
+                    },
                   );
                   // delete file after thumbnail is made
                   fs.unlink('./tmp/' + makeThumbs[i], () => {
                     console.log(makeThumbs[i] + ' done');
                   });
-                  console.error(makeThumbs[i]+ 'error:'+e);
+                  console.error(makeThumbs[i] + 'error:' + e);
                 }
 
                 // delete file
@@ -234,21 +239,7 @@ class Declutter {
                 });
               }).catch((e) => {
                 fs.copyFile(
-                    './public/video-thumb.png',
-                    thumbsDir + '/' + makeThumbs[i].split('.')[0] + '.png',
-                    () => {
-                    // delete file after thumbnail is made
-                      fs.unlink('./tmp/' + makeThumbs[i], () => {
-                        console.log(makeThumbs[i] + ' done');
-                      });
-                    },
-                );
-                // eslint-disable-next-line max-len
-                console.log(makeThumbs[i] + '  *weird file type set generic thumbnail: ' + e.message);
-              });
-            } else {
-              fs.copyFile(
-                  './public/image-broken.png',
+                  './public/video-thumb.png',
                   thumbsDir + '/' + makeThumbs[i].split('.')[0] + '.png',
                   () => {
                     // delete file after thumbnail is made
@@ -256,6 +247,20 @@ class Declutter {
                       console.log(makeThumbs[i] + ' done');
                     });
                   },
+                );
+                // eslint-disable-next-line max-len
+                console.log(makeThumbs[i] + '  *weird file type set generic thumbnail: ' + e.message);
+              });
+            } else {
+              fs.copyFile(
+                './public/image-broken.png',
+                thumbsDir + '/' + makeThumbs[i].split('.')[0] + '.png',
+                () => {
+                  // delete file after thumbnail is made
+                  fs.unlink('./tmp/' + makeThumbs[i], () => {
+                    console.log(makeThumbs[i] + ' done');
+                  });
+                },
               );
               // eslint-disable-next-line max-len
               console.log('  *some error while making thumbnail, used broken.png: ' + e.message);
@@ -265,13 +270,13 @@ class Declutter {
       }
       // eslint-disable-next-line max-len
       this.db.reports.add('thumbnails',
-          makeThumbs.length +
+        makeThumbs.length +
         ' thumbnails set to be generated on ' +
         Date().toString(),
-          0,
-          0,
-          'System',
-          '',
+        0,
+        0,
+        'System',
+        '',
       );
       return (`${makeThumbs.length} Thumbnails will be generated.`);
     }).catch((e) => {
@@ -288,10 +293,10 @@ class Declutter {
     console.log('Updating archive pic list');
     this.archivePicList = [];
     const that = this;
-    const getTop = function(i) {
+    const getTop = function (i) {
       if (i < that.tags.length) {
         that.db.pictures.topNandTag(
-            1, that.minVotes, that.tags[i].tag,
+          1, that.minVotes, that.tags[i].tag,
         ).then((r) => {
           that.archivePicList.push({
             src: that.imgPrefixURL + r[0].filename,
@@ -315,8 +320,8 @@ class Declutter {
    * @return {Object} the user rank
    */
   makeRank(user) {
-    if (user.admin==1) {
-      return {level: 10, rank: 'Master baiter (admin)'};
+    if (user.admin == 1) {
+      return { level: 10, rank: 'Master baiter (admin)' };
     }
 
     for (let i = 0; i < this.rankingData.ranks.length; i++) {
@@ -328,7 +333,7 @@ class Declutter {
       }
     }
     // this is returned when a user maxed out points with a hack
-    return {level: 0, rank: '1337 h4xx0r'};
+    return { level: 0, rank: '1337 h4xx0r' };
   }
 
   /**
@@ -468,7 +473,7 @@ class Declutter {
         * @param {array} files_ - Used internally, dont pass any argument
         * @return {array} The array of files in the dir
        */
-    const getFiles = function(dir, files_) {
+    const getFiles = function (dir, files_) {
       files_ = files_ || [];
       const files = fs.readdirSync(dir);
       for (const i in files) {
@@ -489,7 +494,7 @@ class Declutter {
     const absPathLength = dir.split(path.sep).length;
     for (let i = 0; i < rawFiles.length; i++) {
       // Reset the KVP
-      const tempKVP = {filename: '', tags: []};
+      const tempKVP = { filename: '', tags: [] };
 
       // Extract the tags from the path
       const tagList = [];
@@ -524,8 +529,8 @@ class Declutter {
      * @return {boolean} - wether it exists
      */
   async checkMd5ExistsInDb(md5, ext) {
-    const check=await this.db.pictures.findByFilename(md5 + ext);
-    if (check.length===0) {
+    const check = await this.db.pictures.findByFilename(md5 + ext);
+    if (check.length === 0) {
       return false;
     }
     return true;
@@ -542,11 +547,11 @@ class Declutter {
   errorHandler(err, req, res, next) {
     if (typeof (err) === 'string') {
       // custom application error
-      return res.status(400).json({message: err});
+      return res.status(400).json({ message: err });
     }
 
     // default to 500 server error
-    return res.status(500).json({message: err.message});
+    return res.status(500).json({ message: err.message });
   }
 
   /**
@@ -557,7 +562,7 @@ class Declutter {
       this.tags = data;
     }).catch((e) => {
       console.error(e);
-      this.tags = [{tag: 'error loading all tags'}];
+      this.tags = [{ tag: 'error loading all tags' }];
     });
   }
 

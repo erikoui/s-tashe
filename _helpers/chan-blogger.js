@@ -10,7 +10,7 @@ class ChanBlogger {
    */
   constructor(declutter) {
     // Load the image limiter from declutter
-    this.imageLimiter = declutter.imageLimiter;
+    this.imageDownloadLimiter = declutter.imageDownloadLimiter;
     this.declutter = declutter;
   }
 

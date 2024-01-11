@@ -100,6 +100,7 @@ class UsersRepository {
    * @param {String} password - the SHA1 hashed password
    */
   async login(uname, password) {
+    console.log(`${uname} is trying to login`)
     return db.query(
         'SELECT * FROM users WHERE uname = ? AND password=?',
         [uname, password]);

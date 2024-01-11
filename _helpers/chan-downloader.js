@@ -17,8 +17,8 @@ class ChanDownloader {
    * @param {module} declutter - declutter
    */
   constructor(declutter) {
-    this.imageLimiter = declutter.imageLimiter;
-    this.uploadLimiter = new RateLimiter(3, 'minute');
+    this.imageDownloadLimiter = declutter.imageDownloadLimiter;
+    this.uploadLimiter = declutter.uploadLimiter;
     this.declutter = declutter;
   }
 
@@ -124,7 +124,7 @@ class ChanDownloader {
           if (!(await this.declutter.checkMd5ExistsInDb(md5, imageExtension))) {
             // save the variables as constants to prevent async race conditions
 
-            this.imageLimiter.removeTokens(1, () => {
+            this.imageDownloadLimiter.removeTokens(1, () => {
               try {
                 // This never trues when i remove console log???
                 console.log(filePath);
