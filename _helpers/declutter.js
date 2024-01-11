@@ -6,7 +6,7 @@ const RateLimiter = require('limiter').RateLimiter;
 const ChanDownloader = require('./chan-downloader');
 const ChanParser = require('./chan-parser');
 const ChanBlogger = require('./chan-blogger');
-const chanParser = new ChanParser();
+
 const needle = require('needle');
 const imageThumbnail = require('image-thumbnail');
 /**
@@ -23,7 +23,7 @@ class Declutter {
   constructor(database, cloudStorage) {
     this.imageDownloadLimiter = new RateLimiter(1, 1100);// 1 every 1100 ms
     this.thumbnailLimiter = new RateLimiter(3, 500);// 3 every 500 ms
-    this.uploadLimiter = new RateLimiter(3, 1000);// 3 every 1000 ms
+    this.uploadLimiter = new RateLimiter(1, 1100);// 1 every 1000 ms
     this.db = database;
     this.cloud = cloudStorage;
     this.votePointIncrement = 1;
@@ -33,6 +33,7 @@ class Declutter {
       pointBreaks: [20, 100, 250, 500, 1000, 2000, 5000, 1000000],
       levels: [0, 1, 2, 3, 4, 5, 6, 7],
     };
+    this.chanParser = new ChanParser(this);
     this.chanDownloader = new ChanDownloader(this);
     this.chanBlogger = new ChanBlogger(this);
     this.boardsToScanForImages = ['/s/', '/b/', '/gif/'];
@@ -60,7 +61,7 @@ class Declutter {
    */
   chinScanner() {
     for (let board of this.boardsToScanForImages) {
-      chanParser.loadBoardJson(board).then((data) => {
+      this.chanParser.loadBoardJson(board).then((data) => {
         for (let i = 0; i < data.length; i++) {
           this.imageDownloadLimiter.removeTokens(1, () => {
             this.downloadThreadAndSaveToCloud(data[i]).then(() => {
@@ -71,7 +72,7 @@ class Declutter {
           });
         }
         this.db.reports.add('chinScanner',
-          data.length + ' threads downloaded on ' + Date().toString(),
+          data.length + ' threads queued for download from ' + board + ' on ' + Date().toString(),
           0,
           0,
           'System',
@@ -88,7 +89,7 @@ class Declutter {
   * Wrapper for running chanParser and chanDownloader
   */
   blogPoster() {
-    chanParser.loadBoardJson('/s/').then((data) => {
+    this.chanParser.loadBoardJson('/s/').then((data) => {
       for (let i = 0; i < data.length; i++) {
         this.imageDownloadLimiter.removeTokens(1, () => {
           this.getReplyChainAndMakeBlogPost(data[i], 5).then(() => {
@@ -424,7 +425,10 @@ class Declutter {
           console.error(`${cloudname} : error while uploading to cloud: ${e}`);
         }
       } else {
-        console.log(`image already in database`);
+        console.log(`${cloudname} : image already in database`);
+        fs.unlink(filePath, () => {
+          console.log(`${cloudname} : file deleted from local`);
+        });
       }
     }).catch((e) => {
       console.error(`${filePath} : error callculating MD5: ${e}`);
