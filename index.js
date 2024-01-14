@@ -12,12 +12,12 @@ const Strategy = require('passport-local').Strategy;
 const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 const extract = require('extract-zip');
 const multer = require('multer');
-const upload = multer({dest: 'uploads/'});
+const upload = multer({ dest: 'uploads/' });
 const favicon = require('serve-favicon');
 const cookieParser = require('cookie-parser');
 
 // Load custom modules
-const {db} = require('./_helpers/db2');
+const { db } = require('./_helpers/db2');
 
 const Cloud = require('./_helpers/cos');
 const cloud = new Cloud();
@@ -40,24 +40,24 @@ const imgPrefixURL = declutter.imgPrefixURL;
 
 // Configure the local strategy for use by Passport.
 passport.use(
-    new Strategy(
-        async (username, password, cb) => {
-          try {
-            hashPass = sha1(password);
-            // we actually only need the user id from db.users.login
-            // so that passport can serialize them.
-            const user = await db.users.login(username, hashPass);
-            if (user.length===0) {
-              return cb(null, false, {message: 'Invalid login'});
-            } else {
-              console.log(user[0]);
-              return cb(null, user[0]);
-            }
-          } catch (e) {
-            return cb(e);
-          }
-        },
-    ));
+  new Strategy(
+    async (username, password, cb) => {
+      try {
+        hashPass = sha1(password);
+        // we actually only need the user id from db.users.login
+        // so that passport can serialize them.
+        const user = await db.users.login(username, hashPass);
+        if (user.length === 0) {
+          return cb(null, false, { message: 'Invalid login' });
+        } else {
+          console.log(user[0]);
+          return cb(null, user[0]);
+        }
+      } catch (e) {
+        return cb(e);
+      }
+    },
+  ));
 
 // Configure Passport authenticated session persistence.
 passport.serializeUser((user, cb) => {
@@ -69,11 +69,11 @@ passport.serializeUser((user, cb) => {
 passport.deserializeUser(async (id, done) => {
   try {
     let user = await db.users.findById(id);
-    if (user.length===0) {
+    if (user.length === 0) {
       return done(new Error('user not found'));
     }
     const userExtras = declutter.makeRank(user[0]);
-    user = {...user[0], ...userExtras};
+    user = { ...user[0], ...userExtras };
     done(null, user);
   } catch (e) {
     done(e);
@@ -83,17 +83,17 @@ passport.deserializeUser(async (id, done) => {
 // ----------------------------Schedule tasks-------------
 const schedule = require('node-schedule');
 // run chinScanner every 4 hours
-schedule.scheduleJob('0 */4 * * *', function() {
+schedule.scheduleJob('0 */4 * * *', function () {
   declutter.chinScanner();
 });
 
 // make thumbnails 30 mins after every 4 hours
-schedule.scheduleJob('30 */4 * * *', function() {
+schedule.scheduleJob('30 */4 * * *', function () {
   declutter.makeThumbs(false);
 });
 
 // make blog posts every day at 00:00
-schedule.scheduleJob('0 0 * * *', function() {
+schedule.scheduleJob('0 0 * * *', function () {
   declutter.updateArchivePicList();
   declutter.blogPoster();
 });
@@ -103,7 +103,7 @@ app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(path.join(__dirname, 'public', 'favicon.png')));
 app.use(require('morgan')('combined'));
-app.use(require('body-parser').urlencoded({extended: true}));
+app.use(require('body-parser').urlencoded({ extended: true }));
 
 app.use(session({
   key: 's_tashe',
@@ -137,40 +137,43 @@ app.get('/', (req, res) => {
     rankingData: declutter.rankingData,
   });
 });
-app.get('/tos', (req, res)=>{
-  res.render('pages/tos.ejs', {user: req.user});
+app.get('/tos', (req, res) => {
+  res.render('pages/tos.ejs', { user: req.user });
 });
-app.get('/all', (req, res)=>{
-  db.pictures.allwtags().then((a)=>{
+app.get('/all', (req, res) => {
+  db.pictures.allwtags().then((a) => {
     fs.writeFile('dumpt.txt', JSON.stringify(a), err => {
       if (err) {
         console.error(err);
       }
-  })
-  res.end("OK");
+    })
+    res.end("OK");
+  });
 });
+app.get('/privacy', (req, res) => {
+  res.render('pages/privacy.ejs', { user: req.user });
 });
-app.get('/privacy', (req, res)=>{
-  res.render('pages/privacy.ejs', {user: req.user});
+app.get('/cookies', (req, res) => {
+  res.render('pages/cookies.ejs', { user: req.user });
 });
-app.get('/cookies', (req, res)=>{
-  res.render('pages/cookies.ejs', {user: req.user});
-});
-app.get('/faq', (req, res)=>{
-  res.render('pages/faq.ejs', {user: req.user});
+app.get('/faq', (req, res) => {
+  res.render('pages/faq.ejs', { user: req.user });
 });
 app.get('/tag', (req, res) => {
-  const tag = req.query.tag;
+  let tag = req.query.tag;
+  if(tag==undefined){
+    tag='';
+  }
   let page = Number(req.query.page);
-  const ipp = Number(req.query.ipp)<165?Number(req.query.ipp):165;
-  if (page<=0) {
-    page=1;
+  const ipp = Number(req.query.ipp) < 165 ? Number(req.query.ipp) : 165;
+  if (page <= 0) {
+    page = 1;
   }
   if (!isNaN(ipp) && !isNaN(page)) {
     // q is a promis of an array of promises, so use .then before Promise.all(q)
     // eslint-disable-next-line max-len
-    db.pictures.listByTagName(tag, declutter.minVotes, (page-1)*ipp, ipp).then((q)=>{
-      Promise.all(q).then((picList)=>{
+    db.pictures.listByTagName(tag, declutter.minVotes, (page - 1) * ipp, ipp).then((q) => {
+      Promise.all(q).then((picList) => {
         console.log(picList[1]);
         console.log(picList[0][15]);
         res.render('pages/tag.ejs', {
@@ -179,7 +182,7 @@ app.get('/tag', (req, res) => {
           picList: picList[0],
           user: req.user,
           page: page,
-          maxPage: Math.ceil(Number(picList[1][0].count)/ipp),
+          maxPage: Math.ceil(Number(picList[1][0].count) / ipp),
           tag: tag,
         });
       }).catch((e) => {
@@ -191,23 +194,23 @@ app.get('/tag', (req, res) => {
   }
 });
 app.get('/login', (req, res) => {
-  res.render('pages/login.ejs', {user: req.user});
+  res.render('pages/login.ejs', { user: req.user });
 });
 app.get('/about', (req, res) => {
-  res.render('pages/about.ejs', {user: req.user});
+  res.render('pages/about.ejs', { user: req.user });
 });
 app.get('/blog', (req, res) => {
-  res.render('pages/blog.ejs', {user: req.user});
+  res.render('pages/blog.ejs', { user: req.user });
 });
 app.get('/register', (req, res) => {
-  res.render('pages/register.ejs', {user: req.user});
+  res.render('pages/register.ejs', { user: req.user });
 });
 app.get('/upload', ensureLoggedIn(), declutter.checkLevel(6, false),
-    (req, res) => {
-      res.render('pages/upload', {user: req.user});
-    });
+  (req, res) => {
+    res.render('pages/upload', { user: req.user });
+  });
 app.get('/logout', (req, res) => {
-  req.logout(function(err) {
+  req.logout(function (err) {
     if (err) {
       return next(err);
     }
@@ -216,11 +219,11 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 app.get('/admin', ensureLoggedIn(), declutter.checkLevel(10, false),
-    (req, res) => {
-      res.render('pages/admin', {user: req.user});
-    });
+  (req, res) => {
+    res.render('pages/admin', { user: req.user });
+  });
 app.get('/profile', ensureLoggedIn(), (req, res) => {
-  res.render('pages/profile', {user: req.user});
+  res.render('pages/profile', { user: req.user });
 });
 app.get('/archive', (req, res) => {
   res.render('pages/archive', {
@@ -234,16 +237,16 @@ app.get('/image', (req, res) => {
   });
 });
 app.get('/showreports', ensureLoggedIn(), declutter.checkLevel(10, false),
-    (req, res) => {
-      db.reports.all().then((data) => {
-        res.render('pages/reportlist', {
-          user: req.user,
-          data: data,
-        });
-      }).catch((e) => {
-        res.end(e);
+  (req, res) => {
+    db.reports.all().then((data) => {
+      res.render('pages/reportlist', {
+        user: req.user,
+        data: data,
       });
+    }).catch((e) => {
+      res.end(e);
     });
+  });
 app.get('/blogpost/:id/*', (req, res) => {
   console.log(req.params);
   db.blog.getBlogPost(req.params.id).then((data) => {
@@ -259,54 +262,54 @@ app.get('/blogpost/:id/*', (req, res) => {
   });
 });
 app.get('/modblogpost/:id', ensureLoggedIn(), declutter.checkLevel(10, false),
-    (req, res) => {
-      db.blog.getBlogPost(req.params.id).then((data) => {
-        res.render('pages/modblogpost', {
-          user: req.user,
-          id: req.params.id,
-          title: data.title,
-          filename: imgPrefixURL + data.filename,
-          abstract: data.abstract,
-          body: data.body,
-        });
-      }).catch((e) => {
-        res.render('pages/modblogpost', {
-          user: req.user,
-          id: null,
-          title: null,
-          filename: null,
-          abstract: null,
-          body: null,
-        });
+  (req, res) => {
+    db.blog.getBlogPost(req.params.id).then((data) => {
+      res.render('pages/modblogpost', {
+        user: req.user,
+        id: req.params.id,
+        title: data.title,
+        filename: imgPrefixURL + data.filename,
+        abstract: data.abstract,
+        body: data.body,
+      });
+    }).catch((e) => {
+      res.render('pages/modblogpost', {
+        user: req.user,
+        id: null,
+        title: null,
+        filename: null,
+        abstract: null,
+        body: null,
       });
     });
+  });
 app.get('/delblogpost/:id', ensureLoggedIn(), declutter.checkLevel(10, false),
-    (req, res) => {
-      db.blog.deleteBlogPost(req.params.id).then((data) => {
-        res.end('Post deleted successfully');
-      }).catch((e) => {
-        res.end('ERROROORO: '+e.message);
-      });
+  (req, res) => {
+    db.blog.deleteBlogPost(req.params.id).then((data) => {
+      res.end('Post deleted successfully');
+    }).catch((e) => {
+      res.end('ERROROORO: ' + e.message);
     });
+  });
 app.post('/modblogpost/:id', ensureLoggedIn(), declutter.checkLevel(10, false),
-    (req, res) => {
-      if (req.body.id) {
+  (req, res) => {
+    if (req.body.id) {
       // edit post
-        db.blog.editPost(req.body).then(() => {
-          res.end('Post edited successfully');
-        }).catch((e) => {
-          res.end(e);
-        });
-      } else {
+      db.blog.editPost(req.body).then(() => {
+        res.end('Post edited successfully');
+      }).catch((e) => {
+        res.end(e);
+      });
+    } else {
       // new post
-        db.blog.addPost(req.body).then(() => {
-          res.end('Post added successfully');
-        }).catch((e) => {
-          console.error(e);
-          res.end(e.message);
-        });
-      }
-    });
+      db.blog.addPost(req.body).then(() => {
+        res.end('Post added successfully');
+      }).catch((e) => {
+        console.error(e);
+        res.end(e.message);
+      });
+    }
+  });
 // ----------- API calls ----------
 app.get('/API/getBlogData', (req, res) => {
   db.blog.getRecentN(10).then((blogData) => {
@@ -326,7 +329,7 @@ app.get('/API/getBlogData', (req, res) => {
 });
 app.get('/API/getPicData', (req, res) => {
   db.pictures.getPicDataById(req.query.picid).then((queryData) => {
-    const imgData=queryData;
+    const imgData = queryData;
     res.json({
       err: false,
       picid: req.query.picid,
@@ -345,194 +348,194 @@ app.get('/API/getPicData', (req, res) => {
   });
 });
 app.get('/API/getReportsAndEdits',
-    ensureLoggedIn(),
-    declutter.checkLevel(10, true),
-    (req, res) => {
-      db.reports.getByPicId(req.query.picid).then((reports) => {
-        db.edits.getByPicId(req.query.picid).then((edits)=>{
-          res.json({
-            err: false,
-            edits: edits,
-            reports: reports,
-          });
-        }).catch((e)=>{
-          throw e;
-        });
-      }).catch((e) => {
-        res.json({
-          err: true,
-          message: 'Error:' + e,
-        });
-      });
-    });
-// eslint-disable-next-line max-len
-app.get('/API/changeDescription', declutter.checkLevel(5, true), ensureLoggedIn(),
-    (req, res) => {
-      // eslint-disable-next-line max-len
-      db.pictures.changeDesc(req.query.picid, req.query.newdesc).then((data) => {
+  ensureLoggedIn(),
+  declutter.checkLevel(10, true),
+  (req, res) => {
+    db.reports.getByPicId(req.query.picid).then((reports) => {
+      db.edits.getByPicId(req.query.picid).then((edits) => {
         res.json({
           err: false,
-          message: 'OK:' + req.query.newdesc,
+          edits: edits,
+          reports: reports,
+        });
+      }).catch((e) => {
+        throw e;
+      });
+    }).catch((e) => {
+      res.json({
+        err: true,
+        message: 'Error:' + e,
+      });
+    });
+  });
+// eslint-disable-next-line max-len
+app.get('/API/changeDescription', declutter.checkLevel(5, true), ensureLoggedIn(),
+  (req, res) => {
+    // eslint-disable-next-line max-len
+    db.pictures.changeDesc(req.query.picid, req.query.newdesc).then((data) => {
+      res.json({
+        err: false,
+        message: 'OK:' + req.query.newdesc,
+      });
+      db.edits.add(
+        'desc',
+        req.user.id,
+        data.description,
+        req.query.picid,
+      );
+    }).catch((e) => {
+      res.json({
+        err: true,
+        message: e.message,
+      });
+    });
+  });
+app.get('/API/removereports', ensureLoggedIn(), declutter.checkLevel(10, true),
+  (req, res) => {
+    db.reports.deleteByPicId(req.query.picid).then((data) => {
+      res.json({
+        err: false,
+        message: data.length + 'Reports deleted:',
+      });
+    }).catch((e) => {
+      res.json({
+        err: true,
+        message: 'Error:' + e,
+      });
+    });
+  });
+app.get('/API/addTag', declutter.checkLevel(3, true), ensureLoggedIn(),
+  (req, res) => {
+    let validTag = false;
+    for (let i = 0; i < declutter.tags.length; i++) {
+      if (req.query.tag == declutter.tags[i].tag) {
+        validTag = true;
+        break;
+      }
+    }
+    if (validTag) {
+      db.pictures.addTag(req.query.picid, req.query.tag).then(() => {
+        res.json({
+          err: false,
+          message: 'Tag ' + req.query.tag + ' added.',
         });
         db.edits.add(
-            'desc',
-            req.user.id,
-            data.description,
-            req.query.picid,
+          'addtag',
+          req.user.id,
+          req.query.tag,
+          req.query.picid,
         );
       }).catch((e) => {
         res.json({
           err: true,
-          message: e.message,
+          message: 'Database error: ' + e,
         });
       });
-    });
-app.get('/API/removereports', ensureLoggedIn(), declutter.checkLevel(10, true),
-    (req, res) => {
-      db.reports.deleteByPicId(req.query.picid).then((data) => {
+    } else {
+      res.json({
+        err: true,
+        message: 'Invalid tag',
+      });
+    }
+  });
+app.get('/API/removeTag', declutter.checkLevel(3, true), ensureLoggedIn(),
+  (req, res) => {
+    let validTag = false;
+    for (let i = 0; i < declutter.tags.length; i++) {
+      if (req.query.tag == declutter.tags[i].tag) {
+        validTag = true;
+        break;
+      }
+    }
+    if (validTag) {
+      db.pictures.removeTag(req.query.picid, req.query.tag).then(() => {
         res.json({
           err: false,
-          message: data.length + 'Reports deleted:',
+          message: 'Tag ' + req.query.tag + ' removed.',
         });
+        db.edits.add(
+          'removetag',
+          req.user.id,
+          req.query.tag,
+          req.query.picid,
+        );
       }).catch((e) => {
         res.json({
           err: true,
-          message: 'Error:' + e,
+          message: 'Database error: ' + e,
         });
       });
-    });
-app.get('/API/addTag', declutter.checkLevel(3, true), ensureLoggedIn(),
-    (req, res) => {
-      let validTag = false;
-      for (let i = 0; i < declutter.tags.length; i++) {
-        if (req.query.tag == declutter.tags[i].tag) {
-          validTag = true;
-          break;
-        }
-      }
-      if (validTag) {
-        db.pictures.addTag(req.query.picid, req.query.tag).then(() => {
-          res.json({
-            err: false,
-            message: 'Tag ' + req.query.tag + ' added.',
-          });
-          db.edits.add(
-              'addtag',
-              req.user.id,
-              req.query.tag,
-              req.query.picid,
-          );
-        }).catch((e) => {
-          res.json({
-            err: true,
-            message: 'Database error: ' + e,
-          });
-        });
-      } else {
-        res.json({
-          err: true,
-          message: 'Invalid tag',
-        });
-      }
-    });
-app.get('/API/removeTag', declutter.checkLevel(3, true), ensureLoggedIn(),
-    (req, res) => {
-      let validTag = false;
-      for (let i = 0; i < declutter.tags.length; i++) {
-        if (req.query.tag == declutter.tags[i].tag) {
-          validTag = true;
-          break;
-        }
-      }
-      if (validTag) {
-        db.pictures.removeTag(req.query.picid, req.query.tag).then(() => {
-          res.json({
-            err: false,
-            message: 'Tag ' + req.query.tag + ' removed.',
-          });
-          db.edits.add(
-              'removetag',
-              req.user.id,
-              req.query.tag,
-              req.query.picid,
-          );
-        }).catch((e) => {
-          res.json({
-            err: true,
-            message: 'Database error: ' + e,
-          });
-        });
-      } else {
-        res.json({
-          err: true,
-          message: 'Invalid tag',
-        });
-      }
-    });
+    } else {
+      res.json({
+        err: true,
+        message: 'Invalid tag',
+      });
+    }
+  });
 app.get('/API/deleteallfiles', ensureLoggedIn(), declutter.checkLevel(10, true),
-    (req, res) => {
-      cloud.getBucketContents().then(async (data) => {
-        console.log(data);
-        const filenames = [];
-        for (let i = 0; i < data.Contents.length; i++) {
-          filenames.push(data.Contents[i].Key);
-        }
-        await cloud.deleteItems(filenames);
-        res.end(filenames.toString());
-      }).catch((err) => {
-        console.log('error getting item list from cos:' + err);
-        res.end(`Error: ${err}`);
-      });
+  (req, res) => {
+    cloud.getBucketContents().then(async (data) => {
+      console.log(data);
+      const filenames = [];
+      for (let i = 0; i < data.Contents.length; i++) {
+        filenames.push(data.Contents[i].Key);
+      }
+      await cloud.deleteItems(filenames);
+      res.end(filenames.toString());
+    }).catch((err) => {
+      console.log('error getting item list from cos:' + err);
+      res.end(`Error: ${err}`);
     });
+  });
 
 app.get('/API/listallfiles', ensureLoggedIn(), declutter.checkLevel(10, true),
-    (req, res) => {
-      cloud.getBucketContents().then((data) => {
-        const filenames = [];
-        for (let i = 0; i < data.Contents.length; i++) {
-          filenames.push(data.Contents[i].Key);
-        }
-        res.json({
-          err: false,
-          data: filenames,
-          message: `${filenames.length} total files`,
-        });
-      }).catch((err) => {
-        console.log(`error getting item list from cos: ${err}`);
-        res.json({
-          err: true,
-          data: [],
-          message: `error getting item list from cos: ${err}`,
-        });
+  (req, res) => {
+    cloud.getBucketContents().then((data) => {
+      const filenames = [];
+      for (let i = 0; i < data.Contents.length; i++) {
+        filenames.push(data.Contents[i].Key);
+      }
+      res.json({
+        err: false,
+        data: filenames,
+        message: `${filenames.length} total files`,
+      });
+    }).catch((err) => {
+      console.log(`error getting item list from cos: ${err}`);
+      res.json({
+        err: true,
+        data: [],
+        message: `error getting item list from cos: ${err}`,
       });
     });
+  });
 app.get('/API/download', ensureLoggedIn(), declutter.checkLevel(10, true),
-    (req, res) => {
+  (req, res) => {
     // TODO: return a JSON object or a stream
 
-      declutter.downloadThreadAndSaveToCloud(
-          req.query.thread,
-      ).then((output) => {
-        console.log(output);
-      }).catch((e) => {
-        console.error(e);
-      });
-      res.end('running download script');
+    declutter.downloadThreadAndSaveToCloud(
+      req.query.thread,
+    ).then((output) => {
+      console.log(output);
+    }).catch((e) => {
+      console.error(e);
     });
+    res.end('running download script');
+  });
 app.get('/API/dlZipFile', ensureLoggedIn(), declutter.checkLevel(10, true),
-    (req, res) => {
-      backup.download(
-          req.query.tagId, 'zips/'+req.query.tagId, imgPrefixURL,
-      ).then((output) => {
-        // TODO: wait for backup.download to end and then prompt for download
-        // const file = output;
-        // res.download(file); // Set disposition and send it.
-        res.end('Check console log to see when it is done.');
-      }).catch((e) => {
-        console.error(e);
-      });
-      // res.end('running backup script, wait till you get a download prompt');
+  (req, res) => {
+    backup.download(
+      req.query.tagId, 'zips/' + req.query.tagId, imgPrefixURL,
+    ).then((output) => {
+      // TODO: wait for backup.download to end and then prompt for download
+      // const file = output;
+      // res.download(file); // Set disposition and send it.
+      res.end('Check console log to see when it is done.');
+    }).catch((e) => {
+      console.error(e);
     });
+    // res.end('running backup script, wait till you get a download prompt');
+  });
 // ----LOCAL BACKUP FUNCTION-------- ALSO REMOVE RETURN STATEMENT FROM BACKUP.JS
 // app.get('/API/dlTagToLocal',
 //     (req, res) => {
@@ -580,7 +583,7 @@ app.get('/API/getTwoRandomPics', (req, res) => {
     selectedTag = (req.cookies.selectedTag ? req.cookies.selectedTag : 1);
   }
   db.pictures.twoRandomPics(selectedTag).then((aggregate) => {
-    const data=aggregate.pics;
+    const data = aggregate.pics;
     res.json({
       images: [
         `${imgPrefixURL}${data[0].filename}`,
@@ -639,7 +642,7 @@ app.get('/API/vote', (req, res) => {
 
   // Vote even if user not logged in
   db.pictures.vote(
-      voteid, otherid,
+    voteid, otherid,
   ).then((data) => {
     // Return the votes to the client
     res.json({
@@ -650,7 +653,7 @@ app.get('/API/vote', (req, res) => {
     // Add points to the user if they are logged in
     if (userid) {
       db.users.addPoints(
-          userid, declutter.votePointIncrement,
+        userid, declutter.votePointIncrement,
       ).then(() => {
         // console.log(data);
       }).catch((e) => {
@@ -667,42 +670,54 @@ app.get('/API/vote', (req, res) => {
   });
 });
 app.get('/API/deletePic', ensureLoggedIn(), declutter.checkLevel(10, true),
-    (req, res) => {
-      db.pictures.deleteById(req.query.picid).then((rec) => {
-        console.log('file deleted from db');
-        console.log(rec);
-        cloud.deleteItems([rec[0].filename]).then(() => {
-          console.log('file deleted from cloud.');
-          res.json({
-            err: false,
-            message: 'probably deleted file, errors dont get passed lol',
-          });
-        }).catch((e) => {
-          console.error(e);
-        });
-        db.edits.add('del', req.user.id, rec[0].filename, req.query.picid);
-      }).catch((e) => {
-        console.error(e);
+  (req, res) => {
+    // db.pictures.deleteById(req.query.picid).then((rec) => {
+    //   console.log('file deleted from db');
+    //   console.log(rec);
+    //   cloud.deleteItems([rec[0].filename]).then(() => {
+    //     console.log('file deleted from cloud.');
+    //     res.json({
+    //       err: false,
+    //       message: 'probably deleted file, errors dont get passed lol',
+    //     });
+    //   }).catch((e) => {
+    //     console.error(e);
+    //   });
+    //   db.edits.add('del', req.user.id, rec[0].filename, req.query.picid);
+    // }).catch((e) => {
+    //   console.error(e);
+    // });
+    db.pictures.removeAllTags(req.query.picid).then((rec) => {
+      console.log('Tags removed from ' + req.query.picid);
+      res.json({
+        err: false,
+        message: 'Removed tags from file',
       });
-    });
+    }).catch((e) => {
+      res.json({
+        err: true,
+        message: e.message,
+      })
+    })
+  });
 app.get('/API/getBestEachTag', (req, res) => {
   res.json({
     images: declutter.archivePicList,
   });
 });
 app.get('/API/updateArchive', ensureLoggedIn(), declutter.checkLevel(10, true),
-    (req, res) => {
-      declutter.updateArchivePicList().then(() => {
-        res.end('OK');
-      }).catch((e) => {
-        res.end(e.message);
-      });
+  (req, res) => {
+    declutter.updateArchivePicList().then(() => {
+      res.end('OK');
+    }).catch((e) => {
+      res.end(e.message);
     });
+  });
 app.get('/API/scan4chan', ensureLoggedIn(), declutter.checkLevel(10, true),
-    (req, res) => {
-      declutter.chinScanner();
-      res.end('Scanning 4chan for threads now.');
-    });
+  (req, res) => {
+    declutter.chinScanner();
+    res.end('Scanning 4chan for threads now.');
+  });
 app.get('/API/getLeaderboards', (req, res) => {
   const minVotes = req.query.minvotes ? req.query.minvotes : declutter.minVotes;
   const numLeaders = req.query.n;
@@ -740,9 +755,9 @@ app.get('/API/getLeaderboards', (req, res) => {
   }
 });
 app.get('/API/makeThumbnails', ensureLoggedIn(), declutter.checkLevel(10, true),
-    (req, res) => {
-      res.end(declutter.makeThumbs(req.query.force));
-    });
+  (req, res) => {
+    res.end(declutter.makeThumbs(req.query.force));
+  });
 app.post('/login', passport.authenticate('local', {
   failureRedirect: '/login',
 }), async (req, res) => {
@@ -764,10 +779,10 @@ app.post('/upload', upload.array('files[]'), (req, res) => {
       // Handle zip files
       const zipFile = path.resolve(fp + ext);
       const extractDir = path.resolve(
-          path.join(
-              req.files[i].destination,
-              declutter.randomString(8),
-          ),
+        path.join(
+          req.files[i].destination,
+          declutter.randomString(8),
+        ),
       );
       // Extract
       extract(zipFile, {
@@ -780,10 +795,10 @@ app.post('/upload', upload.array('files[]'), (req, res) => {
         // Upload images and delete them after they are uploaded
         for (let i = 0; i < taggedFiles.length; i++) {
           declutter.uploadAndUpdateDb(
-              taggedFiles[i].filename,
-              'No description',
-              taggedFiles[i].tags,
-              true,
+            taggedFiles[i].filename,
+            'No description',
+            taggedFiles[i].tags,
+            true,
           );
         }
 
@@ -797,9 +812,9 @@ app.post('/upload', upload.array('files[]'), (req, res) => {
     } else if ((/\.(gif|jpe?g|tiff?|png|webp|bmp|webm)$/i).test(ext)) {
       // Handle images
       declutter.uploadAndUpdateDb(
-          fp + ext,
-          req.files[i].originalname, [],
-          true,
+        fp + ext,
+        req.files[i].originalname, [],
+        true,
       );
     } else {
       // Error
@@ -825,26 +840,26 @@ app.post('/register', (req, res) => {
   });
 });
 app.post('/report', declutter.checkLevel(2, true), ensureLoggedIn(),
-    (req, res) => {
-      db.reports.add(
-          req.body.rtype,
-          req.body.details,
-          req.body.picid,
-          req.user.id,
-          req.user.uname,
-          req.body.suggestedfix,
-      ).then(() => {
-        res.json({
-          error: false,
-          message: 'Report submitted',
-        });
-      }).catch((e) => {
-        res.json({
-          error: true,
-          message: 'Failed: ' + e,
-        });
+  (req, res) => {
+    db.reports.add(
+      req.body.rtype,
+      req.body.details,
+      req.body.picid,
+      req.user.id,
+      req.user.uname,
+      req.body.suggestedfix,
+    ).then(() => {
+      res.json({
+        error: false,
+        message: 'Report submitted',
+      });
+    }).catch((e) => {
+      res.json({
+        error: true,
+        message: 'Failed: ' + e,
       });
     });
+  });
 app.post('/API/changeUsername', ensureLoggedIn(), (req, res) => {
   db.users.changeUsername(req.user.id, req.body.uname).then(() => {
     res.redirect('/');
@@ -860,7 +875,7 @@ app.post('/API/changePassword', ensureLoggedIn(), (req, res) => {
     res.redirect('/logout');
   }).catch((e) => {
     console.log(e);
-    res.render('pages/wrongpass', {user: req.user});
+    res.render('pages/wrongpass', { user: req.user });
   });
 });
 

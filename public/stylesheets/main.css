@@ -156,6 +156,12 @@
   cursor: pointer;
 }
 
+.img-responsive{
+  width:auto;
+  object-fit: contain;
+  height:90vh;
+}
+
 /* When you mouse over the container, fade in the overlay title */
 
 .gallery-container:hover .gallery-text-block {

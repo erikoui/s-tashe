@@ -1,4 +1,4 @@
-onload = function() {
+onload = function () {
   /**
    * Hides the images so people cant click them, and shows scores
    *
@@ -11,27 +11,27 @@ onload = function() {
       const vid = document.getElementById('vid' + i);
       const txt = document.getElementById('txt' + i);
       $(txt).show();
-      let score='<br><br><br><br>';
-      if (i==votedindex) {
-        score+='Voted! <br>';
+      let score = '<br><br><br><br>';
+      if (i == votedindex) {
+        score += 'Voted! <br>';
       } else {
-        score+='<br>';
+        score += '<br>';
       }
       if (data.views[i] > 5) {
-        score += 'Score:'+(data.votes[i] / data.views[i]).toFixed(2);
+        score += 'Score:' + (data.votes[i] / data.views[i]).toFixed(2);
       } else {
         score += 'Not enough votes for meaningful score';
       }
       $(txt).html(
-          `${score}`,
-          // <br>
-          // <div class='scorebar'
-          // style='min-width:${(data.votes[i] / data.views[i]) * 100}%'>
-          // &nbsp;</div>`,
+        `${score}`,
+        // <br>
+        // <div class='scorebar'
+        // style='min-width:${(data.votes[i] / data.views[i]) * 100}%'>
+        // &nbsp;</div>`,
       );
       console.log($(txt).html());
-      img.onload = function() { };
-      vid.onload = function() { };
+      img.onload = function () { };
+      vid.onload = function () { };
       img.onclick = () => { };
       vid.onclick = () => { };
     }
@@ -49,8 +49,8 @@ onload = function() {
       pointsDiv.innerText = currentPoints + 1;
     } else {
       $('#login-link').notify(
-          'You are not logged in. Your points are not being stored.',
-          'info',
+        'You are not logged in. Your points are not being stored.',
+        'info',
       );
     }
   }
@@ -61,31 +61,31 @@ onload = function() {
    */
   function updateLeaderboard(data) {
     $.getJSON(
-        '/API/getLeaderboards?n=10&tag=' + data.tags[0][0],
-        (top10) => {
-          $('#tag-leaderboard').html(`<ul id='tleaders'></ul>`);
-          if (!top10.err) {
-            for (let i = 0; i < top10.top.length; i++) {
-              $('#tleaders').append(
+      '/API/getLeaderboards?n=10&tag=' + data.tags[0][0],
+      (top10) => {
+        $('#tag-leaderboard').html(`<ul id='tleaders'></ul>`);
+        if (!top10.err) {
+          for (let i = 0; i < top10.top.length; i++) {
+            $('#tleaders').append(
               // eslint-disable-next-line max-len
-                  `<li><a href="/image?picid=${top10.top[i].id}">${top10.top[i].description}</a> (${top10.top[i].votes}/${top10.top[i].views} - ${top10.top[i].score})</li>`,
-              );
-            }
+              `<li><a href="/image?picid=${top10.top[i].id}">${top10.top[i].description}</a> (${top10.top[i].votes}/${top10.top[i].views} - ${top10.top[i].score})</li>`,
+            );
           }
-        });
+        }
+      });
     $.getJSON(
-        '/API/getLeaderboards?n=10',
-        (top10) => {
-          $('#global-leaderboard').html(`<ul id='gleaders'></ul>`);
-          if (!top10.err) {
-            for (let i = 0; i < top10.top.length; i++) {
-              $('#gleaders').append(
+      '/API/getLeaderboards?n=10',
+      (top10) => {
+        $('#global-leaderboard').html(`<ul id='gleaders'></ul>`);
+        if (!top10.err) {
+          for (let i = 0; i < top10.top.length; i++) {
+            $('#gleaders').append(
               // eslint-disable-next-line max-len
-                  `<li><a href="/image?picid=${top10.top[i].id}">${top10.top[i].description} </a> (${top10.top[i].votes}/${top10.top[i].views} - ${top10.top[i].score})</li>`,
-              );
-            }
+              `<li><a href="/image?picid=${top10.top[i].id}">${top10.top[i].description} </a> (${top10.top[i].votes}/${top10.top[i].views} - ${top10.top[i].score})</li>`,
+            );
           }
-        });
+        }
+      });
   }
 
   /**
@@ -140,7 +140,7 @@ onload = function() {
       } else {
         document.getElementById('img' + i).src = data.images[i];
         document.getElementById('vid' + i).pause();
-        document.getElementById('src' + i).src='';
+        document.getElementById('src' + i).src = '';
         document.getElementById('src' + i).removeAttribute('src');
         document.getElementById('vid' + i).removeAttribute('src');
         document.getElementById('vid' + i).load();
@@ -157,7 +157,7 @@ onload = function() {
       $(clickable).removeClass('selected'); // Change the pic appearance
       clickable.onclick = () => {
         $(clickable).addClass('selected'); // Change the pic appearance
-        vote(data.ids[i % 2], data.ids[(i + 1) % 2], i%2);
+        vote(data.ids[i % 2], data.ids[(i + 1) % 2], i % 2);
       };
     }
 
@@ -173,10 +173,10 @@ onload = function() {
         showImgInfoWhileLoading(data, index);
         updatePointsDisplay();
         $.getJSON(
-            `/API/vote?voteid=${voteid}&otherid=${otherid}`,
-            () => {
-              renderPage();
-            },
+          `/API/vote?voteid=${voteid}&otherid=${otherid}`,
+          () => {
+            renderPage();
+          },
         );
       }
       voted = true;
@@ -187,7 +187,7 @@ onload = function() {
    * Shows buttons for reporting, changing, tagging, renaming, deleting etc
    * @param {object} data - the data from renderPage
    */
-  function showControls(data) {
+  function showControls(data, i) {
     // Level 3: change tags buttons
     const c = [];
     for (let i = 0; i < 6; i++) {
@@ -236,8 +236,8 @@ onload = function() {
         const adminButton = document.createElement('a');
         adminButton.setAttribute('type', 'button');
         adminButton.setAttribute(
-            'href',
-            ``,
+          'href',
+          ``,
         );
         adminButton.setAttribute('class', 'btn btn-sm btn-danger');
         adminButton.innerText = 'Delete image';
@@ -255,8 +255,8 @@ onload = function() {
       const btn = document.createElement('a');
       btn.setAttribute('type', 'button');
       btn.setAttribute(
-          'href',
-          `/image?picid=${data.ids[i]}`,
+        'href',
+        `/image?picid=${data.ids[i]}`,
       );
       btn.setAttribute('class', 'btn btn-sm btn-primary');
       btn.innerText = 'View image';
@@ -264,11 +264,13 @@ onload = function() {
     }
   }
 
+
   /**
- * Show images based on the /API/getTwoRandomPics response
- */
+  * Show images based on the /API/getTwoRandomPics response
+  */
   function renderPage() {
-    $.getJSON('/API/getTwoRandomPics', function(data) {
+
+    $.getJSON('/API/getTwoRandomPics', function (data) {
       if (data) {
         if (data.reload) {
           location.reload();

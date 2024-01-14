@@ -54,6 +54,19 @@ class PicturesRepository {
         WHERE fk_picid=? AND fk_tagid=(SELECT id FROM tags WHERE tag=?)`,
         [picid, tag]);
   }
+
+ 
+  /** [UNTESTED]
+   * removes a tag to the picture tag array
+   * @param {int} picid -
+   * @param {string} tag -
+   */
+  async removeAllTags(picid) {
+    return db.query(
+        `DELETE FROM pic_tag WHERE fk_picid=?`,
+        [picid]);
+  }
+
   /**
    * returns the tags of a picture by id
    * @param {int} picid pic id
@@ -129,7 +142,27 @@ class PicturesRepository {
    * @param {int} selectedtag - The tag id that the current user has selected.
    */
   async twoRandomPics(selectedtag) {
-    const pics=await db.query(
+    // random is ORDER BY RAND()
+    // least viewed is ORDER BY views
+
+    // This picks 2 of the 100 with the least views
+    // const pics=await db.query(
+    //     `SELECT id,filename,description,votes,views
+    //     FROM (SELECT p.id,p.filename,p.description,p.votes,p.views
+    //     FROM pictures p
+    //     INNER JOIN pic_tag pt
+    //     ON p.id=pt.fk_picid
+    //     INNER JOIN tags t
+    //     ON pt.fk_tagid=t.id
+    //     WHERE t.id=?
+    //     ORDER BY views
+    //     LIMIT 100) as bag
+    //     ORDER BY RAND()
+    //     LIMIT 2;`,
+    //     [selectedtag]);
+
+    // this picks 2 at random, sorted exponentially s.t. the least views are more likely
+       const pics=await db.query(
         `SELECT p.id,p.filename,p.description,p.votes,p.views
         FROM pictures p
         INNER JOIN pic_tag pt
@@ -137,7 +170,7 @@ class PicturesRepository {
         INNER JOIN tags t
         ON pt.fk_tagid=t.id
         WHERE t.id=?
-        ORDER BY RAND()
+        ORDER BY views*rand()
         LIMIT 2;`,
         [selectedtag]);
     const p1tags=await db.query(
@@ -216,10 +249,30 @@ class PicturesRepository {
    * @param {int} imagesPerPage - how many items to return
    */
   async listByTagName(tag, minviews, offset, imagesPerPage) {
+    
     let stag=String(tag)
     let sminviews=String(minviews)
     let soffset=String(offset)
     let sipp=String(imagesPerPage)
+    if(stag===''){
+      return [
+        db.query(
+            `SELECT p.id as id, description, votes, views, filename, (votes+1) / (views+1) AS score 
+            FROM pictures p
+            LEFT JOIN pic_tag pt
+            ON p.id=pt.fk_picid
+            WHERE pt.fk_picid is NULL
+            ORDER BY CASE WHEN views >= ? THEN 0 ELSE 1 END, score DESC, views DESC
+            LIMIT ? OFFSET ?;`,
+            [sminviews, sipp, soffset]),
+        db.query(
+            `SELECT COUNT (*) as count 
+            FROM pictures p
+            LEFT JOIN pic_tag pt
+            ON p.id=pt.fk_picid
+            WHERE pt.fk_picid is NULL`),
+      ];
+    }
     return [
       db.query(
           `SELECT p.id as id, description, votes, views, filename, 
@@ -230,7 +283,7 @@ class PicturesRepository {
           INNER JOIN tags t
           ON pt.fk_tagid=t.id
           WHERE t.tag=?
-          ORDER BY CASE WHEN views >= ? THEN 0 ELSE 1 END, score DESC
+          ORDER BY CASE WHEN views >= ? THEN 0 ELSE 1 END, score DESC, views DESC
           LIMIT ? OFFSET ?;`,
           [stag, sminviews, sipp, soffset]),
       db.query(
@@ -307,7 +360,7 @@ class PicturesRepository {
     return db.query(
         `SELECT *, (votes+1) / (views+1) AS score 
         FROM pictures 
-        ORDER BY CASE WHEN views >= ? THEN 0 ELSE 1 END, score DESC
+        ORDER BY CASE WHEN views >= ? THEN 0 ELSE 1 END, score DESC, views DESC
         LIMIT ?;`,
         [minviews, n]);
   }
@@ -331,7 +384,7 @@ class PicturesRepository {
         INNER JOIN tags t
         ON pt.fk_tagid=t.id
         WHERE t.tag=?
-        ORDER BY CASE WHEN views >= ? THEN 0 ELSE 1 END, score DESC 
+        ORDER BY CASE WHEN views >= ? THEN 0 ELSE 1 END, score DESC, views DESC
         LIMIT ?;`,
         [tags, minv, num]);
   }
